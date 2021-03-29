@@ -1,0 +1,484 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>RMtools_1D package &mdash; RM-Tools 1.1 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="RMtools_1D.models_ns package" href="RMtools_1D.models_ns.html" />
+    <link rel="prev" title="Welcome to RM-Tools’s documentation!" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> RM-Tools
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="index.html">Welcome to RM-Tools’s documentation!</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">RMtools_1D package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#subpackages">Subpackages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="RMtools_1D.models_ns.html">RMtools_1D.models_ns package</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-RMtools_1D.calculate_RMSF">RMtools_1D.calculate_RMSF module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#rmtools-1d-do-qufit-1d-mnest-module">RMtools_1D.do_QUfit_1D_mnest module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-RMtools_1D.do_RMclean_1D">RMtools_1D.do_RMclean_1D module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-RMtools_1D.do_RMsynth_1D">RMtools_1D.do_RMsynth_1D module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-RMtools_1D.do_RMsynth_1D_fromFITS">RMtools_1D.do_RMsynth_1D_fromFITS module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-RMtools_1D.mk_test_ascii_data">RMtools_1D.mk_test_ascii_data module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-RMtools_1D">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="RMtools_3D.html">RMtools_3D package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="RMutils.html">RMutils package</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">RM-Tools</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>RMtools_1D package</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/RMtools_1D.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="rmtools-1d-package">
+<h1>RMtools_1D package<a class="headerlink" href="#rmtools-1d-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="RMtools_1D.models_ns.html">RMtools_1D.models_ns package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="RMtools_1D.models_ns.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RMtools_1D.models_ns.html#module-RMtools_1D.models_ns.m1">RMtools_1D.models_ns.m1 module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RMtools_1D.models_ns.html#module-RMtools_1D.models_ns.m11">RMtools_1D.models_ns.m11 module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RMtools_1D.models_ns.html#module-RMtools_1D.models_ns.m2">RMtools_1D.models_ns.m2 module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RMtools_1D.models_ns.html#module-RMtools_1D.models_ns.m3">RMtools_1D.models_ns.m3 module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RMtools_1D.models_ns.html#module-RMtools_1D.models_ns.m4">RMtools_1D.models_ns.m4 module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RMtools_1D.models_ns.html#module-RMtools_1D.models_ns">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-RMtools_1D.calculate_RMSF">
+<span id="rmtools-1d-calculate-rmsf-module"></span><h2>RMtools_1D.calculate_RMSF module<a class="headerlink" href="#module-RMtools_1D.calculate_RMSF" title="Permalink to this headline">¶</a></h2>
+<p>Created on Wed Mar 27 11:01:48 2019</p>
+<p>&#64;author: cvaneck</p>
+<p>This routine will determine the RMSF and related parameters,
+giving the following input information. One of:
+a file with channel frequencies and weights
+OR
+a file with channel frequencies (assumes equal weights)
+OR
+Input values for mininum frequency, maximum frequency, and channel width.
+(assumes equal weights and all channels present)</p>
+<p>The outputs are a list of relavant RMSF properties, and a plot of the RMSF
+shape.</p>
+<dl class="py function">
+<dt id="RMtools_1D.calculate_RMSF.determine_RMSF_parameters">
+<code class="sig-prename descclassname"><span class="pre">RMtools_1D.calculate_RMSF.</span></code><code class="sig-name descname"><span class="pre">determine_RMSF_parameters</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">freq_array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights_array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phi_max</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dphi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plotfile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plotname</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#RMtools_1D.calculate_RMSF.determine_RMSF_parameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Characterizes an RMSF given the supplied frequency and weight arrays.
+Prints the results to terminal and produces a plot.
+Inputs:</p>
+<blockquote>
+<div><p>freq_array: array of frequency values (in Hz)
+weights_array: array of channel weights (arbitrary units)
+phi_max (float): maximum Faraday depth to compute RMSF out to.
+dphi (float): step size in Faraday depth
+plotfile (str): file name and path to save RMSF plot.
+plotname (str): title of plot</p>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py function">
+<dt id="RMtools_1D.calculate_RMSF.main">
+<code class="sig-prename descclassname"><span class="pre">RMtools_1D.calculate_RMSF.</span></code><code class="sig-name descname"><span class="pre">main</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#RMtools_1D.calculate_RMSF.main" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determines what set of input parameters were defined, reads in file or
+generates frequency array as appropriate, and passes frequency and weight
+arrays to the function that works out the RMSF properties.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="rmtools-1d-do-qufit-1d-mnest-module">
+<h2>RMtools_1D.do_QUfit_1D_mnest module<a class="headerlink" href="#rmtools-1d-do-qufit-1d-mnest-module" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-RMtools_1D.do_RMclean_1D">
+<span id="rmtools-1d-do-rmclean-1d-module"></span><h2>RMtools_1D.do_RMclean_1D module<a class="headerlink" href="#module-RMtools_1D.do_RMclean_1D" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt id="RMtools_1D.do_RMclean_1D.main">
+<code class="sig-prename descclassname"><span class="pre">RMtools_1D.do_RMclean_1D.</span></code><code class="sig-name descname"><span class="pre">main</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#RMtools_1D.do_RMclean_1D.main" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="RMtools_1D.do_RMclean_1D.plot_clean_spec">
+<code class="sig-prename descclassname"><span class="pre">RMtools_1D.do_RMclean_1D.</span></code><code class="sig-name descname"><span class="pre">plot_clean_spec</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">phiArr_radm2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dirtyFDF</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cleanFDF</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ccArr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">residFDF</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cutoff</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#RMtools_1D.do_RMclean_1D.plot_clean_spec" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plotting code for CLEANed Faraday depth spectra.
+Inputs:</p>
+<blockquote>
+<div><p>phiArr_radm2 (array): array of Faraday depth values.
+dirty FDF (array): dirty Faraday depth spectrum.
+cleanFDF (array): cleaned (restored) Faraday depth spectrum
+ccArr (array): clean component array
+residFDF (array): residual Faraday depth spectrum
+cutoff (float): clean threshold
+units (str): name of flux unit</p>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py function">
+<dt id="RMtools_1D.do_RMclean_1D.readFiles">
+<code class="sig-prename descclassname"><span class="pre">RMtools_1D.do_RMclean_1D.</span></code><code class="sig-name descname"><span class="pre">readFiles</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fdfFile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rmsfFile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weightFile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rmSynthFile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nBits</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#RMtools_1D.do_RMclean_1D.readFiles" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read in the RM-synthesis output files and assemble back into dictionaries.
+Inputs:</p>
+<blockquote>
+<div><p>fdfFile (str): file path to the FDF.
+rmsfFile (str): file path to the RMSF.
+weightfile (str): file path to the channel weights.
+rmSynthFile (str): file path to the RMsynth json file.
+nBits (int): number of bits to use when storing the data.</p>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py function">
+<dt id="RMtools_1D.do_RMclean_1D.run_rmclean">
+<code class="sig-prename descclassname"><span class="pre">RMtools_1D.do_RMclean_1D.</span></code><code class="sig-name descname"><span class="pre">run_rmclean</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="pre">mDict</span></em>, <em class="sig-param"><span class="pre">aDict</span></em>, <em class="sig-param"><span class="pre">cutoff</span></em>, <em class="sig-param"><span class="pre">maxIter=1000</span></em>, <em class="sig-param"><span class="pre">gain=0.1</span></em>, <em class="sig-param"><span class="pre">nBits=32</span></em>, <em class="sig-param"><span class="pre">showPlots=False</span></em>, <em class="sig-param"><span class="pre">prefixOut=''</span></em>, <em class="sig-param"><span class="pre">verbose=False</span></em>, <em class="sig-param"><span class="pre">log=&lt;built-in</span> <span class="pre">function</span> <span class="pre">print&gt;</span></em>, <em class="sig-param"><span class="pre">saveFigures=False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#RMtools_1D.do_RMclean_1D.run_rmclean" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run RM-CLEAN on a complex FDF spectrum given a RMSF.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>mDict (dict): Summary of RM synthesis results.
+aDict (dict): Data output by RM synthesis.
+cutoff (float): CLEAN cutoff in flux units</p>
+</dd>
+<dt>Kwargs:</dt><dd><p>maxIter (int): Maximum number of CLEAN iterations per pixel.
+gain (float): CLEAN loop gain.
+nBits (int): Precision of floating point numbers.
+showPlots (bool): Show plots?
+verbose (bool): Verbosity.
+log (function): Which logging function to use.</p>
+</dd>
+<dt>Returns:</dt><dd><p>mDict_cl (dict): Summary of RMCLEAN results.
+aDict_cl (dict): Data output by RMCLEAN.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="RMtools_1D.do_RMclean_1D.saveOutput">
+<code class="sig-prename descclassname"><span class="pre">RMtools_1D.do_RMclean_1D.</span></code><code class="sig-name descname"><span class="pre">saveOutput</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="pre">mDict_cl</span></em>, <em class="sig-param"><span class="pre">aDict_cl</span></em>, <em class="sig-param"><span class="pre">prefixOut=''</span></em>, <em class="sig-param"><span class="pre">verbose=False</span></em>, <em class="sig-param"><span class="pre">log=&lt;built-in</span> <span class="pre">function</span> <span class="pre">print&gt;</span></em><span class="sig-paren">)</span><a class="headerlink" href="#RMtools_1D.do_RMclean_1D.saveOutput" title="Permalink to this definition">¶</a></dt>
+<dd><p>Saves RM-CLEAN results to text files. The clean (restored) FDF, model FDF
+(clean components) are saved, as is two files (.dat and .json)
+reporting the fitting results as key-value pairs.
+Inputs:</p>
+<blockquote>
+<div><p>mDict_cl: the results dictionary (mDict_cl) from RM-CLEAN.
+aDict_cl: the array dictionary (aDict) from RM-CLEAN.
+prefixOut (str): name prefix to be given to output files</p>
+<blockquote>
+<div><p>(including relative/absolute directory to save to)</p>
+</div></blockquote>
+<p>verbose (bool): print verbose messages?
+log (function): function to use when printing verbose messages.</p>
+</div></blockquote>
+</dd></dl>
+
+</div>
+<div class="section" id="module-RMtools_1D.do_RMsynth_1D">
+<span id="rmtools-1d-do-rmsynth-1d-module"></span><h2>RMtools_1D.do_RMsynth_1D module<a class="headerlink" href="#module-RMtools_1D.do_RMsynth_1D" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt id="RMtools_1D.do_RMsynth_1D.main">
+<code class="sig-prename descclassname"><span class="pre">RMtools_1D.do_RMsynth_1D.</span></code><code class="sig-name descname"><span class="pre">main</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#RMtools_1D.do_RMsynth_1D.main" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="RMtools_1D.do_RMsynth_1D.readFile">
+<code class="sig-prename descclassname"><span class="pre">RMtools_1D.do_RMsynth_1D.</span></code><code class="sig-name descname"><span class="pre">readFile</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataFile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nBits</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">debug</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#RMtools_1D.do_RMsynth_1D.readFile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read the I, Q &amp; U data from the ASCII file.</p>
+<dl class="simple">
+<dt>Inputs:</dt><dd><p>datafile (str): relative or absolute path to file.
+nBits (int): number of bits to store the data as.
+verbose (bool): Print verbose messages to terminal?
+debug (bool): Print full traceback in case of failure?</p>
+</dd>
+<dt>Returns:</dt><dd><p>data (list of arrays): List containing the columns found in the file.
+If Stokes I is present, this will be [freq_Hz, I, Q, U, dI, dQ, dU],
+else [freq_Hz, q, u,  dq, du].</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="RMtools_1D.do_RMsynth_1D.run_rmsynth">
+<code class="sig-prename descclassname"><span class="pre">RMtools_1D.do_RMsynth_1D.</span></code><code class="sig-name descname"><span class="pre">run_rmsynth</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="pre">data</span></em>, <em class="sig-param"><span class="pre">polyOrd=3</span></em>, <em class="sig-param"><span class="pre">phiMax_radm2=None</span></em>, <em class="sig-param"><span class="pre">dPhi_radm2=None</span></em>, <em class="sig-param"><span class="pre">nSamples=10.0</span></em>, <em class="sig-param"><span class="pre">weightType='variance'</span></em>, <em class="sig-param"><span class="pre">fitRMSF=False</span></em>, <em class="sig-param"><span class="pre">noStokesI=False</span></em>, <em class="sig-param"><span class="pre">phiNoise_radm2=1000000.0</span></em>, <em class="sig-param"><span class="pre">nBits=32</span></em>, <em class="sig-param"><span class="pre">showPlots=False</span></em>, <em class="sig-param"><span class="pre">debug=False</span></em>, <em class="sig-param"><span class="pre">verbose=False</span></em>, <em class="sig-param"><span class="pre">log=&lt;built-in</span> <span class="pre">function</span> <span class="pre">print&gt;</span></em>, <em class="sig-param"><span class="pre">units='Jy/beam'</span></em>, <em class="sig-param"><span class="pre">prefixOut='prefixOut'</span></em>, <em class="sig-param"><span class="pre">saveFigures=None</span></em>, <em class="sig-param"><span class="pre">fit_function='log'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#RMtools_1D.do_RMsynth_1D.run_rmsynth" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run RM synthesis on 1D data.</p>
+<dl>
+<dt>Args:</dt><dd><dl>
+<dt>data (list): Contains frequency and polarization data as either:</dt><dd><dl class="simple">
+<dt>[freq_Hz, I, Q, U, dI, dQ, dU]</dt><dd><p>freq_Hz (array_like): Frequency of each channel in Hz.
+I (array_like): Stokes I intensity in each channel.
+Q (array_like): Stokes Q intensity in each channel.
+U (array_like): Stokes U intensity in each channel.
+dI (array_like): Error in Stokes I intensity in each channel.
+dQ (array_like): Error in Stokes Q intensity in each channel.
+dU (array_like): Error in Stokes U intensity in each channel.</p>
+</dd>
+</dl>
+<p>or
+[freq_Hz, q, u,  dq, du]</p>
+<blockquote>
+<div><p>freq_Hz (array_like): Frequency of each channel in Hz.
+q (array_like): Fractional Stokes Q intensity (Q/I) in each channel.
+u (array_like): Fractional Stokes U intensity (U/I) in each channel.
+dq (array_like): Error in fractional Stokes Q intensity in each channel.
+du (array_like): Error in fractional Stokes U intensity in each channel.</p>
+</div></blockquote>
+</dd>
+</dl>
+</dd>
+<dt>Kwargs:</dt><dd><p>polyOrd (int): Order of polynomial to fit to Stokes I spectrum.
+phiMax_radm2 (float): Maximum absolute Faraday depth (rad/m^2).
+dPhi_radm2 (float): Faraday depth channel size (rad/m^2).
+nSamples (float): Number of samples across the RMSF.
+weightType (str): Can be “variance” or “uniform”</p>
+<blockquote>
+<div><p>“variance” – Weight by uncertainty in Q and U.
+“uniform” – Weight uniformly (i.e. with 1s)</p>
+</div></blockquote>
+<p>fitRMSF (bool): Fit a Gaussian to the RMSF?
+noStokesI (bool: Is Stokes I data provided?
+phiNoise_radm2 (float): ????
+nBits (int): Precision of floating point numbers.
+showPlots (bool): Show plots?
+debug (bool): Turn on debugging messages &amp; plots?
+verbose (bool): Verbosity.
+log (function): Which logging function to use.
+units (str): Units of data.</p>
+</dd>
+<dt>Returns:</dt><dd><p>mDict (dict): Summary of RM synthesis results.
+aDict (dict): Data output by RM synthesis.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="RMtools_1D.do_RMsynth_1D.saveOutput">
+<code class="sig-prename descclassname"><span class="pre">RMtools_1D.do_RMsynth_1D.</span></code><code class="sig-name descname"><span class="pre">saveOutput</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">outdict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arrdict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefixOut</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#RMtools_1D.do_RMsynth_1D.saveOutput" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-RMtools_1D.do_RMsynth_1D_fromFITS">
+<span id="rmtools-1d-do-rmsynth-1d-fromfits-module"></span><h2>RMtools_1D.do_RMsynth_1D_fromFITS module<a class="headerlink" href="#module-RMtools_1D.do_RMsynth_1D_fromFITS" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt id="RMtools_1D.do_RMsynth_1D_fromFITS.get_data_Q_U">
+<code class="sig-prename descclassname"><span class="pre">RMtools_1D.do_RMsynth_1D_fromFITS.</span></code><code class="sig-name descname"><span class="pre">get_data_Q_U</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ycoords</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xcoords</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#RMtools_1D.do_RMsynth_1D_fromFITS.get_data_Q_U" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="RMtools_1D.do_RMsynth_1D_fromFITS.main">
+<code class="sig-prename descclassname"><span class="pre">RMtools_1D.do_RMsynth_1D_fromFITS.</span></code><code class="sig-name descname"><span class="pre">main</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#RMtools_1D.do_RMsynth_1D_fromFITS.main" title="Permalink to this definition">¶</a></dt>
+<dd><p>Start the function to perform RM-synthesis if called from the command line.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-RMtools_1D.mk_test_ascii_data">
+<span id="rmtools-1d-mk-test-ascii-data-module"></span><h2>RMtools_1D.mk_test_ascii_data module<a class="headerlink" href="#module-RMtools_1D.mk_test_ascii_data" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt id="RMtools_1D.mk_test_ascii_data.create_IQU_ascii_data">
+<code class="sig-prename descclassname"><span class="pre">RMtools_1D.mk_test_ascii_data.</span></code><code class="sig-name descname"><span class="pre">create_IQU_ascii_data</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataPath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inCatFile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">startFreq_Hz</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">endFreq_Hz</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nChans</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rmsNoise</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">noiseTmpArr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flagRanges_Hz</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freq0_Hz</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#RMtools_1D.mk_test_ascii_data.create_IQU_ascii_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a set of ASCII files containing Stokes I Q &amp; U spectra.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="RMtools_1D.mk_test_ascii_data.main">
+<code class="sig-prename descclassname"><span class="pre">RMtools_1D.mk_test_ascii_data.</span></code><code class="sig-name descname"><span class="pre">main</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#RMtools_1D.mk_test_ascii_data.main" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run the create_IQU_ascii_data function if called from the command line.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-RMtools_1D">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-RMtools_1D" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="RMtools_1D.models_ns.html" class="btn btn-neutral float-right" title="RMtools_1D.models_ns package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="index.html" class="btn btn-neutral float-left" title="Welcome to RM-Tools’s documentation!" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, CIRADA.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

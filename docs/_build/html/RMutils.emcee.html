@@ -1,0 +1,1208 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>RMutils.emcee package &mdash; RM-Tools 1.1 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> RM-Tools
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <!-- Local TOC -->
+              <div class="local-toc"><ul>
+<li><a class="reference internal" href="#">RMutils.emcee package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-RMutils.emcee.autocorr">RMutils.emcee.autocorr module</a></li>
+<li><a class="reference internal" href="#module-RMutils.emcee.ensemble">RMutils.emcee.ensemble module</a></li>
+<li><a class="reference internal" href="#module-RMutils.emcee.interruptible_pool">RMutils.emcee.interruptible_pool module</a></li>
+<li><a class="reference internal" href="#module-RMutils.emcee.mh">RMutils.emcee.mh module</a></li>
+<li><a class="reference internal" href="#module-RMutils.emcee.mpi_pool">RMutils.emcee.mpi_pool module</a></li>
+<li><a class="reference internal" href="#module-RMutils.emcee.ptsampler">RMutils.emcee.ptsampler module</a></li>
+<li><a class="reference internal" href="#module-RMutils.emcee.sampler">RMutils.emcee.sampler module</a></li>
+<li><a class="reference internal" href="#module-RMutils.emcee.tests">RMutils.emcee.tests module</a></li>
+<li><a class="reference internal" href="#module-RMutils.emcee.utils">RMutils.emcee.utils module</a></li>
+<li><a class="reference internal" href="#module-RMutils.emcee">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">RM-Tools</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>RMutils.emcee package</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/RMutils.emcee.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="rmutils-emcee-package">
+<h1>RMutils.emcee package<a class="headerlink" href="#rmutils-emcee-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-RMutils.emcee.autocorr">
+<span id="rmutils-emcee-autocorr-module"></span><h2>RMutils.emcee.autocorr module<a class="headerlink" href="#module-RMutils.emcee.autocorr" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt id="RMutils.emcee.autocorr.function">
+<code class="sig-prename descclassname"><span class="pre">RMutils.emcee.autocorr.</span></code><code class="sig-name descname"><span class="pre">function</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fast</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#RMutils.emcee.autocorr.function" title="Permalink to this definition">¶</a></dt>
+<dd><p>Estimate the autocorrelation function of a time series using the FFT.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> – The time series. If multidimensional, set the time axis using the
+<code class="docutils literal notranslate"><span class="pre">axis</span></code> keyword argument and the function will be computed for every
+other axis.</p></li>
+<li><p><strong>axis</strong> – (optional)
+The time axis of <code class="docutils literal notranslate"><span class="pre">x</span></code>. Assumed to be the first axis if not specified.</p></li>
+<li><p><strong>fast</strong> – (optional)
+If <code class="docutils literal notranslate"><span class="pre">True</span></code>, only use the largest <code class="docutils literal notranslate"><span class="pre">2^n</span></code> entries for efficiency.
+(default: False)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="RMutils.emcee.autocorr.integrated_time">
+<code class="sig-prename descclassname"><span class="pre">RMutils.emcee.autocorr.</span></code><code class="sig-name descname"><span class="pre">integrated_time</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">window</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fast</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#RMutils.emcee.autocorr.integrated_time" title="Permalink to this definition">¶</a></dt>
+<dd><p>Estimate the integrated autocorrelation time of a time series.</p>
+<p>See <a class="reference external" href="http://www.stat.unc.edu/faculty/cji/Sokal.pdf">Sokal’s notes</a> on
+MCMC and sample estimators for autocorrelation times.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> – The time series. If multidimensional, set the time axis using the
+<code class="docutils literal notranslate"><span class="pre">axis</span></code> keyword argument and the function will be computed for every
+other axis.</p></li>
+<li><p><strong>axis</strong> – (optional)
+The time axis of <code class="docutils literal notranslate"><span class="pre">x</span></code>. Assumed to be the first axis if not specified.</p></li>
+<li><p><strong>window</strong> – (optional)
+The size of the window to use. (default: 50)</p></li>
+<li><p><strong>fast</strong> – (optional)
+If <code class="docutils literal notranslate"><span class="pre">True</span></code>, only use the largest <code class="docutils literal notranslate"><span class="pre">2^n</span></code> entries for efficiency.
+(default: False)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-RMutils.emcee.ensemble">
+<span id="rmutils-emcee-ensemble-module"></span><h2>RMutils.emcee.ensemble module<a class="headerlink" href="#module-RMutils.emcee.ensemble" title="Permalink to this headline">¶</a></h2>
+<p>An affine invariant Markov chain Monte Carlo (MCMC) sampler.</p>
+<dl class="simple">
+<dt>Goodman &amp; Weare, Ensemble Samplers With Affine Invariance</dt><dd><p>Comm. App. Math. Comp. Sci., Vol. 5 (2010), No. 1, 65–80</p>
+</dd>
+</dl>
+<dl class="py class">
+<dt id="RMutils.emcee.ensemble.EnsembleSampler">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">RMutils.emcee.ensemble.</span></code><code class="sig-name descname"><span class="pre">EnsembleSampler</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nwalkers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lnpostfn</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">postargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threads</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pool</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">live_dangerously</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">runtime_sortingfn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#RMutils.emcee.ensemble.EnsembleSampler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#RMutils.emcee.sampler.Sampler" title="RMutils.emcee.sampler.Sampler"><code class="xref py py-class docutils literal notranslate"><span class="pre">RMutils.emcee.sampler.Sampler</span></code></a></p>
+<p>A generalized Ensemble sampler that uses 2 ensembles for parallelization.
+The <code class="docutils literal notranslate"><span class="pre">__init__</span></code> function will raise an <code class="docutils literal notranslate"><span class="pre">AssertionError</span></code> if
+<code class="docutils literal notranslate"><span class="pre">k</span> <span class="pre">&lt;</span> <span class="pre">2</span> <span class="pre">*</span> <span class="pre">dim</span></code> (and you haven’t set the <code class="docutils literal notranslate"><span class="pre">live_dangerously</span></code> parameter)
+or if <code class="docutils literal notranslate"><span class="pre">k</span></code> is odd.</p>
+<p><strong>Warning</strong>: The <a class="reference internal" href="#RMutils.emcee.ensemble.EnsembleSampler.chain" title="RMutils.emcee.ensemble.EnsembleSampler.chain"><code class="xref py py-attr docutils literal notranslate"><span class="pre">chain</span></code></a> member of this object has the shape:
+<code class="docutils literal notranslate"><span class="pre">(nwalkers,</span> <span class="pre">nlinks,</span> <span class="pre">dim)</span></code> where <code class="docutils literal notranslate"><span class="pre">nlinks</span></code> is the number of steps
+taken by the chain and <code class="docutils literal notranslate"><span class="pre">k</span></code> is the number of walkers.  Use the
+<a class="reference internal" href="#RMutils.emcee.ensemble.EnsembleSampler.flatchain" title="RMutils.emcee.ensemble.EnsembleSampler.flatchain"><code class="xref py py-attr docutils literal notranslate"><span class="pre">flatchain</span></code></a> property to get the chain flattened to
+<code class="docutils literal notranslate"><span class="pre">(nlinks,</span> <span class="pre">dim)</span></code>. For users of pre-1.0 versions, this shape is
+different so be careful!</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>nwalkers</strong> – The number of Goodman &amp; Weare “walkers”.</p></li>
+<li><p><strong>dim</strong> – Number of dimensions in the parameter space.</p></li>
+<li><p><strong>lnpostfn</strong> – A function that takes a vector in the parameter space as input and
+returns the natural logarithm of the posterior probability for that
+position.</p></li>
+<li><p><strong>a</strong> – (optional)
+The proposal scale parameter. (default: <code class="docutils literal notranslate"><span class="pre">2.0</span></code>)</p></li>
+<li><p><strong>args</strong> – (optional)
+A list of extra positional arguments for <code class="docutils literal notranslate"><span class="pre">lnpostfn</span></code>. <code class="docutils literal notranslate"><span class="pre">lnpostfn</span></code>
+will be called with the sequence <code class="docutils literal notranslate"><span class="pre">lnpostfn(p,</span> <span class="pre">*args,</span> <span class="pre">**kwargs)</span></code>.</p></li>
+<li><p><strong>kwargs</strong> – (optional)
+A list of extra keyword arguments for <code class="docutils literal notranslate"><span class="pre">lnpostfn</span></code>. <code class="docutils literal notranslate"><span class="pre">lnpostfn</span></code>
+will be called with the sequence <code class="docutils literal notranslate"><span class="pre">lnpostfn(p,</span> <span class="pre">*args,</span> <span class="pre">**kwargs)</span></code>.</p></li>
+<li><p><strong>postargs</strong> – (optional)
+Alias of <code class="docutils literal notranslate"><span class="pre">args</span></code> for backwards compatibility.</p></li>
+<li><p><strong>threads</strong> – (optional)
+The number of threads to use for parallelization. If <code class="docutils literal notranslate"><span class="pre">threads</span> <span class="pre">==</span> <span class="pre">1</span></code>,
+then the <code class="docutils literal notranslate"><span class="pre">multiprocessing</span></code> module is not used but if
+<code class="docutils literal notranslate"><span class="pre">threads</span> <span class="pre">&gt;</span> <span class="pre">1</span></code>, then a <code class="docutils literal notranslate"><span class="pre">Pool</span></code> object is created and calls to
+<code class="docutils literal notranslate"><span class="pre">lnpostfn</span></code> are run in parallel.</p></li>
+<li><p><strong>pool</strong> – (optional)
+An alternative method of using the parallelized algorithm. If
+provided, the value of <code class="docutils literal notranslate"><span class="pre">threads</span></code> is ignored and the
+object provided by <code class="docutils literal notranslate"><span class="pre">pool</span></code> is used for all parallelization. It
+can be any object with a <code class="docutils literal notranslate"><span class="pre">map</span></code> method that follows the same
+calling sequence as the built-in <code class="docutils literal notranslate"><span class="pre">map</span></code> function.</p></li>
+<li><p><strong>runtime_sortingfn</strong> – (optional)
+A function implementing custom runtime load-balancing. See
+<span class="xref std std-ref">loadbalance</span> for more information.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="RMutils.emcee.ensemble.EnsembleSampler.acceptance_fraction">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">acceptance_fraction</span></code><a class="headerlink" href="#RMutils.emcee.ensemble.EnsembleSampler.acceptance_fraction" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">k</span></code>) of the fraction of steps accepted for each
+walker.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>An array (length</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="RMutils.emcee.ensemble.EnsembleSampler.acor">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">acor</span></code><a class="headerlink" href="#RMutils.emcee.ensemble.EnsembleSampler.acor" title="Permalink to this definition">¶</a></dt>
+<dd><p>An estimate of the autocorrelation time for each parameter (length:
+<code class="docutils literal notranslate"><span class="pre">dim</span></code>).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="RMutils.emcee.ensemble.EnsembleSampler.blobs">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">blobs</span></code><a class="headerlink" href="#RMutils.emcee.ensemble.EnsembleSampler.blobs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the list of “blobs” produced by sampling. The result is a list
+(of length <code class="docutils literal notranslate"><span class="pre">iterations</span></code>) of <code class="docutils literal notranslate"><span class="pre">list</span></code> s (of length <code class="docutils literal notranslate"><span class="pre">nwalkers</span></code>) of
+arbitrary objects. <strong>Note</strong>: this will actually be an empty list if
+your <code class="docutils literal notranslate"><span class="pre">lnpostfn</span></code> doesn’t return any metadata.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="RMutils.emcee.ensemble.EnsembleSampler.chain">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">chain</span></code><a class="headerlink" href="#RMutils.emcee.ensemble.EnsembleSampler.chain" title="Permalink to this definition">¶</a></dt>
+<dd><p>A pointer to the Markov chain itself. The shape of this array is
+<code class="docutils literal notranslate"><span class="pre">(k,</span> <span class="pre">iterations,</span> <span class="pre">dim)</span></code>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="RMutils.emcee.ensemble.EnsembleSampler.clear_blobs">
+<code class="sig-name descname"><span class="pre">clear_blobs</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#RMutils.emcee.ensemble.EnsembleSampler.clear_blobs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clear the <code class="docutils literal notranslate"><span class="pre">blobs</span></code> list.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="RMutils.emcee.ensemble.EnsembleSampler.flatchain">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">flatchain</span></code><a class="headerlink" href="#RMutils.emcee.ensemble.EnsembleSampler.flatchain" title="Permalink to this definition">¶</a></dt>
+<dd><p>A shortcut for accessing chain flattened along the zeroth (walker)
+axis.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="RMutils.emcee.ensemble.EnsembleSampler.flatlnprobability">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">flatlnprobability</span></code><a class="headerlink" href="#RMutils.emcee.ensemble.EnsembleSampler.flatlnprobability" title="Permalink to this definition">¶</a></dt>
+<dd><p>A shortcut to return the equivalent of <code class="docutils literal notranslate"><span class="pre">lnprobability</span></code> but aligned
+to <code class="docutils literal notranslate"><span class="pre">flatchain</span></code> rather than <code class="docutils literal notranslate"><span class="pre">chain</span></code>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="RMutils.emcee.ensemble.EnsembleSampler.get_autocorr_time">
+<code class="sig-name descname"><span class="pre">get_autocorr_time</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">window</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fast</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#RMutils.emcee.ensemble.EnsembleSampler.get_autocorr_time" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute an estimate of the autocorrelation time for each parameter
+(length: <code class="docutils literal notranslate"><span class="pre">dim</span></code>).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>window</strong> – (optional)
+The size of the windowing function. This is equivalent to the
+maximum number of lags to use. (default: 50)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="RMutils.emcee.ensemble.EnsembleSampler.lnprobability">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">lnprobability</span></code><a class="headerlink" href="#RMutils.emcee.ensemble.EnsembleSampler.lnprobability" title="Permalink to this definition">¶</a></dt>
+<dd><p>A pointer to the matrix of the value of <code class="docutils literal notranslate"><span class="pre">lnprobfn</span></code> produced at each
+step for each walker. The shape is <code class="docutils literal notranslate"><span class="pre">(k,</span> <span class="pre">iterations)</span></code>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="RMutils.emcee.ensemble.EnsembleSampler.reset">
+<code class="sig-name descname"><span class="pre">reset</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#RMutils.emcee.ensemble.EnsembleSampler.reset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clear the <code class="docutils literal notranslate"><span class="pre">chain</span></code> and <code class="docutils literal notranslate"><span class="pre">lnprobability</span></code> array. Also reset the
+bookkeeping parameters.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="RMutils.emcee.ensemble.EnsembleSampler.sample">
+<code class="sig-name descname"><span class="pre">sample</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lnprob0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rstate0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">blobs0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iterations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">thin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">storechain</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mh_proposal</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#RMutils.emcee.ensemble.EnsembleSampler.sample" title="Permalink to this definition">¶</a></dt>
+<dd><p>Advance the chain <code class="docutils literal notranslate"><span class="pre">iterations</span></code> steps as a generator.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>p0</strong> – A list of the initial positions of the walkers in the
+parameter space. It should have the shape <code class="docutils literal notranslate"><span class="pre">(nwalkers,</span> <span class="pre">dim)</span></code>.</p></li>
+<li><p><strong>lnprob0</strong> – (optional)
+The list of log posterior probabilities for the walkers at
+positions given by <code class="docutils literal notranslate"><span class="pre">p0</span></code>. If <code class="docutils literal notranslate"><span class="pre">lnprob</span> <span class="pre">is</span> <span class="pre">None</span></code>, the initial
+values are calculated. It should have the shape <code class="docutils literal notranslate"><span class="pre">(k,</span> <span class="pre">dim)</span></code>.</p></li>
+<li><p><strong>rstate0</strong> – (optional)
+The state of the random number generator.
+See the <code class="xref py py-attr docutils literal notranslate"><span class="pre">Sampler.random_state</span></code> property for details.</p></li>
+<li><p><strong>iterations</strong> – (optional)
+The number of steps to run.</p></li>
+<li><p><strong>thin</strong> – (optional)
+If you only want to store and yield every <code class="docutils literal notranslate"><span class="pre">thin</span></code> samples in the
+chain, set thin to an integer greater than 1.</p></li>
+<li><p><strong>storechain</strong> – (optional)
+By default, the sampler stores (in memory) the positions and
+log-probabilities of the samples in the chain. If you are
+using another method to store the samples to a file or if you
+don’t need to analyse the samples after the fact (for burn-in
+for example) set <code class="docutils literal notranslate"><span class="pre">storechain</span></code> to <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p></li>
+<li><p><strong>mh_proposal</strong> – (optional)
+A function that returns a list of positions for <code class="docutils literal notranslate"><span class="pre">nwalkers</span></code>
+walkers given a current list of positions of the same size. See
+<code class="xref py py-class docutils literal notranslate"><span class="pre">utils.MH_proposal_axisaligned</span></code> for an example.</p></li>
+</ul>
+</dd>
+</dl>
+<p>At each iteration, this generator yields:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">pos</span></code> - A list of the current positions of the walkers in the
+parameter space. The shape of this object will be
+<code class="docutils literal notranslate"><span class="pre">(nwalkers,</span> <span class="pre">dim)</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">lnprob</span></code> - The list of log posterior probabilities for the
+walkers at positions given by <code class="docutils literal notranslate"><span class="pre">pos</span></code> . The shape of this object
+is <code class="docutils literal notranslate"><span class="pre">(nwalkers,</span> <span class="pre">dim)</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">rstate</span></code> - The current state of the random number generator.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">blobs</span></code> - (optional) The metadata “blobs” associated with the
+current position. The value is only returned if <code class="docutils literal notranslate"><span class="pre">lnpostfn</span></code>
+returns blobs too.</p></li>
+</ul>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-RMutils.emcee.interruptible_pool">
+<span id="rmutils-emcee-interruptible-pool-module"></span><h2>RMutils.emcee.interruptible_pool module<a class="headerlink" href="#module-RMutils.emcee.interruptible_pool" title="Permalink to this headline">¶</a></h2>
+<p>Python’s multiprocessing.Pool class doesn’t interact well with
+<code class="docutils literal notranslate"><span class="pre">KeyboardInterrupt</span></code> signals, as documented in places such as:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="http://stackoverflow.com/questions/1408356/">http://stackoverflow.com/questions/1408356/</a></p></li>
+<li><p><a class="reference external" href="http://stackoverflow.com/questions/11312525/">http://stackoverflow.com/questions/11312525/</a></p></li>
+<li><p><a class="reference external" href="http://noswap.com/blog/python-multiprocessing-keyboardinterrupt">http://noswap.com/blog/python-multiprocessing-keyboardinterrupt</a></p></li>
+</ul>
+<p>Various workarounds have been shared. Here, we adapt the one proposed in the
+last link above, by John Reese, and shared as</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://github.com/jreese/multiprocessing-keyboardinterrupt/">https://github.com/jreese/multiprocessing-keyboardinterrupt/</a></p></li>
+</ul>
+<p>Our version is a drop-in replacement for multiprocessing.Pool … as long as
+the map() method is the only one that needs to be interrupt-friendly.</p>
+<p>Contributed by Peter K. G. Williams &lt;<a class="reference external" href="mailto:peter&#37;&#52;&#48;newton&#46;cx">peter<span>&#64;</span>newton<span>&#46;</span>cx</a>&gt;.</p>
+<p><em>Added in version 2.1.0</em></p>
+<dl class="py class">
+<dt id="RMutils.emcee.interruptible_pool.InterruptiblePool">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">RMutils.emcee.interruptible_pool.</span></code><code class="sig-name descname"><span class="pre">InterruptiblePool</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">processes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initializer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#RMutils.emcee.interruptible_pool.InterruptiblePool" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">multiprocessing.pool.Pool</span></code></p>
+<p>A modified version of <code class="xref py py-class docutils literal notranslate"><span class="pre">multiprocessing.pool.Pool</span></code> that has better
+behavior with regard to <code class="docutils literal notranslate"><span class="pre">KeyboardInterrupts</span></code> in the <a class="reference internal" href="#RMutils.emcee.interruptible_pool.InterruptiblePool.map" title="RMutils.emcee.interruptible_pool.InterruptiblePool.map"><code class="xref py py-func docutils literal notranslate"><span class="pre">map()</span></code></a> method.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>processes</strong> – (optional)
+The number of worker processes to use; defaults to the number of CPUs.</p></li>
+<li><p><strong>initializer</strong> – (optional)
+Either <code class="docutils literal notranslate"><span class="pre">None</span></code>, or a callable that will be invoked by each worker
+process when it starts.</p></li>
+<li><p><strong>initargs</strong> – (optional)
+Arguments for <em>initializer</em>; it will be called as
+<code class="docutils literal notranslate"><span class="pre">initializer(*initargs)</span></code>.</p></li>
+<li><p><strong>kwargs</strong> – (optional)
+Extra arguments. Python 2.7 supports a <code class="docutils literal notranslate"><span class="pre">maxtasksperchild</span></code> parameter.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="RMutils.emcee.interruptible_pool.InterruptiblePool.map">
+<code class="sig-name descname"><span class="pre">map</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iterable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chunksize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#RMutils.emcee.interruptible_pool.InterruptiblePool.map" title="Permalink to this definition">¶</a></dt>
+<dd><p>Equivalent of <code class="docutils literal notranslate"><span class="pre">map()</span></code> built-in, without swallowing
+<code class="docutils literal notranslate"><span class="pre">KeyboardInterrupt</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>func</strong> – The function to apply to the items.</p></li>
+<li><p><strong>iterable</strong> – An iterable of items that will have <cite>func</cite> applied to them.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="RMutils.emcee.interruptible_pool.InterruptiblePool.wait_timeout">
+<code class="sig-name descname"><span class="pre">wait_timeout</span></code><em class="property"> <span class="pre">=</span> <span class="pre">3600</span></em><a class="headerlink" href="#RMutils.emcee.interruptible_pool.InterruptiblePool.wait_timeout" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-RMutils.emcee.mh">
+<span id="rmutils-emcee-mh-module"></span><h2>RMutils.emcee.mh module<a class="headerlink" href="#module-RMutils.emcee.mh" title="Permalink to this headline">¶</a></h2>
+<p>A vanilla Metropolis-Hastings sampler</p>
+<dl class="py class">
+<dt id="RMutils.emcee.mh.MHSampler">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">RMutils.emcee.mh.</span></code><code class="sig-name descname"><span class="pre">MHSampler</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cov</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#RMutils.emcee.mh.MHSampler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#RMutils.emcee.sampler.Sampler" title="RMutils.emcee.sampler.Sampler"><code class="xref py py-class docutils literal notranslate"><span class="pre">RMutils.emcee.sampler.Sampler</span></code></a></p>
+<p>The most basic possible Metropolis-Hastings style MCMC sampler</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cov</strong> – The covariance matrix to use for the proposal distribution.</p></li>
+<li><p><strong>dim</strong> – Number of dimensions in the parameter space.</p></li>
+<li><p><strong>lnpostfn</strong> – A function that takes a vector in the parameter space as input and
+returns the natural logarithm of the posterior probability for that
+position.</p></li>
+<li><p><strong>args</strong> – (optional)
+A list of extra positional arguments for <code class="docutils literal notranslate"><span class="pre">lnpostfn</span></code>. <code class="docutils literal notranslate"><span class="pre">lnpostfn</span></code>
+will be called with the sequence <code class="docutils literal notranslate"><span class="pre">lnpostfn(p,</span> <span class="pre">*args,</span> <span class="pre">**kwargs)</span></code>.</p></li>
+<li><p><strong>kwargs</strong> – (optional)
+A list of extra keyword arguments for <code class="docutils literal notranslate"><span class="pre">lnpostfn</span></code>. <code class="docutils literal notranslate"><span class="pre">lnpostfn</span></code>
+will be called with the sequence <code class="docutils literal notranslate"><span class="pre">lnpostfn(p,</span> <span class="pre">*args,</span> <span class="pre">**kwargs)</span></code>.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="RMutils.emcee.mh.MHSampler.acor">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">acor</span></code><a class="headerlink" href="#RMutils.emcee.mh.MHSampler.acor" title="Permalink to this definition">¶</a></dt>
+<dd><p>An estimate of the autocorrelation time for each parameter (length:
+<code class="docutils literal notranslate"><span class="pre">dim</span></code>).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="RMutils.emcee.mh.MHSampler.get_autocorr_time">
+<code class="sig-name descname"><span class="pre">get_autocorr_time</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">window</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#RMutils.emcee.mh.MHSampler.get_autocorr_time" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute an estimate of the autocorrelation time for each parameter
+(length: <code class="docutils literal notranslate"><span class="pre">dim</span></code>).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>window</strong> – (optional)
+The size of the windowing function. This is equivalent to the
+maximum number of lags to use. (default: 50)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="RMutils.emcee.mh.MHSampler.reset">
+<code class="sig-name descname"><span class="pre">reset</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#RMutils.emcee.mh.MHSampler.reset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clear <code class="docutils literal notranslate"><span class="pre">chain</span></code>, <code class="docutils literal notranslate"><span class="pre">lnprobability</span></code> and the bookkeeping parameters.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="RMutils.emcee.mh.MHSampler.sample">
+<code class="sig-name descname"><span class="pre">sample</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lnprob</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">randomstate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">thin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">storechain</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iterations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#RMutils.emcee.mh.MHSampler.sample" title="Permalink to this definition">¶</a></dt>
+<dd><p>Advances the chain <code class="docutils literal notranslate"><span class="pre">iterations</span></code> steps as an iterator</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>p0</strong> – The initial position vector.</p></li>
+<li><p><strong>lnprob0</strong> – (optional)
+The log posterior probability at position <code class="docutils literal notranslate"><span class="pre">p0</span></code>. If <code class="docutils literal notranslate"><span class="pre">lnprob</span></code>
+is not provided, the initial value is calculated.</p></li>
+<li><p><strong>rstate0</strong> – (optional)
+The state of the random number generator. See the
+<code class="xref py py-func docutils literal notranslate"><span class="pre">random_state()</span></code> property for details.</p></li>
+<li><p><strong>iterations</strong> – (optional)
+The number of steps to run.</p></li>
+<li><p><strong>thin</strong> – (optional)
+If you only want to store and yield every <code class="docutils literal notranslate"><span class="pre">thin</span></code> samples in the
+chain, set thin to an integer greater than 1.</p></li>
+<li><p><strong>storechain</strong> – (optional)
+By default, the sampler stores (in memory) the positions and
+log-probabilities of the samples in the chain. If you are
+using another method to store the samples to a file or if you
+don’t need to analyse the samples after the fact (for burn-in
+for example) set <code class="docutils literal notranslate"><span class="pre">storechain</span></code> to <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p></li>
+</ul>
+</dd>
+</dl>
+<p>At each iteration, this generator yields:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">pos</span></code> - The current positions of the chain in the parameter
+space.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">lnprob</span></code> - The value of the log posterior at <code class="docutils literal notranslate"><span class="pre">pos</span></code> .</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">rstate</span></code> - The current state of the random number generator.</p></li>
+</ul>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-RMutils.emcee.mpi_pool">
+<span id="rmutils-emcee-mpi-pool-module"></span><h2>RMutils.emcee.mpi_pool module<a class="headerlink" href="#module-RMutils.emcee.mpi_pool" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="RMutils.emcee.mpi_pool.MPIPool">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">RMutils.emcee.mpi_pool.</span></code><code class="sig-name descname"><span class="pre">MPIPool</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">comm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">debug</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loadbalance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#RMutils.emcee.mpi_pool.MPIPool" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A pool that distributes tasks over a set of MPI processes. MPI is an
+API for distributed memory parallelism.  This pool will let you run
+emcee without shared memory, letting you use much larger machines
+with emcee.</p>
+<p>The pool only support the <a class="reference internal" href="#RMutils.emcee.mpi_pool.MPIPool.map" title="RMutils.emcee.mpi_pool.MPIPool.map"><code class="xref py py-func docutils literal notranslate"><span class="pre">map()</span></code></a> method at the moment because
+this is the only functionality that emcee needs. That being said,
+this pool is fairly general and it could be used for other purposes.</p>
+<p>Contributed by <a class="reference external" href="https://github.com/joezuntz">Joe Zuntz</a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>comm</strong> – (optional)
+The <code class="docutils literal notranslate"><span class="pre">mpi4py</span></code> communicator.</p></li>
+<li><p><strong>debug</strong> – (optional)
+If <code class="docutils literal notranslate"><span class="pre">True</span></code>, print out a lot of status updates at each step.</p></li>
+<li><p><strong>loadbalance</strong> – (optional)
+if <code class="docutils literal notranslate"><span class="pre">True</span></code> and ntask &gt; Ncpus, tries to loadbalance by sending
+out one task to each cpu first and then sending out the rest
+as the cpus get done.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="RMutils.emcee.mpi_pool.MPIPool.bcast">
+<code class="sig-name descname"><span class="pre">bcast</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#RMutils.emcee.mpi_pool.MPIPool.bcast" title="Permalink to this definition">¶</a></dt>
+<dd><p>Equivalent to mpi4py <a class="reference internal" href="#RMutils.emcee.mpi_pool.MPIPool.bcast" title="RMutils.emcee.mpi_pool.MPIPool.bcast"><code class="xref py py-func docutils literal notranslate"><span class="pre">bcast()</span></code></a> collective operation.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="RMutils.emcee.mpi_pool.MPIPool.close">
+<code class="sig-name descname"><span class="pre">close</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#RMutils.emcee.mpi_pool.MPIPool.close" title="Permalink to this definition">¶</a></dt>
+<dd><p>Just send a message off to all the pool members which contains
+the special <code class="xref py py-class docutils literal notranslate"><span class="pre">_close_pool_message</span></code> sentinel.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="RMutils.emcee.mpi_pool.MPIPool.is_master">
+<code class="sig-name descname"><span class="pre">is_master</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#RMutils.emcee.mpi_pool.MPIPool.is_master" title="Permalink to this definition">¶</a></dt>
+<dd><p>Is the current process the master?</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="RMutils.emcee.mpi_pool.MPIPool.map">
+<code class="sig-name descname"><span class="pre">map</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">function</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tasks</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#RMutils.emcee.mpi_pool.MPIPool.map" title="Permalink to this definition">¶</a></dt>
+<dd><p>Like the built-in <a class="reference internal" href="#RMutils.emcee.mpi_pool.MPIPool.map" title="RMutils.emcee.mpi_pool.MPIPool.map"><code class="xref py py-func docutils literal notranslate"><span class="pre">map()</span></code></a> function, apply a function to all
+of the values in a list and return the list of results.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>function</strong> – The function to apply to the list.</p></li>
+<li><p><strong>tasks</strong> – The list of elements.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="RMutils.emcee.mpi_pool.MPIPool.wait">
+<code class="sig-name descname"><span class="pre">wait</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#RMutils.emcee.mpi_pool.MPIPool.wait" title="Permalink to this definition">¶</a></dt>
+<dd><p>If this isn’t the master process, wait for instructions.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-RMutils.emcee.ptsampler">
+<span id="rmutils-emcee-ptsampler-module"></span><h2>RMutils.emcee.ptsampler module<a class="headerlink" href="#module-RMutils.emcee.ptsampler" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="RMutils.emcee.ptsampler.PTSampler">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">RMutils.emcee.ptsampler.</span></code><code class="sig-name descname"><span class="pre">PTSampler</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ntemps</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nwalkers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logl</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threads</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pool</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">betas</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Tmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loglargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logpargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loglkwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logpkwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#RMutils.emcee.ptsampler.PTSampler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#RMutils.emcee.sampler.Sampler" title="RMutils.emcee.sampler.Sampler"><code class="xref py py-class docutils literal notranslate"><span class="pre">RMutils.emcee.sampler.Sampler</span></code></a></p>
+<p>A parallel-tempered ensemble sampler, using <code class="xref py py-class docutils literal notranslate"><span class="pre">EnsembleSampler</span></code>
+for sampling within each parallel chain.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ntemps</strong> – The number of temperatures.  Can be <code class="docutils literal notranslate"><span class="pre">None</span></code>, in which case
+the <code class="docutils literal notranslate"><span class="pre">Tmax</span></code> argument sets the maximum temperature.</p></li>
+<li><p><strong>nwalkers</strong> – The number of ensemble walkers at each temperature.</p></li>
+<li><p><strong>dim</strong> – The dimension of parameter space.</p></li>
+<li><p><strong>logl</strong> – The log-likelihood function.</p></li>
+<li><p><strong>logp</strong> – The log-prior function.</p></li>
+<li><p><strong>threads</strong> – (optional)
+The number of parallel threads to use in sampling.</p></li>
+<li><p><strong>pool</strong> – (optional)
+Alternative to <code class="docutils literal notranslate"><span class="pre">threads</span></code>.  Any object that implements a
+<code class="docutils literal notranslate"><span class="pre">map</span></code> method compatible with the built-in <code class="docutils literal notranslate"><span class="pre">map</span></code> will do
+here.  For example, <code class="xref py py-class docutils literal notranslate"><span class="pre">multi.Pool</span></code> will do.</p></li>
+<li><p><strong>betas</strong> – (optional)
+Array giving the inverse temperatures, <span class="math notranslate nohighlight">\(\beta=1/T\)</span>,
+used in the ladder.  The default is chosen so that a Gaussian
+posterior in the given number of dimensions will have a 0.25
+tswap acceptance rate.</p></li>
+<li><p><strong>a</strong> – (optional)
+Proposal scale factor.</p></li>
+<li><p><strong>Tmax</strong> – (optional)
+Maximum temperature for the ladder.  If <code class="docutils literal notranslate"><span class="pre">ntemps</span></code> is
+<code class="docutils literal notranslate"><span class="pre">None</span></code>, this argument is used to set the temperature ladder.</p></li>
+<li><p><strong>loglargs</strong> – (optional)
+Positional arguments for the log-likelihood function.</p></li>
+<li><p><strong>logpargs</strong> – (optional)
+Positional arguments for the log-prior function.</p></li>
+<li><p><strong>loglkwargs</strong> – (optional)
+Keyword arguments for the log-likelihood function.</p></li>
+<li><p><strong>logpkwargs</strong> – (optional)
+Keyword arguments for the log-prior function.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="RMutils.emcee.ptsampler.PTSampler.acceptance_fraction">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">acceptance_fraction</span></code><a class="headerlink" href="#RMutils.emcee.ptsampler.PTSampler.acceptance_fraction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Matrix of shape <code class="docutils literal notranslate"><span class="pre">(Ntemps,</span> <span class="pre">Nwalkers)</span></code> detailing the
+acceptance fraction for each walker.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="RMutils.emcee.ptsampler.PTSampler.acor">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">acor</span></code><a class="headerlink" href="#RMutils.emcee.ptsampler.PTSampler.acor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a matrix of autocorrelation lengths for each
+parameter in each temperature of shape <code class="docutils literal notranslate"><span class="pre">(Ntemps,</span> <span class="pre">Ndim)</span></code>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="RMutils.emcee.ptsampler.PTSampler.betas">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">betas</span></code><a class="headerlink" href="#RMutils.emcee.ptsampler.PTSampler.betas" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the sequence of inverse temperatures in the ladder.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="RMutils.emcee.ptsampler.PTSampler.chain">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">chain</span></code><a class="headerlink" href="#RMutils.emcee.ptsampler.PTSampler.chain" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the stored chain of samples; shape <code class="docutils literal notranslate"><span class="pre">(Ntemps,</span>
+<span class="pre">Nwalkers,</span> <span class="pre">Nsteps,</span> <span class="pre">Ndim)</span></code>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="RMutils.emcee.ptsampler.PTSampler.flatchain">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">flatchain</span></code><a class="headerlink" href="#RMutils.emcee.ptsampler.PTSampler.flatchain" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the stored chain, but flattened along the walker axis, so
+of shape <code class="docutils literal notranslate"><span class="pre">(Ntemps,</span> <span class="pre">Nwalkers*Nsteps,</span> <span class="pre">Ndim)</span></code>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="RMutils.emcee.ptsampler.PTSampler.get_autocorr_time">
+<code class="sig-name descname"><span class="pre">get_autocorr_time</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">window</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#RMutils.emcee.ptsampler.PTSampler.get_autocorr_time" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a matrix of autocorrelation lengths for each
+parameter in each temperature of shape <code class="docutils literal notranslate"><span class="pre">(Ntemps,</span> <span class="pre">Ndim)</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>window</strong> – (optional)
+The size of the windowing function. This is equivalent to the
+maximum number of lags to use. (default: 50)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="RMutils.emcee.ptsampler.PTSampler.lnlikelihood">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">lnlikelihood</span></code><a class="headerlink" href="#RMutils.emcee.ptsampler.PTSampler.lnlikelihood" title="Permalink to this definition">¶</a></dt>
+<dd><p>Matrix of ln-likelihood values; shape <code class="docutils literal notranslate"><span class="pre">(Ntemps,</span> <span class="pre">Nwalkers,</span> <span class="pre">Nsteps)</span></code>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="RMutils.emcee.ptsampler.PTSampler.lnprobability">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">lnprobability</span></code><a class="headerlink" href="#RMutils.emcee.ptsampler.PTSampler.lnprobability" title="Permalink to this definition">¶</a></dt>
+<dd><p>Matrix of lnprobability values; shape <code class="docutils literal notranslate"><span class="pre">(Ntemps,</span> <span class="pre">Nwalkers,</span> <span class="pre">Nsteps)</span></code>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="RMutils.emcee.ptsampler.PTSampler.reset">
+<code class="sig-name descname"><span class="pre">reset</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#RMutils.emcee.ptsampler.PTSampler.reset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clear the <code class="docutils literal notranslate"><span class="pre">chain</span></code>, <code class="docutils literal notranslate"><span class="pre">lnprobability</span></code>, <code class="docutils literal notranslate"><span class="pre">lnlikelihood</span></code>,
+<code class="docutils literal notranslate"><span class="pre">acceptance_fraction</span></code>, <code class="docutils literal notranslate"><span class="pre">tswap_acceptance_fraction</span></code> stored
+properties.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="RMutils.emcee.ptsampler.PTSampler.sample">
+<code class="sig-name descname"><span class="pre">sample</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lnprob0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lnlike0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iterations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">thin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">storechain</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#RMutils.emcee.ptsampler.PTSampler.sample" title="Permalink to this definition">¶</a></dt>
+<dd><p>Advance the chains <code class="docutils literal notranslate"><span class="pre">iterations</span></code> steps as a generator.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>p0</strong> – The initial positions of the walkers.  Shape should be
+<code class="docutils literal notranslate"><span class="pre">(ntemps,</span> <span class="pre">nwalkers,</span> <span class="pre">dim)</span></code>.</p></li>
+<li><p><strong>lnprob0</strong> – (optional)
+The initial posterior values for the ensembles.  Shape
+<code class="docutils literal notranslate"><span class="pre">(ntemps,</span> <span class="pre">nwalkers)</span></code>.</p></li>
+<li><p><strong>lnlike0</strong> – (optional)
+The initial likelihood values for the ensembles.  Shape
+<code class="docutils literal notranslate"><span class="pre">(ntemps,</span> <span class="pre">nwalkers)</span></code>.</p></li>
+<li><p><strong>iterations</strong> – (optional)
+The number of iterations to preform.</p></li>
+<li><p><strong>thin</strong> – (optional)
+The number of iterations to perform between saving the
+state to the internal chain.</p></li>
+<li><p><strong>storechain</strong> – (optional)
+If <code class="docutils literal notranslate"><span class="pre">True</span></code> store the iterations in the <code class="docutils literal notranslate"><span class="pre">chain</span></code>
+property.</p></li>
+</ul>
+</dd>
+</dl>
+<p>At each iteration, this generator yields</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">p</span></code>, the current position of the walkers.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">lnprob</span></code> the current posterior values for the walkers.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">lnlike</span></code> the current likelihood values for the walkers.</p></li>
+</ul>
+</dd></dl>
+
+<dl class="py method">
+<dt id="RMutils.emcee.ptsampler.PTSampler.thermodynamic_integration_log_evidence">
+<code class="sig-name descname"><span class="pre">thermodynamic_integration_log_evidence</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">logls</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fburnin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#RMutils.emcee.ptsampler.PTSampler.thermodynamic_integration_log_evidence" title="Permalink to this definition">¶</a></dt>
+<dd><p>Thermodynamic integration estimate of the evidence.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>logls</strong> – (optional) The log-likelihoods to use for
+computing the thermodynamic evidence.  If <code class="docutils literal notranslate"><span class="pre">None</span></code> (the
+default), use the stored log-likelihoods in the sampler.
+Should be of shape <code class="docutils literal notranslate"><span class="pre">(Ntemps,</span> <span class="pre">Nwalkers,</span> <span class="pre">Nsamples)</span></code>.</p></li>
+<li><p><strong>fburnin</strong> – (optional)
+The fraction of the chain to discard as burnin samples; only the
+final <code class="docutils literal notranslate"><span class="pre">1-fburnin</span></code> fraction of the samples will be used to
+compute the evidence; the default is <code class="docutils literal notranslate"><span class="pre">fburnin</span> <span class="pre">=</span> <span class="pre">0.1</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return (lnZ, dlnZ)<code class="docutils literal notranslate"><span class="pre">(lnZ,</span> <span class="pre">dlnZ)</span></code></dt>
+<dd class="field-even"><p>Returns an estimate of the
+log-evidence and the error associated with the finite
+number of temperatures at which the posterior has been
+sampled.</p>
+</dd>
+</dl>
+<p>The evidence is the integral of the un-normalized posterior
+over all of parameter space:</p>
+<div class="math notranslate nohighlight">
+\[Z \equiv \int d\theta \, l(\theta) p(\theta)\]</div>
+<p>Thermodymanic integration is a technique for estimating the
+evidence integral using information from the chains at various
+temperatures.  Let</p>
+<div class="math notranslate nohighlight">
+\[Z(\beta) = \int d\theta \, l^\beta(\theta) p(\theta)\]</div>
+<p>Then</p>
+<div class="math notranslate nohighlight">
+\[\frac{d \ln Z}{d \beta}
+= \frac{1}{Z(\beta)} \int d\theta l^\beta p \ln l
+= \left \langle \ln l \right \rangle_\beta\]</div>
+<p>so</p>
+<div class="math notranslate nohighlight">
+\[\ln Z(\beta = 1)
+= \int_0^1 d\beta \left \langle \ln l \right\rangle_\beta\]</div>
+<p>By computing the average of the log-likelihood at the
+difference temperatures, the sampler can approximate the above
+integral.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="RMutils.emcee.ptsampler.PTSampler.tswap_acceptance_fraction">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">tswap_acceptance_fraction</span></code><a class="headerlink" href="#RMutils.emcee.ptsampler.PTSampler.tswap_acceptance_fraction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns an array of accepted temperature swap fractions for
+each temperature; shape <code class="docutils literal notranslate"><span class="pre">(ntemps,</span> <span class="pre">)</span></code>.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-RMutils.emcee.sampler">
+<span id="rmutils-emcee-sampler-module"></span><h2>RMutils.emcee.sampler module<a class="headerlink" href="#module-RMutils.emcee.sampler" title="Permalink to this headline">¶</a></h2>
+<p>The base sampler class implementing various helpful functions.</p>
+<dl class="py class">
+<dt id="RMutils.emcee.sampler.Sampler">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">RMutils.emcee.sampler.</span></code><code class="sig-name descname"><span class="pre">Sampler</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lnprobfn</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#RMutils.emcee.sampler.Sampler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>An abstract sampler object that implements various helper functions</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dim</strong> – The number of dimensions in the parameter space.</p></li>
+<li><p><strong>lnpostfn</strong> – A function that takes a vector in the parameter space as input and
+returns the natural logarithm of the posterior probability for that
+position.</p></li>
+<li><p><strong>args</strong> – (optional)
+A list of extra positional arguments for <code class="docutils literal notranslate"><span class="pre">lnpostfn</span></code>. <code class="docutils literal notranslate"><span class="pre">lnpostfn</span></code>
+will be called with the sequence <code class="docutils literal notranslate"><span class="pre">lnpostfn(p,</span> <span class="pre">*args,</span> <span class="pre">**kwargs)</span></code>.</p></li>
+<li><p><strong>kwargs</strong> – (optional)
+A list of extra keyword arguments for <code class="docutils literal notranslate"><span class="pre">lnpostfn</span></code>. <code class="docutils literal notranslate"><span class="pre">lnpostfn</span></code>
+will be called with the sequence <code class="docutils literal notranslate"><span class="pre">lnpostfn(p,</span> <span class="pre">*args,</span> <span class="pre">**kwargs)</span></code>.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="RMutils.emcee.sampler.Sampler.acceptance_fraction">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">acceptance_fraction</span></code><a class="headerlink" href="#RMutils.emcee.sampler.Sampler.acceptance_fraction" title="Permalink to this definition">¶</a></dt>
+<dd><p>The fraction of proposed steps that were accepted.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="RMutils.emcee.sampler.Sampler.acor">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">acor</span></code><a class="headerlink" href="#RMutils.emcee.sampler.Sampler.acor" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="RMutils.emcee.sampler.Sampler.chain">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">chain</span></code><a class="headerlink" href="#RMutils.emcee.sampler.Sampler.chain" title="Permalink to this definition">¶</a></dt>
+<dd><p>A pointer to the Markov chain.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="RMutils.emcee.sampler.Sampler.clear_chain">
+<code class="sig-name descname"><span class="pre">clear_chain</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#RMutils.emcee.sampler.Sampler.clear_chain" title="Permalink to this definition">¶</a></dt>
+<dd><p>An alias for <a class="reference internal" href="#RMutils.emcee.sampler.Sampler.reset" title="RMutils.emcee.sampler.Sampler.reset"><code class="xref py py-func docutils literal notranslate"><span class="pre">reset()</span></code></a> kept for backwards compatibility.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="RMutils.emcee.sampler.Sampler.flatchain">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">flatchain</span></code><a class="headerlink" href="#RMutils.emcee.sampler.Sampler.flatchain" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias of <code class="docutils literal notranslate"><span class="pre">chain</span></code> provided for compatibility.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="RMutils.emcee.sampler.Sampler.get_autocorr_time">
+<code class="sig-name descname"><span class="pre">get_autocorr_time</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">window</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#RMutils.emcee.sampler.Sampler.get_autocorr_time" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="RMutils.emcee.sampler.Sampler.get_lnprob">
+<code class="sig-name descname"><span class="pre">get_lnprob</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#RMutils.emcee.sampler.Sampler.get_lnprob" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the log-probability at the given position.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="RMutils.emcee.sampler.Sampler.lnprobability">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">lnprobability</span></code><a class="headerlink" href="#RMutils.emcee.sampler.Sampler.lnprobability" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of the log-probability values associated with each step in
+the chain.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="RMutils.emcee.sampler.Sampler.random_state">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">random_state</span></code><a class="headerlink" href="#RMutils.emcee.sampler.Sampler.random_state" title="Permalink to this definition">¶</a></dt>
+<dd><p>The state of the internal random number generator. In practice, it’s
+the result of calling <code class="docutils literal notranslate"><span class="pre">get_state()</span></code> on a
+<code class="docutils literal notranslate"><span class="pre">numpy.random.mtrand.RandomState</span></code> object. You can try to set this
+property but be warned that if you do this and it fails, it will do
+so silently.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="RMutils.emcee.sampler.Sampler.reset">
+<code class="sig-name descname"><span class="pre">reset</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#RMutils.emcee.sampler.Sampler.reset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clear <code class="docutils literal notranslate"><span class="pre">chain</span></code>, <code class="docutils literal notranslate"><span class="pre">lnprobability</span></code> and the bookkeeping parameters.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="RMutils.emcee.sampler.Sampler.run_mcmc">
+<code class="sig-name descname"><span class="pre">run_mcmc</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pos0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">N</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rstate0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lnprob0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#RMutils.emcee.sampler.Sampler.run_mcmc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Iterate <a class="reference internal" href="#RMutils.emcee.sampler.Sampler.sample" title="RMutils.emcee.sampler.Sampler.sample"><code class="xref py py-func docutils literal notranslate"><span class="pre">sample()</span></code></a> for <code class="docutils literal notranslate"><span class="pre">N</span></code> iterations and return the result.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>pos0</strong> – The initial position vector.  Can also be None to resume from
+where :func:<code class="docutils literal notranslate"><span class="pre">run_mcmc</span></code> left off the last time it executed.</p></li>
+<li><p><strong>N</strong> – The number of steps to run.</p></li>
+<li><p><strong>lnprob0</strong> – (optional)
+The log posterior probability at position <code class="docutils literal notranslate"><span class="pre">p0</span></code>. If <code class="docutils literal notranslate"><span class="pre">lnprob</span></code>
+is not provided, the initial value is calculated.</p></li>
+<li><p><strong>rstate0</strong> – (optional)
+The state of the random number generator. See the
+<a class="reference internal" href="#RMutils.emcee.sampler.Sampler.random_state" title="RMutils.emcee.sampler.Sampler.random_state"><code class="xref py py-func docutils literal notranslate"><span class="pre">random_state()</span></code></a> property for details.</p></li>
+<li><p><strong>kwargs</strong> – (optional)
+Other parameters that are directly passed to <a class="reference internal" href="#RMutils.emcee.sampler.Sampler.sample" title="RMutils.emcee.sampler.Sampler.sample"><code class="xref py py-func docutils literal notranslate"><span class="pre">sample()</span></code></a>.</p></li>
+</ul>
+</dd>
+</dl>
+<p>This returns the results of the final sample in whatever form
+<a class="reference internal" href="#RMutils.emcee.sampler.Sampler.sample" title="RMutils.emcee.sampler.Sampler.sample"><code class="xref py py-func docutils literal notranslate"><span class="pre">sample()</span></code></a> yields.  Usually, that’s:
+<code class="docutils literal notranslate"><span class="pre">pos</span></code>, <code class="docutils literal notranslate"><span class="pre">lnprob</span></code>, <code class="docutils literal notranslate"><span class="pre">rstate</span></code>, <code class="docutils literal notranslate"><span class="pre">blobs</span></code> (blobs optional)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="RMutils.emcee.sampler.Sampler.sample">
+<code class="sig-name descname"><span class="pre">sample</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#RMutils.emcee.sampler.Sampler.sample" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-RMutils.emcee.tests">
+<span id="rmutils-emcee-tests-module"></span><h2>RMutils.emcee.tests module<a class="headerlink" href="#module-RMutils.emcee.tests" title="Permalink to this headline">¶</a></h2>
+<p>Defines various nose unit tests</p>
+<dl class="py class">
+<dt id="RMutils.emcee.tests.LogLikeGaussian">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">RMutils.emcee.tests.</span></code><code class="sig-name descname"><span class="pre">LogLikeGaussian</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">icov</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#RMutils.emcee.tests.LogLikeGaussian" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+</dd></dl>
+
+<dl class="py class">
+<dt id="RMutils.emcee.tests.LogPriorGaussian">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">RMutils.emcee.tests.</span></code><code class="sig-name descname"><span class="pre">LogPriorGaussian</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">icov</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cutoff</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#RMutils.emcee.tests.LogPriorGaussian" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+</dd></dl>
+
+<dl class="py class">
+<dt id="RMutils.emcee.tests.Tests">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">RMutils.emcee.tests.</span></code><code class="sig-name descname"><span class="pre">Tests</span></code><a class="headerlink" href="#RMutils.emcee.tests.Tests" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt id="RMutils.emcee.tests.Tests.check_pt_sampler">
+<code class="sig-name descname"><span class="pre">check_pt_sampler</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cutoff</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">N</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#RMutils.emcee.tests.Tests.check_pt_sampler" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="RMutils.emcee.tests.Tests.check_sampler">
+<code class="sig-name descname"><span class="pre">check_sampler</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">N</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#RMutils.emcee.tests.Tests.check_sampler" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="RMutils.emcee.tests.Tests.setUp">
+<code class="sig-name descname"><span class="pre">setUp</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#RMutils.emcee.tests.Tests.setUp" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="RMutils.emcee.tests.Tests.test_blobs">
+<code class="sig-name descname"><span class="pre">test_blobs</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#RMutils.emcee.tests.Tests.test_blobs" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="RMutils.emcee.tests.Tests.test_ensemble">
+<code class="sig-name descname"><span class="pre">test_ensemble</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#RMutils.emcee.tests.Tests.test_ensemble" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="RMutils.emcee.tests.Tests.test_inf_nan_params">
+<code class="sig-name descname"><span class="pre">test_inf_nan_params</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#RMutils.emcee.tests.Tests.test_inf_nan_params" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="RMutils.emcee.tests.Tests.test_mh">
+<code class="sig-name descname"><span class="pre">test_mh</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#RMutils.emcee.tests.Tests.test_mh" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="RMutils.emcee.tests.Tests.test_nan_lnprob">
+<code class="sig-name descname"><span class="pre">test_nan_lnprob</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#RMutils.emcee.tests.Tests.test_nan_lnprob" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="RMutils.emcee.tests.Tests.test_parallel">
+<code class="sig-name descname"><span class="pre">test_parallel</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#RMutils.emcee.tests.Tests.test_parallel" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="RMutils.emcee.tests.Tests.test_pt_sampler">
+<code class="sig-name descname"><span class="pre">test_pt_sampler</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#RMutils.emcee.tests.Tests.test_pt_sampler" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="RMutils.emcee.tests.Tests.test_run_mcmc_resume">
+<code class="sig-name descname"><span class="pre">test_run_mcmc_resume</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#RMutils.emcee.tests.Tests.test_run_mcmc_resume" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt id="RMutils.emcee.tests.ln_flat">
+<code class="sig-prename descclassname"><span class="pre">RMutils.emcee.tests.</span></code><code class="sig-name descname"><span class="pre">ln_flat</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#RMutils.emcee.tests.ln_flat" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="RMutils.emcee.tests.lnprob_gaussian">
+<code class="sig-prename descclassname"><span class="pre">RMutils.emcee.tests.</span></code><code class="sig-name descname"><span class="pre">lnprob_gaussian</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">icov</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#RMutils.emcee.tests.lnprob_gaussian" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="RMutils.emcee.tests.lnprob_gaussian_nan">
+<code class="sig-prename descclassname"><span class="pre">RMutils.emcee.tests.</span></code><code class="sig-name descname"><span class="pre">lnprob_gaussian_nan</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">icov</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#RMutils.emcee.tests.lnprob_gaussian_nan" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="RMutils.emcee.tests.log_unit_sphere_volume">
+<code class="sig-prename descclassname"><span class="pre">RMutils.emcee.tests.</span></code><code class="sig-name descname"><span class="pre">log_unit_sphere_volume</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ndim</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#RMutils.emcee.tests.log_unit_sphere_volume" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-RMutils.emcee.utils">
+<span id="rmutils-emcee-utils-module"></span><h2>RMutils.emcee.utils module<a class="headerlink" href="#module-RMutils.emcee.utils" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="RMutils.emcee.utils.MH_proposal_axisaligned">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">RMutils.emcee.utils.</span></code><code class="sig-name descname"><span class="pre">MH_proposal_axisaligned</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stdev</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#RMutils.emcee.utils.MH_proposal_axisaligned" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A Metropolis-Hastings proposal, with axis-aligned Gaussian steps,
+for convenient use as the <code class="docutils literal notranslate"><span class="pre">mh_proposal</span></code> option to
+<code class="xref py py-func docutils literal notranslate"><span class="pre">EnsembleSampler.sample()</span></code> .</p>
+</dd></dl>
+
+<dl class="py class">
+<dt id="RMutils.emcee.utils.MPIPool">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">RMutils.emcee.utils.</span></code><code class="sig-name descname"><span class="pre">MPIPool</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">comm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">debug</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loadbalance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#RMutils.emcee.utils.MPIPool" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A pool that distributes tasks over a set of MPI processes. MPI is an
+API for distributed memory parallelism.  This pool will let you run
+emcee without shared memory, letting you use much larger machines
+with emcee.</p>
+<p>The pool only support the <a class="reference internal" href="#RMutils.emcee.utils.MPIPool.map" title="RMutils.emcee.utils.MPIPool.map"><code class="xref py py-func docutils literal notranslate"><span class="pre">map()</span></code></a> method at the moment because
+this is the only functionality that emcee needs. That being said,
+this pool is fairly general and it could be used for other purposes.</p>
+<p>Contributed by <a class="reference external" href="https://github.com/joezuntz">Joe Zuntz</a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>comm</strong> – (optional)
+The <code class="docutils literal notranslate"><span class="pre">mpi4py</span></code> communicator.</p></li>
+<li><p><strong>debug</strong> – (optional)
+If <code class="docutils literal notranslate"><span class="pre">True</span></code>, print out a lot of status updates at each step.</p></li>
+<li><p><strong>loadbalance</strong> – (optional)
+if <code class="docutils literal notranslate"><span class="pre">True</span></code> and ntask &gt; Ncpus, tries to loadbalance by sending
+out one task to each cpu first and then sending out the rest
+as the cpus get done.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="RMutils.emcee.utils.MPIPool.bcast">
+<code class="sig-name descname"><span class="pre">bcast</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#RMutils.emcee.utils.MPIPool.bcast" title="Permalink to this definition">¶</a></dt>
+<dd><p>Equivalent to mpi4py <a class="reference internal" href="#RMutils.emcee.utils.MPIPool.bcast" title="RMutils.emcee.utils.MPIPool.bcast"><code class="xref py py-func docutils literal notranslate"><span class="pre">bcast()</span></code></a> collective operation.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="RMutils.emcee.utils.MPIPool.close">
+<code class="sig-name descname"><span class="pre">close</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#RMutils.emcee.utils.MPIPool.close" title="Permalink to this definition">¶</a></dt>
+<dd><p>Just send a message off to all the pool members which contains
+the special <code class="xref py py-class docutils literal notranslate"><span class="pre">_close_pool_message</span></code> sentinel.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="RMutils.emcee.utils.MPIPool.is_master">
+<code class="sig-name descname"><span class="pre">is_master</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#RMutils.emcee.utils.MPIPool.is_master" title="Permalink to this definition">¶</a></dt>
+<dd><p>Is the current process the master?</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="RMutils.emcee.utils.MPIPool.map">
+<code class="sig-name descname"><span class="pre">map</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">function</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tasks</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#RMutils.emcee.utils.MPIPool.map" title="Permalink to this definition">¶</a></dt>
+<dd><p>Like the built-in <a class="reference internal" href="#RMutils.emcee.utils.MPIPool.map" title="RMutils.emcee.utils.MPIPool.map"><code class="xref py py-func docutils literal notranslate"><span class="pre">map()</span></code></a> function, apply a function to all
+of the values in a list and return the list of results.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>function</strong> – The function to apply to the list.</p></li>
+<li><p><strong>tasks</strong> – The list of elements.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="RMutils.emcee.utils.MPIPool.wait">
+<code class="sig-name descname"><span class="pre">wait</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#RMutils.emcee.utils.MPIPool.wait" title="Permalink to this definition">¶</a></dt>
+<dd><p>If this isn’t the master process, wait for instructions.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt id="RMutils.emcee.utils.sample_ball">
+<code class="sig-prename descclassname"><span class="pre">RMutils.emcee.utils.</span></code><code class="sig-name descname"><span class="pre">sample_ball</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">std</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#RMutils.emcee.utils.sample_ball" title="Permalink to this definition">¶</a></dt>
+<dd><p>Produce a ball of walkers around an initial parameter value.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>p0</strong> – The initial parameter value.</p></li>
+<li><p><strong>std</strong> – The axis-aligned standard deviation.</p></li>
+<li><p><strong>size</strong> – The number of samples to produce.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-RMutils.emcee">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-RMutils.emcee" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt id="RMutils.emcee.test">
+<code class="sig-prename descclassname"><span class="pre">RMutils.emcee.</span></code><code class="sig-name descname"><span class="pre">test</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#RMutils.emcee.test" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, CIRADA.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

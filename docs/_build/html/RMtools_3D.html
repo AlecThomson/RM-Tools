@@ -1,0 +1,655 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>RMtools_3D package &mdash; RM-Tools 1.1 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="RMutils package" href="RMutils.html" />
+    <link rel="prev" title="RMtools_1D.models_ns package" href="RMtools_1D.models_ns.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> RM-Tools
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="index.html">Welcome to RM-Tools’s documentation!</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="RMtools_1D.html">RMtools_1D package</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">RMtools_3D package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#subpackages">Subpackages</a><ul class="simple">
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-RMtools_3D.RMpeakfit_3D">RMtools_3D.RMpeakfit_3D module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-RMtools_3D.assemble_chunks">RMtools_3D.assemble_chunks module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-RMtools_3D.create_chunks">RMtools_3D.create_chunks module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-RMtools_3D.do_RMclean_3D">RMtools_3D.do_RMclean_3D module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-RMtools_3D.do_RMsynth_3D">RMtools_3D.do_RMsynth_3D module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-RMtools_3D.do_fitIcube">RMtools_3D.do_fitIcube module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-RMtools_3D.extract_region">RMtools_3D.extract_region module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-RMtools_3D.make_freq_file">RMtools_3D.make_freq_file module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-RMtools_3D.mk_test_cube_data">RMtools_3D.mk_test_cube_data module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-RMtools_3D">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="RMutils.html">RMutils package</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">RM-Tools</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>RMtools_3D package</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/RMtools_3D.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="rmtools-3d-package">
+<h1>RMtools_3D package<a class="headerlink" href="#rmtools-3d-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+</div>
+</div>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-RMtools_3D.RMpeakfit_3D">
+<span id="rmtools-3d-rmpeakfit-3d-module"></span><h2>RMtools_3D.RMpeakfit_3D module<a class="headerlink" href="#module-RMtools_3D.RMpeakfit_3D" title="Permalink to this headline">¶</a></h2>
+<p># NAME:     RMpeakfit_3D.py                                                   #
+#                                                                             #
+# PURPOSE:  Fit peak of RM spectra, for every pixel in 3D FDF cube.           #
+#
+# Initial version: Cameron Van Eck, Dec 2020</p>
+<dl class="py function">
+<dt id="RMtools_3D.RMpeakfit_3D.delete_FITSheader_axis">
+<code class="sig-prename descclassname"><span class="pre">RMtools_3D.RMpeakfit_3D.</span></code><code class="sig-name descname"><span class="pre">delete_FITSheader_axis</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fitsheader</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis_number</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#RMtools_3D.RMpeakfit_3D.delete_FITSheader_axis" title="Permalink to this definition">¶</a></dt>
+<dd><p>Deletes FITS keywords associated with the specified axis.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="RMtools_3D.RMpeakfit_3D.find_axes">
+<code class="sig-prename descclassname"><span class="pre">RMtools_3D.RMpeakfit_3D.</span></code><code class="sig-name descname"><span class="pre">find_axes</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">header</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#RMtools_3D.RMpeakfit_3D.find_axes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Idenfities how many axes are present in a FITS file, and which is the
+Faraday depth axis. Necessary for bookkeeping on cube dimensionality,
+given that RM-clean only supports 3D cubes, but data may be 4D files.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="RMtools_3D.RMpeakfit_3D.main">
+<code class="sig-prename descclassname"><span class="pre">RMtools_3D.RMpeakfit_3D.</span></code><code class="sig-name descname"><span class="pre">main</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#RMtools_3D.RMpeakfit_3D.main" title="Permalink to this definition">¶</a></dt>
+<dd><p>Start peak fitting from the command line.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="RMtools_3D.RMpeakfit_3D.pixelwise_peak_fitting">
+<code class="sig-prename descclassname"><span class="pre">RMtools_3D.RMpeakfit_3D.</span></code><code class="sig-name descname"><span class="pre">pixelwise_peak_fitting</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">FDF</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phiArr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fwhmRMSF</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lamSqArr_m2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lam0Sq</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">product_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">noiseArr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stokesIcube</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#RMtools_3D.RMpeakfit_3D.pixelwise_peak_fitting" title="Permalink to this definition">¶</a></dt>
+<dd><p>Performs the 1D FDF peak fitting used in RMsynth/RMclean_1D, pixelwise on
+all pixels in a 3D FDF cube.</p>
+<dl>
+<dt>Inputs:</dt><dd><dl class="simple">
+<dt>FDF: FDF cube (3D array). This is assumed to be in astropy axis ordering</dt><dd><p>(Phi, dec, ra)</p>
+</dd>
+</dl>
+<p>phiArr: (1D) array of phi values
+fwhmRMSF: 2D array of RMSF FWHM values
+lamSqArr_m2: 1D array of channel lambda^2 values.
+lam0Sq: scalar value for lambda^2_0, the reference wavelength squared.
+product_list: list containing the names of the fitting products to save.
+dFDF: 2D array of theoretical noise values. If not supplied, the</p>
+<blockquote>
+<div><p>peak fitting will default to using the measured noise.</p>
+</div></blockquote>
+</dd>
+</dl>
+<p>Outputs: dictionary of 2D maps, 1 per fit output</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="RMtools_3D.RMpeakfit_3D.read_files">
+<code class="sig-prename descclassname"><span class="pre">RMtools_3D.RMpeakfit_3D.</span></code><code class="sig-name descname"><span class="pre">read_files</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">FDF_filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freq_filename</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#RMtools_3D.RMpeakfit_3D.read_files" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read in the files needed for peak fitting. Files assumed to be the standard
+outputs of RMsynth3D (and, optionally, RMclean3D). also, freq file.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="RMtools_3D.RMpeakfit_3D.save_maps">
+<code class="sig-prename descclassname"><span class="pre">RMtools_3D.RMpeakfit_3D.</span></code><code class="sig-name descname"><span class="pre">save_maps</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">map_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">FDFheader</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#RMtools_3D.RMpeakfit_3D.save_maps" title="Permalink to this definition">¶</a></dt>
+<dd><p>Saves the selected 2D maps of the fit output.
+Inputs:</p>
+<blockquote>
+<div><p>map_dict: a dictionary of 2D maps for the fitting outputs.
+prefix_path: the full or relative path to save the files, plus the file</p>
+<blockquote>
+<div><p>prefix to be given to the files.</p>
+</div></blockquote>
+</div></blockquote>
+</dd></dl>
+
+</div>
+<div class="section" id="module-RMtools_3D.assemble_chunks">
+<span id="rmtools-3d-assemble-chunks-module"></span><h2>RMtools_3D.assemble_chunks module<a class="headerlink" href="#module-RMtools_3D.assemble_chunks" title="Permalink to this headline">¶</a></h2>
+<p>Created on Wed May 29 13:10:26 2019</p>
+<p>This code reassembles chunks into larger files. This is useful for assembling
+output files from 3D RM synthesis back into larger cubes.</p>
+<p>&#64;author: cvaneck</p>
+<dl class="py function">
+<dt id="RMtools_3D.assemble_chunks.main">
+<code class="sig-prename descclassname"><span class="pre">RMtools_3D.assemble_chunks.</span></code><code class="sig-name descname"><span class="pre">main</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#RMtools_3D.assemble_chunks.main" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function will assemble a large FITS file or cube from smaller chunks.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="RMtools_3D.assemble_chunks.progress">
+<code class="sig-prename descclassname"><span class="pre">RMtools_3D.assemble_chunks.</span></code><code class="sig-name descname"><span class="pre">progress</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">width</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">percent</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#RMtools_3D.assemble_chunks.progress" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print a progress bar to the terminal.
+Stolen from Mike Bell.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-RMtools_3D.create_chunks">
+<span id="rmtools-3d-create-chunks-module"></span><h2>RMtools_3D.create_chunks module<a class="headerlink" href="#module-RMtools_3D.create_chunks" title="Permalink to this headline">¶</a></h2>
+<p>Created on Tue May 28 13:25:30 2019</p>
+<p>This code will divide a FITS cube into individual chunks.
+To minimize problems with how to divide the cube, it will convert the image
+plane into a 1D list of spectra.
+Then the file will divided into smaller files, with fewer pixels, in order to
+be run through RM synthesis and CLEAN.
+A separate routine will re-assemble the individual chunks into a combined file again.
+This code attempts to minimize the memory profile: in principle it should never
+need more memory than the size of a single chunk, and perhaps not even that much.</p>
+<p>&#64;author: cvaneck
+May 2019</p>
+<dl class="py function">
+<dt id="RMtools_3D.create_chunks.main">
+<code class="sig-prename descclassname"><span class="pre">RMtools_3D.create_chunks.</span></code><code class="sig-name descname"><span class="pre">main</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#RMtools_3D.create_chunks.main" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function will divide a large FITS file or cube into smaller chunks.
+It does so in a memory efficient way that requires only a small RAM overhead
+(approximately 1 chunk worth?).</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="RMtools_3D.create_chunks.progress">
+<code class="sig-prename descclassname"><span class="pre">RMtools_3D.create_chunks.</span></code><code class="sig-name descname"><span class="pre">progress</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">width</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">percent</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#RMtools_3D.create_chunks.progress" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print a progress bar to the terminal.
+Stolen from Mike Bell.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-RMtools_3D.do_RMclean_3D">
+<span id="rmtools-3d-do-rmclean-3d-module"></span><h2>RMtools_3D.do_RMclean_3D module<a class="headerlink" href="#module-RMtools_3D.do_RMclean_3D" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt id="RMtools_3D.do_RMclean_3D.find_axes">
+<code class="sig-prename descclassname"><span class="pre">RMtools_3D.do_RMclean_3D.</span></code><code class="sig-name descname"><span class="pre">find_axes</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">header</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#RMtools_3D.do_RMclean_3D.find_axes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Idenfities how many axes are present in a FITS file, and which is the
+Faraday depth axis. Necessary for bookkeeping on cube dimensionality,
+given that RM-clean only supports 3D cubes, but data may be 4D files.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="RMtools_3D.do_RMclean_3D.main">
+<code class="sig-prename descclassname"><span class="pre">RMtools_3D.do_RMclean_3D.</span></code><code class="sig-name descname"><span class="pre">main</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#RMtools_3D.do_RMclean_3D.main" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="RMtools_3D.do_RMclean_3D.read_FDF_cube">
+<code class="sig-prename descclassname"><span class="pre">RMtools_3D.do_RMclean_3D.</span></code><code class="sig-name descname"><span class="pre">read_FDF_cube</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#RMtools_3D.do_RMclean_3D.read_FDF_cube" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read in a FDF/RMSF cube. Figures out which axis is Faraday depth and
+puts it first (in numpy order) to accommodate the rest of the code.
+Returns: (complex_cube, header,FD_axis)</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="RMtools_3D.do_RMclean_3D.read_FDF_cubes">
+<code class="sig-prename descclassname"><span class="pre">RMtools_3D.do_RMclean_3D.</span></code><code class="sig-name descname"><span class="pre">read_FDF_cubes</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#RMtools_3D.do_RMclean_3D.read_FDF_cubes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read in a FDF/RMSF cube. Input filename can be any of real, imag, or tot components.
+Figures out which axis is Faraday depth and
+puts it first (in numpy order) to accommodate the rest of the code.
+Returns: (complex_cube, header,FD_axis)</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="RMtools_3D.do_RMclean_3D.run_rmclean">
+<code class="sig-prename descclassname"><span class="pre">RMtools_3D.do_RMclean_3D.</span></code><code class="sig-name descname"><span class="pre">run_rmclean</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="pre">fitsFDF</span></em>, <em class="sig-param"><span class="pre">fitsRMSF</span></em>, <em class="sig-param"><span class="pre">cutoff</span></em>, <em class="sig-param"><span class="pre">maxIter=1000</span></em>, <em class="sig-param"><span class="pre">gain=0.1</span></em>, <em class="sig-param"><span class="pre">nBits=32</span></em>, <em class="sig-param"><span class="pre">pool=None</span></em>, <em class="sig-param"><span class="pre">chunksize=None</span></em>, <em class="sig-param"><span class="pre">verbose=True</span></em>, <em class="sig-param"><span class="pre">log=&lt;built-in</span> <span class="pre">function</span> <span class="pre">print&gt;</span></em><span class="sig-paren">)</span><a class="headerlink" href="#RMtools_3D.do_RMclean_3D.run_rmclean" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run RM-CLEAN on a 2/3D FDF cube given an RMSF cube stored as FITS.</p>
+<p>If you want to run RM-CLEAN on arrays, just use util_RM.do_rmclean_hogbom.</p>
+<dl>
+<dt>Args:</dt><dd><p>fitsFDF (str): Name of FDF FITS file.
+fitsRMSF (str): Name of RMSF FITS file
+cutoff (float): CLEAN cutoff in flux units</p>
+</dd>
+<dt>Kwargs:</dt><dd><p>maxIter (int): Maximum number of CLEAN iterations per pixel.
+gain (float): CLEAN loop gain.
+nBits (int): Precision of floating point numbers.
+pool (multiprocessing Pool): Pool function from multiprocessing</p>
+<blockquote>
+<div><p>or schwimmbad</p>
+</div></blockquote>
+<dl class="simple">
+<dt>chunksize (int): Number of chunks which it submits to the process pool</dt><dd><p>as separate tasks. The (approximate) size of these chunks can be
+specified by setting chunksize to a positive integer.</p>
+</dd>
+</dl>
+<p>verbose (bool): Verbosity.
+log (function): Which logging function to use.</p>
+</dd>
+<dt>Returns:</dt><dd><p>cleanFDF (ndarray): Cube of RMCLEANed FDFs.
+ccArr (ndarray): Cube of RMCLEAN components (i.e. the model).
+iterCountArr (ndarray): Cube of number of RMCLEAN iterations.
+residFDF (ndarray): Cube of residual RMCLEANed FDFs.
+head (fits.header): Header of FDF FITS file for template.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="RMtools_3D.do_RMclean_3D.writefits">
+<code class="sig-prename descclassname"><span class="pre">RMtools_3D.do_RMclean_3D.</span></code><code class="sig-name descname"><span class="pre">writefits</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="pre">cleanFDF</span></em>, <em class="sig-param"><span class="pre">ccArr</span></em>, <em class="sig-param"><span class="pre">iterCountArr</span></em>, <em class="sig-param"><span class="pre">residFDF</span></em>, <em class="sig-param"><span class="pre">headtemp</span></em>, <em class="sig-param"><span class="pre">nBits=32</span></em>, <em class="sig-param"><span class="pre">prefixOut=''</span></em>, <em class="sig-param"><span class="pre">outDir=''</span></em>, <em class="sig-param"><span class="pre">write_separate_FDF=False</span></em>, <em class="sig-param"><span class="pre">verbose=True</span></em>, <em class="sig-param"><span class="pre">log=&lt;built-in</span> <span class="pre">function</span> <span class="pre">print&gt;</span></em><span class="sig-paren">)</span><a class="headerlink" href="#RMtools_3D.do_RMclean_3D.writefits" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write data to disk in FITS</p>
+<dl>
+<dt>Output files:</dt><dd><dl>
+<dt>Default:</dt><dd><p>FDF_clean.fits: RMCLEANed FDF, in 3 extensions: Q,U, and PI.
+FDF_CC.fits: RMCLEAN components, in 3 extensions: Q,U, and PI.
+CLEAN_nIter.fits: RMCLEAN iterations.</p>
+</dd>
+<dt>write_seperate_FDF=True:</dt><dd><p>FDF_clean_real.fits and FDF_CC.fits are split into
+three constituent components:</p>
+<blockquote>
+<div><p>FDF_clean_real.fits: Stokes Q
+FDF_clean_im.fits: Stokes U
+FDF_clean_tot.fits: Polarized Intensity (sqrt(Q^2+U^2))
+FDF_CC_real.fits: Stokes Q
+FDF_CC_im.fits: Stokes U
+FDF_CC_tot.fits: Polarized Intensity (sqrt(Q^2+U^2))
+CLEAN_nIter.fits: RMCLEAN iterations.</p>
+</div></blockquote>
+</dd>
+</dl>
+</dd>
+<dt>Args:</dt><dd><p>cleanFDF (ndarray): Cube of RMCLEANed FDFs.
+ccArr (ndarray): Cube of RMCLEAN components (i.e. the model).
+iterCountArr (ndarray): Cube of number of RMCLEAN iterations.
+residFDF (ndarray): Cube of residual RMCLEANed FDFs.</p>
+</dd>
+<dt>Kwargs:</dt><dd><p>prefixOut (str): Prefix for filenames.
+outDir (str): Directory to save files.
+write_seperate_FDF (bool): Write Q, U, and PI separately?
+verbose (bool): Verbosity.
+log (function): Which logging function to use.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-RMtools_3D.do_RMsynth_3D">
+<span id="rmtools-3d-do-rmsynth-3d-module"></span><h2>RMtools_3D.do_RMsynth_3D module<a class="headerlink" href="#module-RMtools_3D.do_RMsynth_3D" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt id="RMtools_3D.do_RMsynth_3D.find_freq_axis">
+<code class="sig-prename descclassname"><span class="pre">RMtools_3D.do_RMsynth_3D.</span></code><code class="sig-name descname"><span class="pre">find_freq_axis</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">header</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#RMtools_3D.do_RMsynth_3D.find_freq_axis" title="Permalink to this definition">¶</a></dt>
+<dd><p>Finds the frequency axis in a FITS header.
+Input: header: a Pyfits header object.
+Returns the axis number (as recorded in the FITS file, <strong>NOT</strong> in numpy ordering.)
+Returns 0 if the frequency axis cannot be found.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="RMtools_3D.do_RMsynth_3D.main">
+<code class="sig-prename descclassname"><span class="pre">RMtools_3D.do_RMsynth_3D.</span></code><code class="sig-name descname"><span class="pre">main</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#RMtools_3D.do_RMsynth_3D.main" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="RMtools_3D.do_RMsynth_3D.readFitsCube">
+<code class="sig-prename descclassname"><span class="pre">RMtools_3D.do_RMsynth_3D.</span></code><code class="sig-name descname"><span class="pre">readFitsCube</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="pre">file</span></em>, <em class="sig-param"><span class="pre">verbose</span></em>, <em class="sig-param"><span class="pre">log=&lt;built-in</span> <span class="pre">function</span> <span class="pre">print&gt;</span></em><span class="sig-paren">)</span><a class="headerlink" href="#RMtools_3D.do_RMsynth_3D.readFitsCube" title="Permalink to this definition">¶</a></dt>
+<dd><p>The old version of this function could only accept 3 or 4 axis input
+(and implicitly assumed that in the 4 axis case that axis 3 was degenerate).
+I’m trying to somewhat generalize this, so that it will accept NAXIS=1..3
+cases and automatically try to identify which axis is the frequency axis,
+and will try to remove the degenerate axis in the 4D case.
+Where it can’t find the correct frequency axis, it will assume it is the
+last one. It assumes any fourth or higher dimensions are degenerate (length 1)
+and will remove them. If the higher dimensions are NOT degenerate (e.g., a
+cube with all 4 Stokes), the code will fail (support may be added later?).
+-Cameron (3 April 2019)</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="RMtools_3D.do_RMsynth_3D.readFreqFile">
+<code class="sig-prename descclassname"><span class="pre">RMtools_3D.do_RMsynth_3D.</span></code><code class="sig-name descname"><span class="pre">readFreqFile</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="pre">file</span></em>, <em class="sig-param"><span class="pre">verbose</span></em>, <em class="sig-param"><span class="pre">log=&lt;built-in</span> <span class="pre">function</span> <span class="pre">print&gt;</span></em><span class="sig-paren">)</span><a class="headerlink" href="#RMtools_3D.do_RMsynth_3D.readFreqFile" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="RMtools_3D.do_RMsynth_3D.run_rmsynth">
+<code class="sig-prename descclassname"><span class="pre">RMtools_3D.do_RMsynth_3D.</span></code><code class="sig-name descname"><span class="pre">run_rmsynth</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="pre">dataQ</span></em>, <em class="sig-param"><span class="pre">dataU</span></em>, <em class="sig-param"><span class="pre">freqArr_Hz</span></em>, <em class="sig-param"><span class="pre">dataI=None</span></em>, <em class="sig-param"><span class="pre">rmsArr=None</span></em>, <em class="sig-param"><span class="pre">phiMax_radm2=None</span></em>, <em class="sig-param"><span class="pre">dPhi_radm2=None</span></em>, <em class="sig-param"><span class="pre">nSamples=10.0</span></em>, <em class="sig-param"><span class="pre">weightType='uniform'</span></em>, <em class="sig-param"><span class="pre">fitRMSF=False</span></em>, <em class="sig-param"><span class="pre">nBits=32</span></em>, <em class="sig-param"><span class="pre">verbose=True</span></em>, <em class="sig-param"><span class="pre">not_rmsf=False</span></em>, <em class="sig-param"><span class="pre">log=&lt;built-in</span> <span class="pre">function</span> <span class="pre">print&gt;</span></em><span class="sig-paren">)</span><a class="headerlink" href="#RMtools_3D.do_RMsynth_3D.run_rmsynth" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run RM-synthesis on 2/3D data.</p>
+<dl>
+<dt>Args:</dt><dd><p>dataQ (array_like): Stokes Q intensity cube.
+dataU (array_like): Stokes U intensity cube.
+freqArr_Hz (array_like): Frequency of each channel in Hz.</p>
+</dd>
+<dt>Kwargs:</dt><dd><p>dataI (array_like): Model cube of Stokes I spectra (see do_fitIcube).
+rmsArr (array_like): Cube of RMS spectra.
+phiMax_radm2 (float): Maximum absolute Faraday depth (rad/m^2).
+dPhi_radm2 (float): Faraday depth channel size (rad/m^2).
+nSamples (float): Number of samples across the RMSF.</p>
+<blockquote>
+<div><dl class="simple">
+<dt>weightType (str): Can be “variance” or “uniform”</dt><dd><p>“variance” – Weight by RMS.
+“uniform” – Weight uniformly (i.e. with 1s)</p>
+</dd>
+</dl>
+</div></blockquote>
+<p>fitRMSF (bool): Fit a Gaussian to the RMSF?
+nBits (int): Precision of floating point numbers.
+verbose (bool): Verbosity.
+not_rmsf (bool): Just do RM synthesis and ignore RMSF?
+log (function): Which logging function to use.</p>
+</dd>
+<dt>Returns:</dt><dd><dl class="simple">
+<dt>dataArr (list): FDF and RMSF information</dt><dd><dl class="simple">
+<dt>if not_rmsf:</dt><dd><p>dataArr = [FDFcube, phiArr_radm2, lam0Sq_m2, lambdaSqArr_m2]</p>
+</dd>
+<dt>else:</dt><dd><p>dataArr = [FDFcube, phiArr_radm2, RMSFcube, phi2Arr_radm2, fwhmRMSFCube,fitStatArr, lam0Sq_m2, lambdaSqArr_m2]</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="RMtools_3D.do_RMsynth_3D.writefits">
+<code class="sig-prename descclassname"><span class="pre">RMtools_3D.do_RMsynth_3D.</span></code><code class="sig-name descname"><span class="pre">writefits</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="pre">dataArr</span></em>, <em class="sig-param"><span class="pre">headtemplate</span></em>, <em class="sig-param"><span class="pre">fitRMSF=False</span></em>, <em class="sig-param"><span class="pre">prefixOut=''</span></em>, <em class="sig-param"><span class="pre">outDir=''</span></em>, <em class="sig-param"><span class="pre">nBits=32</span></em>, <em class="sig-param"><span class="pre">write_seperate_FDF=False</span></em>, <em class="sig-param"><span class="pre">not_rmsf=True</span></em>, <em class="sig-param"><span class="pre">verbose=True</span></em>, <em class="sig-param"><span class="pre">log=&lt;built-in</span> <span class="pre">function</span> <span class="pre">print&gt;</span></em><span class="sig-paren">)</span><a class="headerlink" href="#RMtools_3D.do_RMsynth_3D.writefits" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write data to disk in FITS</p>
+<dl>
+<dt>Output files:</dt><dd><p>Default:
+FDF_dirty.fits: FDF, in 3 extensions: Q,U, and PI.
+FDF_maxPI.fits: 2D map of peak polarized intensity per pixel.
+FDF_peakRM.fits: 2D map of Faraday depth of highest peak, per pixel.
+RMSF.fits: 4 extensions; first 3 are RMSF cubes [Q, U, PI]</p>
+<blockquote>
+<div><p>4th is 2D map of RMSF FWHM.</p>
+</div></blockquote>
+<p>write_seperate_FDF=True:
+FDF_dirty.fits is split into three constituent components:</p>
+<blockquote>
+<div><p>FDF_real_dirty.fits: Stokes Q
+FDF_im_dirty.fits: Stokes U
+FDF_tot_dirty.fits: Polarizd Intensity (sqrt(Q^2+U^2))</p>
+</div></blockquote>
+</dd>
+<dt>Args:</dt><dd><dl>
+<dt>dataArr (list): FDF and RMSF information</dt><dd><dl class="simple">
+<dt>if not_rmsf:</dt><dd><p>dataArr = [FDFcube, phiArr_radm2, lam0Sq_m2, lambdaSqArr_m2]</p>
+</dd>
+<dt>else:</dt><dd><p>dataArr = [FDFcube, phiArr_radm2, RMSFcube, phi2Arr_radm2, fwhmRMSFCube,fitStatArr, lam0Sq_m2, lambdaSqArr_m2]</p>
+</dd>
+</dl>
+<p>headtemplate: FITS header template</p>
+</dd>
+</dl>
+</dd>
+<dt>Kwargs:</dt><dd><p>fitRMSF (bool): Fit a Gaussian to the RMSF?
+prefixOut (str): Prefix for filenames.
+outDir (str): Directory to save files.
+write_seperate_FDF (bool): Write Q, U, and PI separately?
+verbose (bool): Verbosity.
+not_rmsf (bool): Just do RM synthesis and ignore RMSF?
+log (function): Which logging function to use.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-RMtools_3D.do_fitIcube">
+<span id="rmtools-3d-do-fiticube-module"></span><h2>RMtools_3D.do_fitIcube module<a class="headerlink" href="#module-RMtools_3D.do_fitIcube" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt id="RMtools_3D.do_fitIcube.main">
+<code class="sig-prename descclassname"><span class="pre">RMtools_3D.do_fitIcube.</span></code><code class="sig-name descname"><span class="pre">main</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#RMtools_3D.do_fitIcube.main" title="Permalink to this definition">¶</a></dt>
+<dd><p>Start the make_model_I function if called from the command line.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="RMtools_3D.do_fitIcube.make_model_I">
+<code class="sig-prename descclassname"><span class="pre">RMtools_3D.do_fitIcube.</span></code><code class="sig-name descname"><span class="pre">make_model_I</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fitsI</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freqFile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">polyOrd</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cutoff</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefixOut</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outDir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fit_function</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'log'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#RMtools_3D.do_fitIcube.make_model_I" title="Permalink to this definition">¶</a></dt>
+<dd><p>Detect emission in a cube and fit a polynomial or power law model spectrum
+to the emitting pixels. Create a representative noise spectrum using the
+residual planes.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-RMtools_3D.extract_region">
+<span id="rmtools-3d-extract-region-module"></span><h2>RMtools_3D.extract_region module<a class="headerlink" href="#module-RMtools_3D.extract_region" title="Permalink to this headline">¶</a></h2>
+<p>Created on Thu May 30 10:44:28 2019</p>
+<p>Extract subregion of a FITS file, with option to extract a plane.</p>
+<p>There are many cutout tools like it, but this one is mine.</p>
+<p>&#64;author: cvaneck
+May 2019</p>
+<dl class="py function">
+<dt id="RMtools_3D.extract_region.main">
+<code class="sig-prename descclassname"><span class="pre">RMtools_3D.extract_region.</span></code><code class="sig-name descname"><span class="pre">main</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#RMtools_3D.extract_region.main" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function will extract a region (‘cutout) from an FITS file and save
+it to a new file. Command line options will allow the user to select the
+region in either pixel or sky coordinates.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-RMtools_3D.make_freq_file">
+<span id="rmtools-3d-make-freq-file-module"></span><h2>RMtools_3D.make_freq_file module<a class="headerlink" href="#module-RMtools_3D.make_freq_file" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt id="RMtools_3D.make_freq_file.get_fits_header">
+<code class="sig-prename descclassname"><span class="pre">RMtools_3D.make_freq_file.</span></code><code class="sig-name descname"><span class="pre">get_fits_header</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#RMtools_3D.make_freq_file.get_fits_header" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="RMtools_3D.make_freq_file.get_freq_array">
+<code class="sig-prename descclassname"><span class="pre">RMtools_3D.make_freq_file.</span></code><code class="sig-name descname"><span class="pre">get_freq_array</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#RMtools_3D.make_freq_file.get_freq_array" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="RMtools_3D.make_freq_file.save_freq_file">
+<code class="sig-prename descclassname"><span class="pre">RMtools_3D.make_freq_file.</span></code><code class="sig-name descname"><span class="pre">save_freq_file</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#RMtools_3D.make_freq_file.save_freq_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parses command line arguments, extracts FITS header, and saves it to a file.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-RMtools_3D.mk_test_cube_data">
+<span id="rmtools-3d-mk-test-cube-data-module"></span><h2>RMtools_3D.mk_test_cube_data module<a class="headerlink" href="#module-RMtools_3D.mk_test_cube_data" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt id="RMtools_3D.mk_test_cube_data.create_IQU_cube_data">
+<code class="sig-prename descclassname"><span class="pre">RMtools_3D.mk_test_cube_data.</span></code><code class="sig-name descname"><span class="pre">create_IQU_cube_data</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataPath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inCatFile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">startFreq_Hz</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">endFreq_Hz</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nChans</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rmsNoise</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beamMinFWHM_deg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beamMajFWHM_deg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beamPA_deg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pixScale_deg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xCent_deg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yCent_deg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nPixX</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nPixY</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coordSys</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'EQU'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">noiseTmpArr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flagRanges_Hz</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#RMtools_3D.mk_test_cube_data.create_IQU_cube_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a set of Stokes I Q &amp; U data-cubes containing polarised sources.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="RMtools_3D.mk_test_cube_data.main">
+<code class="sig-prename descclassname"><span class="pre">RMtools_3D.mk_test_cube_data.</span></code><code class="sig-name descname"><span class="pre">main</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#RMtools_3D.mk_test_cube_data.main" title="Permalink to this definition">¶</a></dt>
+<dd><p>Start the create_IQU_fits_data function if called from the command line.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-RMtools_3D">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-RMtools_3D" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="RMutils.html" class="btn btn-neutral float-right" title="RMutils package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="RMtools_1D.models_ns.html" class="btn btn-neutral float-left" title="RMtools_1D.models_ns package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, CIRADA.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
