@@ -37,14 +37,13 @@
 import sys
 import os
 import time
+from dask.array.core import to_zarr
 import numpy as np
 import astropy.io.fits as pf
-
-try:
-    import schwimmbad
-    parallel_available=True
-except:
-    parallel_available=False
+import dafits
+import dask.array as da
+from dask.distributed import Client
+import zarr
 
 from RMutils.util_RM import do_rmclean_hogbom
 from RMutils.util_RM import fits_make_lin_axis
@@ -54,7 +53,7 @@ C = 2.997924538e8 # Speed of light [m/s]
 
 #-----------------------------------------------------------------------------#
 def run_rmclean(fitsFDF, fitsRMSF, cutoff, maxIter=1000, gain=0.1, nBits=32,
-                pool=None, chunksize=None, verbose = True, log = print):
+                verbose = True, log = print):
     """Run RM-CLEAN on a 2/3D FDF cube given an RMSF cube stored as FITS.
 
     If you want to run RM-CLEAN on arrays, just use util_RM.do_rmclean_hogbom.
@@ -100,9 +99,8 @@ def run_rmclean(fitsFDF, fitsRMSF, cutoff, maxIter=1000, gain=0.1, nBits=32,
     # Read the RMSF
 
     RMSFArr, headRMSF,FD_axis = read_FDF_cubes(fitsRMSF)
-    HDULst = pf.open(fitsRMSF.replace('_real','_FWHM').replace('_im','_FWHM').replace('_tot','_FWHM'), "readonly", memmap=True)
-    fwhmRMSFArr = np.squeeze(HDULst[0].data)
-    HDULst.close()
+    fwhmRMSFArr = dafits.read(fitsRMSF.replace('_real','_FWHM').replace('_im','_FWHM').replace('_tot','_FWHM'))
+    fwhmRMSFArr = da.squeeze(fwhmRMSFArr)
     phi2Arr_radm2 = fits_make_lin_axis(headRMSF, axis=FD_axis-1, dtype=dtFloat)
 
     startTime = time.time()
@@ -118,10 +116,7 @@ def run_rmclean(fitsFDF, fitsRMSF, cutoff, maxIter=1000, gain=0.1, nBits=32,
                           maxIter          = maxIter,
                           gain             = gain,
                           verbose          = verbose,
-                          doPlots          = False,
-                          pool             = pool,
-                          chunksize        = chunksize)
-
+                          doPlots          = False)
 
     endTime = time.time()
     cputime = (endTime - startTime)
@@ -136,17 +131,17 @@ def run_rmclean(fitsFDF, fitsRMSF, cutoff, maxIter=1000, gain=0.1, nBits=32,
     new_Ndim=cleanFDF.ndim
     #The difference is the number of dimensions that need to be added:
     if old_Ndim-new_Ndim != 0: #add missing (degenerate) dimensions back in
-        cleanFDF=np.expand_dims(cleanFDF,axis=tuple(range(old_Ndim-new_Ndim)))
-        ccArr=np.expand_dims(ccArr,axis=tuple(range(old_Ndim-new_Ndim)))
-        residFDF=np.expand_dims(residFDF,axis=tuple(range(old_Ndim-new_Ndim)))
+        cleanFDF=da.expand_dims(cleanFDF,axis=tuple(range(old_Ndim-new_Ndim)))
+        ccArr=da.expand_dims(ccArr,axis=tuple(range(old_Ndim-new_Ndim)))
+        residFDF=da.expand_dims(residFDF,axis=tuple(range(old_Ndim-new_Ndim)))
     #New dimensions are added to the beginning of the axis ordering 
     #(revserse of FITS ordering)
     
     #Move the FDF axis to it's original spot. Hopefully this means that all
     # axes are in their original place after all of that.
-    cleanFDF=np.moveaxis(cleanFDF,old_Ndim-new_Ndim,old_Ndim-FD_axis)
-    ccArr=np.moveaxis(ccArr,old_Ndim-new_Ndim,old_Ndim-FD_axis)
-    residFDF=np.moveaxis(residFDF,old_Ndim-new_Ndim,old_Ndim-FD_axis)
+    cleanFDF=da.moveaxis(cleanFDF,old_Ndim-new_Ndim,old_Ndim-FD_axis)
+    ccArr=da.moveaxis(ccArr,old_Ndim-new_Ndim,old_Ndim-FD_axis)
+    residFDF=da.moveaxis(residFDF,old_Ndim-new_Ndim,old_Ndim-FD_axis)
 
     return cleanFDF, ccArr, iterCountArr, residFDF, head
 
@@ -192,50 +187,88 @@ def writefits(cleanFDF, ccArr, iterCountArr, residFDF, headtemp, nBits=32,
 
     if outDir=='':  #To prevent code breaking if file is in current directory
         outDir='.'
+
+    # Write cubes to Zarr to begin computation
+    FDF_zarr_real = outDir + "/" + prefixOut + "FDF_clean_real.zarr"
+    FDF_zarr_imag = outDir + "/" + prefixOut + "FDF_clean_imag.zarr"
+    FDF_zarr_tot = outDir + "/" + prefixOut + "FDF_clean_tot.zarr"
+
+    FDFcube_real = da.real(cleanFDF).astype(dtFloat)
+    FDFcube_imag = da.imag(cleanFDF).astype(dtFloat)
+    FDFcube_tot = da.absolute(cleanFDF).astype(dtFloat)
+
+    from IPython import embed; embed()
+
+    FDFcube_real.to_zarr(FDF_zarr_real, overwrite=True)
+    FDFcube_imag.to_zarr(FDF_zarr_imag, overwrite=True)
+    FDFcube_tot.to_zarr(FDF_zarr_tot, overwrite=True)
+
+    FDFcubeArr_real = zarr.open(FDF_zarr_real, mode="r")
+    FDFcubeArr_imag = zarr.open(FDF_zarr_imag, mode="r")
+    FDFcubeArr_tot = zarr.open(FDF_zarr_tot, mode="r")
+    
     # Save the clean FDF
     if not write_separate_FDF:
         fitsFileOut = outDir + "/" + prefixOut + "FDF_clean.fits"
+
         if(verbose): log("> %s" % fitsFileOut)
-        hdu0 = pf.PrimaryHDU(cleanFDF.real.astype(dtFloat), headtemp)
-        hdu1 = pf.ImageHDU(cleanFDF.imag.astype(dtFloat), headtemp)
-        hdu2 = pf.ImageHDU(np.abs(cleanFDF).astype(dtFloat), headtemp)
+        hdu0 = pf.PrimaryHDU(FDFcubeArr_real, headtemp)
+        hdu1 = pf.ImageHDU(FDFcubeArr_imag, headtemp)
+        hdu2 = pf.ImageHDU(FDFcubeArr_tot, headtemp)
         hduLst = pf.HDUList([hdu0, hdu1, hdu2])
         hduLst.writeto(fitsFileOut, output_verify="fix", overwrite=True)
         hduLst.close()
     else:
-        hdu0 = pf.PrimaryHDU(cleanFDF.real.astype(dtFloat), headtemp)
+        hdu0 = pf.PrimaryHDU(FDFcubeArr_real, headtemp)
         fitsFileOut = outDir + "/" + prefixOut + "FDF_clean_real.fits"
         hdu0.writeto(fitsFileOut, output_verify="fix", overwrite=True)
         if (verbose): log("> %s" % fitsFileOut)
-        hdu1 = pf.PrimaryHDU(cleanFDF.imag.astype(dtFloat), headtemp)
+        hdu1 = pf.PrimaryHDU(FDFcubeArr_imag, headtemp)
         fitsFileOut = outDir + "/" + prefixOut + "FDF_clean_im.fits"
         hdu1.writeto(fitsFileOut, output_verify="fix", overwrite=True)
         if (verbose): log("> %s" % fitsFileOut)
-        hdu2 = pf.PrimaryHDU(np.abs(cleanFDF).astype(dtFloat), headtemp)
+        hdu2 = pf.PrimaryHDU(FDFcubeArr_tot, headtemp)
         fitsFileOut = outDir + "/" + prefixOut + "FDF_clean_tot.fits"
         hdu2.writeto(fitsFileOut, output_verify="fix", overwrite=True)
         if (verbose): log("> %s" % fitsFileOut)
+
+    # Write cubes to Zarr to begin computation
+    FDF_CC_zarr_real = outDir + "/" + prefixOut + "FDF_CC_clean_real.zarr"
+    FDF_CC_zarr_imag = outDir + "/" + prefixOut + "FDF_CC_clean_imag.zarr"
+    FDF_CC_zarr_tot = outDir + "/" + prefixOut + "FDF_CC_clean_tot.zarr"
+
+    FDF_CCcube_real = da.real(ccArr).astype(dtFloat)
+    FDF_CCcube_imag = da.imag(ccArr).astype(dtFloat)
+    FDF_CCcube_tot = da.absolute(ccArr).astype(dtFloat)
+
+    FDF_CCcube_real.to_zarr(FDF_CC_zarr_real, overwrite=True)
+    FDF_CCcube_imag.to_zarr(FDF_CC_zarr_imag, overwrite=True)
+    FDF_CCcube_tot.to_zarr(FDF_CC_zarr_tot, overwrite=True)
+
+    FDF_CCcube_real = zarr.open(FDF_CC_zarr_real, mode="r")
+    FDF_CCcube_imag = zarr.open(FDF_CC_zarr_imag, mode="r")
+    FDF_CCcube_tot = zarr.open(FDF_CC_zarr_tot, mode="r")
 
     if not write_separate_FDF:
     #Save the complex clean components as another file.
         fitsFileOut = outDir + "/" + prefixOut + "FDF_CC.fits"
         if (verbose): log("> %s" % fitsFileOut)
-        hdu0 = pf.PrimaryHDU(ccArr.real.astype(dtFloat), headtemp)
-        hdu1 = pf.ImageHDU(ccArr.imag.astype(dtFloat), headtemp)
-        hdu2 = pf.ImageHDU(np.abs(ccArr).astype(dtFloat), headtemp)
+        hdu0 = pf.PrimaryHDU(FDF_CCcube_real, headtemp)
+        hdu1 = pf.ImageHDU(FDF_CCcube_imag, headtemp)
+        hdu2 = pf.ImageHDU(FDF_CCcube_tot, headtemp)
         hduLst = pf.HDUList([hdu0, hdu1, hdu2])
         hduLst.writeto(fitsFileOut, output_verify="fix", overwrite=True)
         hduLst.close()
     else:
-        hdu0 = pf.PrimaryHDU(ccArr.real.astype(dtFloat), headtemp)
+        hdu0 = pf.PrimaryHDU(FDF_CCcube_real, headtemp)
         fitsFileOut = outDir + "/" + prefixOut + "FDF_CC_real.fits"
         hdu0.writeto(fitsFileOut, output_verify="fix", overwrite=True)
         if (verbose): log("> %s" % fitsFileOut)
-        hdu1 = pf.PrimaryHDU(ccArr.imag.astype(dtFloat), headtemp)
+        hdu1 = pf.PrimaryHDU(FDF_CCcube_imag, headtemp)
         fitsFileOut = outDir + "/" + prefixOut + "FDF_CC_im.fits"
         hdu1.writeto(fitsFileOut, output_verify="fix", overwrite=True)
         if (verbose): log("> %s" % fitsFileOut)
-        hdu2 = pf.PrimaryHDU(np.abs(ccArr).astype(dtFloat), headtemp)
+        hdu2 = pf.PrimaryHDU(FDF_CCcube_tot, headtemp)
         fitsFileOut = outDir + "/" + prefixOut + "FDF_CC_tot.fits"
         hdu2.writeto(fitsFileOut, output_verify="fix", overwrite=True)
         if (verbose): log("> %s" % fitsFileOut)
@@ -250,11 +283,17 @@ def writefits(cleanFDF, ccArr, iterCountArr, residFDF, headtemp, nBits=32,
 
     # Save the iteration count mask
     fitsFileOut = outDir + "/" + prefixOut + "CLEAN_nIter.fits"
+    zarrFileOut = fitsFileOut.replace(".fits", ".zarr")
+
+    da.expand_dims(
+        iterCountArr.astype(dtFloat), 
+        axis=tuple(range(headtemp['NAXIS']-iterCountArr.ndim))).to_zarr(zarrFileOut)
+    iterCountArr = zarr.open(zarrFileOut, mode="r")
+
     if (verbose): log("> %s" % fitsFileOut)
     headtemp["BUNIT"] = "Iterations"
-    hdu0 = pf.PrimaryHDU(np.expand_dims(iterCountArr.astype(dtFloat), 
-                        axis=tuple(range(headtemp['NAXIS']-iterCountArr.ndim))),
-                        headtemp)
+    hdu0 = pf.PrimaryHDU(iterCountArr,
+                         headtemp)
     hduLst = pf.HDUList([hdu0])
     hduLst.writeto(fitsFileOut, output_verify="fix", overwrite=True)
     hduLst.close()
@@ -286,7 +325,7 @@ def read_FDF_cube(filename):
 
     #Move FD axis to first place in numpy order.
     if FD_axis != Ndim:
-        complex_cube=np.moveaxis(complex_cube,Ndim-FD_axis,0)
+        complex_cube=da.moveaxis(complex_cube,Ndim-FD_axis,0)
 
     #Remove degenerate axes to prevent problems with later steps.
     complex_cube=complex_cube.squeeze()
@@ -315,12 +354,9 @@ def read_FDF_cubes(filename):
     puts it first (in numpy order) to accommodate the rest of the code.
     Returns: (complex_cube, header,FD_axis)
     """
-    HDUreal = pf.open(filename.replace('_tot','_real').replace('_im','_real'), "readonly", memmap=True)
-    head = HDUreal[0].header.copy()
-    FDFreal = HDUreal[0].data
+    FDFreal, head = dafits.read(filename.replace('_tot','_real').replace('_im','_real'), return_header=True)
 
-    HDUimag = pf.open(filename.replace('_tot','_im').replace('_real','_im'), "readonly", memmap=True)
-    FDFimag = HDUimag[0].data
+    FDFimag = dafits.read(filename.replace('_tot','_real').replace('_im','_real'), return_header=False)
     complex_cube = FDFreal + 1j * FDFimag
 
     #Identify Faraday depth axis (assumed to be last one if not explicitly found)
@@ -328,7 +364,7 @@ def read_FDF_cubes(filename):
 
     #Move FD axis to first place in numpy order.
     if FD_axis != Ndim:
-        complex_cube=np.moveaxis(complex_cube,Ndim-FD_axis,0)
+        complex_cube=da.moveaxis(complex_cube,Ndim-FD_axis,0)
 
     #Remove degenerate axes to prevent problems with later steps.
     complex_cube=complex_cube.squeeze()
@@ -377,35 +413,9 @@ def main():
     parser.add_argument("-v", dest="verbose", action="store_true",
                         help="Verbose [False].")
 
-    group = parser.add_mutually_exclusive_group()
-    group.add_argument("--ncores", dest="n_cores", default=1,
-                       type=int, help="Number of processes (uses multiprocessing).")
-    parser.add_argument("--chunk", dest="chunk", default=None,
-                       type=int, help="Chunk size (uses multiprocessing -- not available in MPI!)")
-    group.add_argument("--mpi", dest="mpi", default=False,
-                       action="store_true", help="Run with MPI.")
-
-
+    parser.add_argument("--client", default=None,
+                    help="Dask client address [None - creates local Client]")
     args = parser.parse_args()
-
-    #Check if the user is trying to use parallelization without installing it:
-    if parallel_available==False and (args.n_cores != 1 or args.chunk != None or args.mpi != False):
-        raise Exception('Parallel processing not available. Please install the schwimmbad module to enable parallel processing.')
-
-    #If parallelization requested use it, otherwise use the old-fashioned way.
-    if parallel_available==True and (args.n_cores != 1 or args.chunk != None or args.mpi != False):
-        pool = schwimmbad.choose_pool(mpi=args.mpi, processes=args.n_cores)
-        if args.mpi:
-            if not pool.is_master():
-                pool.wait()
-                sys.exit(0)
-        if args.n_cores > 1:
-            chunksize = args.chunk
-        else:
-            chunksize = None
-    else:
-        pool = None
-        chunksize = None
 
 
     verbose = args.verbose
@@ -414,6 +424,9 @@ def main():
         if not os.path.exists(f):
             print("File does not exist: '%s'." % f)
             sys.exit()
+    client = Client(args.client)
+    if verbose:
+        print(f"Dask client running at '{client.dashboard_link}'")
     dataDir, dummy = os.path.split(args.fitsFDF[0])
 
     # Run RM-CLEAN on the cubes
@@ -422,7 +435,6 @@ def main():
                                                         cutoff      = args.cutoff,
                                                         maxIter     = args.maxIter,
                                                         gain        = args.gain,
-                                                        chunksize   = chunksize,
                                                         nBits       = 32,
                                                         verbose = verbose)
     # Write results to disk
