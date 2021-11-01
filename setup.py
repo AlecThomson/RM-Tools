@@ -16,7 +16,8 @@ VERSION = '1.1.1'
 DOWNLOAD_URL = 'https://github.com/CIRADA-Tools/RM-Tools/archive/v'+VERSION+'.tar.gz'
 
 REQUIRED = [
-    'numpy', 'scipy', 'matplotlib', 'astropy',
+    'numpy', 'scipy', 'matplotlib', 'astropy', 'dask', 'distributed', 'zarr',
+    'dafits'
 ]
 
 extras_require={'QUfitting': ['pymultinest'],'parallel':["schwimmbad"]}
