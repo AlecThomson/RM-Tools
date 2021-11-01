@@ -197,8 +197,6 @@ def writefits(cleanFDF, ccArr, iterCountArr, residFDF, headtemp, nBits=32,
     FDFcube_imag = da.imag(cleanFDF).astype(dtFloat)
     FDFcube_tot = da.absolute(cleanFDF).astype(dtFloat)
 
-    from IPython import embed; embed()
-
     FDFcube_real.to_zarr(FDF_zarr_real, overwrite=True)
     FDFcube_imag.to_zarr(FDF_zarr_imag, overwrite=True)
     FDFcube_tot.to_zarr(FDF_zarr_tot, overwrite=True)
@@ -426,6 +424,9 @@ def main():
         if not os.path.exists(f):
             print("File does not exist: '%s'." % f)
             sys.exit()
+
+    dataDir, _ = os.path.split(args.fitsFDF[0])
+    
     report = args.report
     if report is not None:
         report = dataDir + '/' + report + '.html'
@@ -435,28 +436,24 @@ def main():
     with performance_report(report):
         if verbose:
             print(f"Dask client running at '{client.dashboard_link}'")
-    if verbose:
-        print(f"Dask client running at '{client.dashboard_link}'")
-    dataDir, dummy = os.path.split(args.fitsFDF[0])
-
-    # Run RM-CLEAN on the cubes
-    cleanFDF, ccArr, iterCountArr, residFDF, headtemp = run_rmclean(fitsFDF     = args.fitsFDF[0],
-                                                        fitsRMSF    = args.fitsRMSF[0],
-                                                        cutoff      = args.cutoff,
-                                                        maxIter     = args.maxIter,
-                                                        gain        = args.gain,
-                                                        nBits       = 32,
-                                                        verbose = verbose)
-    # Write results to disk
-    writefits(cleanFDF,
-            ccArr,
-            iterCountArr,
-            residFDF,
-            headtemp,
-            prefixOut           = args.prefixOut,
-            outDir              = dataDir,
-            write_separate_FDF  = args.write_separate_FDF,
-            verbose             = verbose)
+        # Run RM-CLEAN on the cubes
+        cleanFDF, ccArr, iterCountArr, residFDF, headtemp = run_rmclean(fitsFDF     = args.fitsFDF[0],
+                                                            fitsRMSF    = args.fitsRMSF[0],
+                                                            cutoff      = args.cutoff,
+                                                            maxIter     = args.maxIter,
+                                                            gain        = args.gain,
+                                                            nBits       = 32,
+                                                            verbose = verbose)
+        # Write results to disk
+        writefits(cleanFDF,
+                ccArr,
+                iterCountArr,
+                residFDF,
+                headtemp,
+                prefixOut           = args.prefixOut,
+                outDir              = dataDir,
+                write_separate_FDF  = args.write_separate_FDF,
+                verbose             = verbose)
 
 #-----------------------------------------------------------------------------#
 if __name__ == "__main__":
