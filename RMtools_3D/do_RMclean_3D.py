@@ -42,7 +42,7 @@ import numpy as np
 import astropy.io.fits as pf
 import dafits
 import dask.array as da
-from dask.distributed import Client
+from dask.distributed import Client, performance_report
 import zarr
 
 from RMutils.util_RM import do_rmclean_hogbom
@@ -415,6 +415,8 @@ def main():
 
     parser.add_argument("--client", default=None,
                     help="Dask client address [None - creates local Client]")
+    parser.add_argument("--report", default=None,
+                    help="Dask report name [None - not saved]")
     args = parser.parse_args()
 
 
@@ -424,7 +426,15 @@ def main():
         if not os.path.exists(f):
             print("File does not exist: '%s'." % f)
             sys.exit()
+    report = args.report
+    if report is not None:
+        report = dataDir + '/' + report + '.html'
+        if verbose:
+            print(f"Saving report to '{report}'")
     client = Client(args.client)
+    with performance_report(report):
+        if verbose:
+            print(f"Dask client running at '{client.dashboard_link}'")
     if verbose:
         print(f"Dask client running at '{client.dashboard_link}'")
     dataDir, dummy = os.path.split(args.fitsFDF[0])
