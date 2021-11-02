@@ -620,9 +620,9 @@ def fits_make_lin_axis(head, axis=0, dtype="f4"):
 #-----------------------------------------------------------------------------#
 def extrap(x, xp, yp):
     """
-    Wrapper to allow da.interp to linearly extrapolate at function ends.
+    Wrapper to allow np.interp to linearly extrapolate at function ends.
     
-    da.interp function with linear extrapolation
+    np.interp function with linear extrapolation
     http://stackoverflow.com/questions/2745329/how-to-make-scipy-interpolate
     -give-a-an-extrapolated-result-beyond-the-input-ran
 
@@ -804,9 +804,9 @@ def measure_FDF_parms(FDF, phiArr, fwhmRMSF, dFDF=None, lamSqArr_m2=None,
     iL = int(max(0, indxPeakPIchan-fwhmRMSF_chan*2))
     iR = int(min(len(absFDF), indxPeakPIchan+fwhmRMSF_chan*2))
     absFDFmsked = absFDF.copy()
-    absFDFmsked[iL:iR] = da.nan
+    absFDFmsked[iL:iR] = np.nan
     absFDFmsked = absFDFmsked[da.where(absFDFmsked==absFDFmsked)]
-    if float(len(absFDFmsked))/len(absFDF)<0.3:
+    if float(len(absFDFmsked.compute()))/len(absFDF)<0.3:
         dFDFcorMAD = MAD(absFDF)
         dFDFrms = da.sqrt( da.mean(absFDF**2) )
     else:
@@ -891,10 +891,10 @@ def measure_FDF_parms(FDF, phiArr, fwhmRMSF, dFDF=None, lamSqArr_m2=None,
             
         # Calculate the polarisation angle from the fitted peak
         # Uncertainty from Eqn A.12 in Brentjens & De Bruyn 2005
-        indxPeakPIfit = da.interp(phiPeakPIfit, phiArr,
+        indxPeakPIfit = np.interp(phiPeakPIfit, phiArr,
                                   da.arange(phiArr.shape[-1], dtype='f4'))
-        peakFDFimagFit = da.interp(phiPeakPIfit, phiArr, FDF.imag)
-        peakFDFrealFit = da.interp(phiPeakPIfit, phiArr, FDF.real)
+        peakFDFimagFit = np.interp(phiPeakPIfit, phiArr, FDF.imag)
+        peakFDFrealFit = np.interp(phiPeakPIfit, phiArr, FDF.real)
         polAngleFit_deg = 0.5 * da.degrees(da.arctan2(peakFDFimagFit,
                                                   peakFDFrealFit)) % 180
         dPolAngleFit_deg = da.degrees(dFDF / (2.0 * ampPeakPIfit))
@@ -964,7 +964,7 @@ def cdf_percentile(x, p, q=50.0):
     try: #Can fail if NaNs present, so return NaN in this case.
         i = da.where(p>q/100.0)[0][0]
     except:
-        return da.nan
+        return np.nan
 
     # If at extremes of the distribution, return the limiting value
     if i==0 or i==len(x):
@@ -1010,7 +1010,7 @@ def calc_sigma_add(xArr, yArr, dyArr, yMed=None, noise=None, nSamp=1000,
     chiSqRedArr = chiSqArr/dof
 
     # Calculate the PDF in log space and normalise the peak to 1
-    lnProbArr = (-da.log(sigmaAddArr) -nData * da.log(2.0*da.pi)/2.0
+    lnProbArr = (-da.log(sigmaAddArr) -nData * da.log(2.0*np.pi)/2.0
                  -lnSigmaSumArr -chiSqArr/2.0)
     lnProbArr -= da.nanmax(lnProbArr)
     probArr = da.exp(lnProbArr)
@@ -1056,7 +1056,7 @@ def calc_sigma_add(xArr, yArr, dyArr, yMed=None, noise=None, nSamp=1000,
         ax1.set_ylabel('Amplitude')
 
         # Plot the histogram of the data overlaid by the normal distribution
-        H = 1.0/ da.sqrt(2.0 * da.pi * noise**2.0)
+        H = 1.0/ da.sqrt(2.0 * np.pi * noise**2.0)
         xNorm = da.linspace(yMed-3*noise, yMed+3*noise, 1000)
         yNorm = H * da.exp(-0.5 * ((xNorm-yMed)/noise)**2.0)
         fwhm = noise * (2.0 * da.sqrt(2.0 * da.log(2.0)))

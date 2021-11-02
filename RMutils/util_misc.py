@@ -487,7 +487,9 @@ def create_frac_spectra(freqArr, IArr, QArr, UArr, dIArr, dQArr, dUArr,
                 "p": [0.0, 0.0, 0.0, 0.0, 0.0, 1.0], #default if fail: flat 1s.
                 "polyOrd":polyOrd,
                 "AIC":0,
-                "reference_frequency_Hz":1}
+                "reference_frequency_Hz":1,
+                "fit_function": fit_function
+                }
             IModArr = np.ones_like(IArr)
     
     # Calculate the fractional spectra and errors
