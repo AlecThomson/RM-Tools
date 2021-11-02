@@ -402,35 +402,35 @@ def run_rmsynth(data, polyOrd=2, phiMax_radm2=None, dPhi_radm2=None,
 
     if verbose:
        # Print the results to the screen
-       log()
-       log('-'*80)
-       log('RESULTS:\n')
-       log('FWHM RMSF = %.4g rad/m^2' % (mDict["fwhmRMSF"]))
+        log()
+        log('-'*80)
+        log('RESULTS:\n')
+        log('FWHM RMSF = %.4g rad/m^2' % (mDict["fwhmRMSF"]))
 
-       log('Pol Angle = %.4g (+/-%.4g) deg' % (mDict["polAngleFit_deg"],
-                                              mDict["dPolAngleFit_deg"]))
-       log('Pol Angle 0 = %.4g (+/-%.4g) deg' % (mDict["polAngle0Fit_deg"],
+        log('Pol Angle = %.4g (+/-%.4g) deg' % (mDict["polAngleFit_deg"],
+                                                mDict["dPolAngleFit_deg"]))
+        log('Pol Angle 0 = %.4g (+/-%.4g) deg' % (mDict["polAngle0Fit_deg"],
                                                 mDict["dPolAngle0Fit_deg"]))
-       log('Peak FD = %.4g (+/-%.4g) rad/m^2' % (mDict["phiPeakPIfit_rm2"],
+        log('Peak FD = %.4g (+/-%.4g) rad/m^2' % (mDict["phiPeakPIfit_rm2"],
                                                 mDict["dPhiPeakPIfit_rm2"]))
-       log('freq0_GHz = %.4g ' % (mDict["freq0_Hz"]/1e9))
-       log('I freq0 = %.4g %s' % (mDict["Ifreq0"],units))
-       log('Peak PI = %.4g (+/-%.4g) %s' % (mDict["ampPeakPIfit"],
+        log('freq0_GHz = %.4g ' % (mDict["freq0_Hz"]/1e9))
+        log('I freq0 = %.4g %s' % (mDict["Ifreq0"],units))
+        log('Peak PI = %.4g (+/-%.4g) %s' % (mDict["ampPeakPIfit"],
                                                 mDict["dAmpPeakPIfit"],units))
-       log('QU Noise = %.4g %s' % (mDict["dQU"],units))
-       log('FDF Noise (theory)   = %.4g %s' % (mDict["dFDFth"],units))
-       log('FDF Noise (Corrected MAD) = %.4g %s' % (mDict["dFDFcorMAD"],units))
-       log('FDF Noise (rms)   = %.4g %s' % (mDict["dFDFrms"],units))
-       log('FDF SNR = %.4g ' % (mDict["snrPIfit"]))
-       log('sigma_add(q) = %.4g (+%.4g, -%.4g)' % (mDict["sigmaAddQ"],
+        log('QU Noise = %.4g %s' % (mDict["dQU"],units))
+        log('FDF Noise (theory)   = %.4g %s' % (mDict["dFDFth"],units))
+        log('FDF Noise (Corrected MAD) = %.4g %s' % (mDict["dFDFcorMAD"],units))
+        log('FDF Noise (rms)   = %.4g %s' % (mDict["dFDFrms"],units))
+        log('FDF SNR = %.4g ' % (mDict["snrPIfit"]))
+        log('sigma_add(q) = %.4g (+%.4g, -%.4g)' % (mDict["sigmaAddQ"],
                                             mDict["dSigmaAddPlusQ"],
                                             mDict["dSigmaAddMinusQ"]))
-       log('sigma_add(u) = %.4g (+%.4g, -%.4g)' % (mDict["sigmaAddU"],
+        log('sigma_add(u) = %.4g (+%.4g, -%.4g)' % (mDict["sigmaAddU"],
                                             mDict["dSigmaAddPlusU"],
                                             mDict["dSigmaAddMinusU"]))
-       log('Fitted polynomial order = {} '.format(mDict['polyOrd']))
-       log()
-       log('-'*80)
+        log('Fitted polynomial order = {} '.format(mDict['polyOrd']))
+        log()
+        log('-'*80)
 
 
 
