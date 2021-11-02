@@ -352,8 +352,8 @@ def fit_StokesI_model(freqArr,IArr,dIArr,polyOrd,fit_function="log"):
     #to make all the numbers close to 1:
     fitDict['reference_frequency_Hz']=nanmean(freqArr[goodchan])
 
-#negative orders indicate that the code should dynamically increase 
-#order of polynomial so long as it improves the fit
+    #negative orders indicate that the code should dynamically increase 
+    #order of polynomial so long as it improves the fit
     if polyOrd < 0: 
         highest_order=np.abs(polyOrd)
     #Try zero-th order (constant) fit first:
@@ -379,13 +379,12 @@ def fit_StokesI_model(freqArr,IArr,dIArr,polyOrd,fit_function="log"):
                             IArr[goodchan],dIArr[goodchan], polyOrd,fit_function)
         fitDict["AIC"] = 2*(polyOrd+1)+mp.fnorm
         fitDict["polyOrd"] = polyOrd
-        
+    
     fitDict["p"] = mp.params
     fitDict["fitStatus"] = int(np.abs(mp.status))
     fitDict["chiSq"] = mp.fnorm
     fitDict["chiSqRed"] = mp.fnorm/fitDict["dof"]
     fitDict["nIter"] = mp.niter
-
 
     return fitDict
 
