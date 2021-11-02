@@ -962,7 +962,7 @@ def cdf_percentile(x, p, q=50.0):
 
     # Determine index where cumulative percentage is achieved
     try: #Can fail if NaNs present, so return NaN in this case.
-        i = da.where(p>q/100.0)[0][0]
+        i = np.where(p>q/100.0)[0][0]
     except:
         return np.nan
 
@@ -1023,9 +1023,10 @@ def calc_sigma_add(xArr, yArr, dyArr, yMed=None, noise=None, nSamp=1000,
     CPDF = da.cumsum(probArr)/da.nansum(probArr)
 
     # Calculate the mean of the distribution and the +/- 1-sigma limits
-    sigmaAdd = cdf_percentile(x=sigmaAddArr, p=CPDF, q=50.0)
-    sigmaAddMinus = cdf_percentile(x=sigmaAddArr, p=CPDF, q=15.72)
-    sigmaAddPlus = cdf_percentile(x=sigmaAddArr, p=CPDF, q=84.27)
+    sigmaAdd = cdf_percentile(x=sigmaAddArr.compute(), p=CPDF.compute(), q=50.0)
+    sigmaAddMinus = cdf_percentile(x=sigmaAddArr.compute(), p=CPDF.compute(), q=15.72)
+    sigmaAddPlus = cdf_percentile(x=sigmaAddArr.compute(), p=CPDF.compute(), q=84.27)
+
     mDict = {"sigmaAdd" + suffix:  toscalar(sigmaAdd),
              "dSigmaAddMinus" + suffix: toscalar(sigmaAdd - sigmaAddMinus),
              "dSigmaAddPlus" + suffix: toscalar(sigmaAddPlus - sigmaAdd)}

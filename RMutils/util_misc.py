@@ -357,14 +357,19 @@ def fit_StokesI_model(freqArr,IArr,dIArr,polyOrd,fit_function="log"):
     if polyOrd < 0: 
         highest_order=np.abs(polyOrd)
     #Try zero-th order (constant) fit first:
-        mp = fit_spec_poly5(freqArr[goodchan]/fitDict['reference_frequency_Hz'], 
-                            IArr[goodchan], dIArr[goodchan], 0,fit_function)
+        mp = fit_spec_poly5((freqArr[goodchan]/fitDict['reference_frequency_Hz']).compute(), 
+                            IArr[goodchan].compute(), 
+                            dIArr[goodchan].compute(), 
+                            0,
+                            fit_function)
         old_aic=2+mp.fnorm
         current_order=1
         while current_order <= highest_order:
-            new_mp = fit_spec_poly5(freqArr[goodchan]/fitDict['reference_frequency_Hz'],
-                                    IArr[goodchan], dIArr[goodchan], 
-                                    current_order,fit_function)
+            new_mp = fit_spec_poly5((freqArr[goodchan]/fitDict['reference_frequency_Hz']).compute(),
+                                    IArr[goodchan].compute(), 
+                                    dIArr[goodchan].compute(), 
+                                    current_order,
+                                    fit_function)
             new_aic=2*(current_order+1)+new_mp.fnorm
             if new_aic < old_aic: #if there's an improvement, keep going
                 old_aic=new_aic
@@ -375,8 +380,11 @@ def fit_StokesI_model(freqArr,IArr,dIArr,polyOrd,fit_function="log"):
         fitDict["polyOrd"] = current_order-1  #Best order is always one less than the last one checked.
         fitDict["AIC"] = old_aic 
     else:
-        mp = fit_spec_poly5(freqArr[goodchan]/fitDict['reference_frequency_Hz'],
-                            IArr[goodchan],dIArr[goodchan], polyOrd,fit_function)
+        mp = fit_spec_poly5((freqArr[goodchan]/fitDict['reference_frequency_Hz']).compute(),
+                            IArr[goodchan].compute(),
+                            dIArr[goodchan].compute(), 
+                            polyOrd,
+                            fit_function)
         fitDict["AIC"] = 2*(polyOrd+1)+mp.fnorm
         fitDict["polyOrd"] = polyOrd
     

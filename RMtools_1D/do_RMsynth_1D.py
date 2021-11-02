@@ -244,10 +244,11 @@ def run_rmsynth(
         )
         ax.plot(freqArr_Hz / 1e9, dQArr, marker="o", color="b", lw=0.5, label="rms Q")
         ax.plot(freqArr_Hz / 1e9, dUArr, marker="o", color="r", lw=0.5, label="rms U")
-        xRange = (np.nanmax(freqArr_Hz) - np.nanmin(freqArr_Hz)) / 1e9
+        xRange = (da.nanmax(freqArr_Hz) - da.nanmin(freqArr_Hz)) / 1e9
+
         ax.set_xlim(
-            da.min(freqArr_Hz) / 1e9 - xRange * 0.05,
-            da.max(freqArr_Hz) / 1e9 + xRange * 0.05,
+            (da.min(freqArr_Hz) / 1e9 - xRange * 0.05).compute(),
+            (da.max(freqArr_Hz) / 1e9 + xRange * 0.05).compute(),
         )
         ax.set_xlabel("$\\nu$ (GHz)")
         ax.set_ylabel("RMS " + units)
@@ -408,17 +409,17 @@ def run_rmsynth(
     # Debugging plots for spectral complexity measure
     if debug:
         tmpFig = plot_complexity_fig(
-            xArr=pD["xArrQ"],
-            qArr=pD["yArrQ"],
-            dqArr=pD["dyArrQ"],
-            sigmaAddqArr=pD["sigmaAddArrQ"],
-            chiSqRedqArr=pD["chiSqRedArrQ"],
-            probqArr=pD["probArrQ"],
-            uArr=pD["yArrU"],
-            duArr=pD["dyArrU"],
-            sigmaAdduArr=pD["sigmaAddArrU"],
-            chiSqReduArr=pD["chiSqRedArrU"],
-            probuArr=pD["probArrU"],
+            xArr=pD["xArrQ"].compute(),
+            qArr=pD["yArrQ"].compute(),
+            dqArr=pD["dyArrQ"].compute(),
+            sigmaAddqArr=pD["sigmaAddArrQ"].compute(),
+            chiSqRedqArr=pD["chiSqRedArrQ"].compute(),
+            probqArr=pD["probArrQ"].compute(),
+            uArr=pD["yArrU"].compute(),
+            duArr=pD["dyArrU"].compute(),
+            sigmaAdduArr=pD["sigmaAddArrU"].compute(),
+            chiSqReduArr=pD["chiSqRedArrU"].compute(),
+            probuArr=pD["probArrU"].compute(),
             mDict=mDict,
         )
         if saveFigures:
