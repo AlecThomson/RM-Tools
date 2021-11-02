@@ -43,6 +43,7 @@ import math as m
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.interpolate import interp1d
+import dask.array as da
 
 from RMutils.util_RM import do_rmsynth
 from RMutils.util_RM import do_rmsynth_planes
@@ -146,8 +147,8 @@ def run_rmsynth(data, polyOrd=2, phiMax_radm2=None, dPhi_radm2=None,
     # If no Stokes I present, create a dummy spectrum = unity
     if noStokesI:
         if verbose: log("Warn: no Stokes I data in use.")
-        IArr = np.ones_like(QArr)
-        dIArr = np.zeros_like(QArr)
+        IArr = da.ones_like(QArr)
+        dIArr = da.zeros_like(QArr)
 
     # Convert to GHz for convenience
     freqArr_GHz = freqArr_Hz / 1e9
@@ -170,12 +171,11 @@ def run_rmsynth(data, polyOrd=2, phiMax_radm2=None, dPhi_radm2=None,
                                  )
              
     dquArr = (dqArr + duArr)/2.0
-    dquArr= np.where(np.isfinite(dquArr),dquArr,np.nan)
-
+    dquArr= da.where(da.isfinite(dquArr),dquArr,np.nan)
 
     # Plot the data and the Stokes I model fit
     if verbose: log("Plotting the input data and spectral index fit.")
-    freqHirArr_Hz =  np.linspace(freqArr_Hz[0], freqArr_Hz[-1], 10000)
+    freqHirArr_Hz =  da.linspace(freqArr_Hz[0], freqArr_Hz[-1], 10000)
     if modStokesI is None:   
         IModHirArr = calculate_StokesI_model(fitDict,freqHirArr_Hz)
     elif modStokesI is not None:
@@ -183,15 +183,15 @@ def run_rmsynth(data, polyOrd=2, phiMax_radm2=None, dPhi_radm2=None,
         IModHirArr = modStokesI_interp(freqHirArr_Hz)
     if showPlots or saveFigures:
         specFig = plt.figure(facecolor='w',figsize=(12.0, 8))
-        plot_Ipqu_spectra_fig(freqArr_Hz     = freqArr_Hz,
-                              IArr           = IArr,
-                              qArr           = qArr,
-                              uArr           = uArr,
-                              dIArr          = dIArr,
-                              dqArr          = dqArr,
-                              duArr          = duArr,
-                              freqHirArr_Hz  = freqHirArr_Hz,
-                              IModArr        = IModHirArr,
+        plot_Ipqu_spectra_fig(freqArr_Hz     = freqArr_Hz.compute(),
+                              IArr           = IArr.compute(),
+                              qArr           = qArr.compute(),
+                              uArr           = uArr.compute(),
+                              dIArr          = dIArr.compute(),
+                              dqArr          = dqArr.compute(),
+                              duArr          = duArr.compute(),
+                              freqHirArr_Hz  = freqHirArr_Hz.compute(),
+                              IModArr        = IModHirArr.compute(),
                               fig            = specFig,
                               units          = units)
     if saveFigures:
@@ -221,8 +221,8 @@ def run_rmsynth(data, polyOrd=2, phiMax_radm2=None, dPhi_radm2=None,
         ax.plot(freqArr_Hz/1e9, dUArr, marker='o', color='r', lw=0.5,
                 label='rms U')
         xRange = (np.nanmax(freqArr_Hz)-np.nanmin(freqArr_Hz))/1e9
-        ax.set_xlim( np.min(freqArr_Hz)/1e9 - xRange*0.05,
-                     np.max(freqArr_Hz)/1e9 + xRange*0.05)
+        ax.set_xlim( da.min(freqArr_Hz)/1e9 - xRange*0.05,
+                     da.max(freqArr_Hz)/1e9 + xRange*0.05)
         ax.set_xlabel('$\\nu$ (GHz)')
         ax.set_ylabel('RMS '+units)
         ax.set_title("RMS noise in Stokes Q, U and <Q,U> spectra")
@@ -231,12 +231,12 @@ def run_rmsynth(data, polyOrd=2, phiMax_radm2=None, dPhi_radm2=None,
     #-------------------------------------------------------------------------#
 
     # Calculate some wavelength parameters
-    lambdaSqArr_m2 = np.power(C/freqArr_Hz, 2.0)
-    dFreq_Hz = np.nanmin(np.abs(np.diff(freqArr_Hz)))
+    lambdaSqArr_m2 = da.power(C/freqArr_Hz, 2.0)
+    dFreq_Hz = np.nanmin(da.absolute(da.diff(freqArr_Hz)))
     lambdaSqRange_m2 = ( np.nanmax(lambdaSqArr_m2) -
                          np.nanmin(lambdaSqArr_m2) )
-    dLambdaSqMin_m2 = np.nanmin(np.abs(np.diff(lambdaSqArr_m2)))
-    dLambdaSqMax_m2 = np.nanmax(np.abs(np.diff(lambdaSqArr_m2)))
+    dLambdaSqMin_m2 = np.nanmin(da.absolute(da.diff(lambdaSqArr_m2)))
+    dLambdaSqMax_m2 = np.nanmax(da.absolute(da.diff(lambdaSqArr_m2)))
 
     # Set the Faraday depth range
     fwhmRMSF_radm2 = 2.0 * m.sqrt(3.0) / lambdaSqRange_m2
@@ -250,7 +250,7 @@ def run_rmsynth(data, polyOrd=2, phiMax_radm2=None, dPhi_radm2=None,
     nChanRM = int(round(abs((phiMax_radm2 - 0.0) / dPhi_radm2)) * 2.0 + 1.0)
     startPhi_radm2 = - (nChanRM-1.0) * dPhi_radm2 / 2.0
     stopPhi_radm2 = + (nChanRM-1.0) * dPhi_radm2 / 2.0
-    phiArr_radm2 = np.linspace(startPhi_radm2, stopPhi_radm2, nChanRM)
+    phiArr_radm2 = da.linspace(startPhi_radm2, stopPhi_radm2, nChanRM)
     phiArr_radm2 = phiArr_radm2.astype(dtFloat)
     if verbose: log("PhiArr = %.2f to %.2f by %.2f (%d chans)." % (phiArr_radm2[0],
                                                          phiArr_radm2[-1],
@@ -259,10 +259,10 @@ def run_rmsynth(data, polyOrd=2, phiMax_radm2=None, dPhi_radm2=None,
 
     # Calculate the weighting as 1/sigma^2 or all 1s (uniform)
     if weightType=="variance":
-        weightArr = 1.0 / np.power(dquArr, 2.0)
+        weightArr = 1.0 / da.power(dquArr, 2.0)
     else:
         weightType = "uniform"
-        weightArr = np.ones(freqArr_Hz.shape, dtype=dtFloat)
+        weightArr = da.ones(freqArr_Hz.shape, dtype=dtFloat)
     if verbose: log("Weight type is '%s'." % weightType)
 
     startTime = time.time()
@@ -282,7 +282,7 @@ def run_rmsynth(data, polyOrd=2, phiMax_radm2=None, dPhi_radm2=None,
         get_rmsf_planes(lambdaSqArr_m2  = lambdaSqArr_m2,
                         phiArr_radm2    = phiArr_radm2,
                         weightArr       = weightArr,
-                        mskArr          = ~np.isfinite(qArr),
+                        mskArr          = ~da.isfinite(qArr),
                         lam0Sq_m2       = lam0Sq_m2,
                         double          = True,
                         fitRMSF         = fitRMSF,
@@ -319,8 +319,8 @@ def run_rmsynth(data, polyOrd=2, phiMax_radm2=None, dPhi_radm2=None,
         fitDict=renormalize_StokesI_model(fitDict,freq0_Hz)
 
     # Calculate the theoretical noise in the FDF !!Old formula only works for wariance weights!
-    weightArr = np.where(np.isnan(weightArr), 0.0, weightArr)
-    dFDFth = Ifreq0*np.sqrt( np.nansum(weightArr**2 * np.nan_to_num(dquArr)**2) / (np.sum(weightArr))**2 )
+    weightArr = da.where(da.isnan(weightArr), 0.0, weightArr)
+    dFDFth = Ifreq0*da.sqrt( np.nansum(weightArr**2 * np.nan_to_num(dquArr)**2) / (da.sum(weightArr))**2 )
 
 
     # Measure the parameters of the dirty FDF
@@ -351,11 +351,11 @@ def run_rmsynth(data, polyOrd=2, phiMax_radm2=None, dPhi_radm2=None,
 
 
     #Add information on nature of channels:
-    good_channels=np.where(np.logical_and(weightArr != 0,np.isfinite(qArr)))[0]
-    mDict["min_freq"]=float(np.min(freqArr_Hz[good_channels]))
-    mDict["max_freq"]=float(np.max(freqArr_Hz[good_channels]))
+    good_channels=da.where(da.logical_and(weightArr != 0,da.isfinite(qArr)))[0]
+    mDict["min_freq"]=float(da.min(freqArr_Hz[good_channels]))
+    mDict["max_freq"]=float(da.max(freqArr_Hz[good_channels]))
     mDict["N_channels"]=good_channels.size
-    mDict["median_channel_width"]=float(np.median(np.diff(freqArr_Hz)))
+    mDict["median_channel_width"]=float(da.median(da.diff(freqArr_Hz), axis=0))
 
     # Measure the complexity of the q and u spectra
     mDict["fracPol"] = mDict["ampPeakPIfit"]/(Ifreq0)
@@ -437,10 +437,10 @@ def run_rmsynth(data, polyOrd=2, phiMax_radm2=None, dPhi_radm2=None,
     # Plot the RM Spread Function and dirty FDF
     if showPlots or saveFigures:
         fdfFig = plt.figure(facecolor='w',figsize=(12.0, 8))
-        plot_rmsf_fdf_fig(phiArr     = phiArr_radm2,
-                          FDF        = dirtyFDF,
-                          phi2Arr    = phi2Arr_radm2,
-                          RMSFArr    = RMSFArr,
+        plot_rmsf_fdf_fig(phiArr     = phiArr_radm2.compute(),
+                          FDF        = dirtyFDF.compute(),
+                          phi2Arr    = phi2Arr_radm2.compute(),
+                          RMSFArr    = RMSFArr.compute(),
                           fwhmRMSF   = fwhmRMSF,
                           vLine      = mDict["phiPeakPIfit_rm2"],
                           fig        = fdfFig,
@@ -499,7 +499,7 @@ def readFile(dataFile, nBits, verbose=True, debug=False):
         if verbose: print("> Trying [freq_Hz, I, Q, U, dI, dQ, dU]", end=' ')
         (freqArr_Hz, IArr, QArr, UArr,
          dIArr, dQArr, dUArr) = \
-         np.loadtxt(dataFile, unpack=True, dtype=dtFloat)
+         da.from_array(np.loadtxt(dataFile, unpack=True, dtype=dtFloat))
         if verbose: print("... success.")
         data=[freqArr_Hz, IArr, QArr, UArr, dIArr, dQArr, dUArr]
     except Exception:
@@ -508,7 +508,7 @@ def readFile(dataFile, nBits, verbose=True, debug=False):
         try:
             if verbose: print("> Trying [freq_Hz, q, u,  dq, du]", end=' ')
             (freqArr_Hz, QArr, UArr, dQArr, dUArr) = \
-                         np.loadtxt(dataFile, unpack=True, dtype=dtFloat)
+                         da.from_array(np.loadtxt(dataFile, unpack=True, dtype=dtFloat))
             if verbose: print("... success.")
             data=[freqArr_Hz, QArr, UArr, dQArr, dUArr]
 
