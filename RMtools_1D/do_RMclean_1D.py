@@ -42,6 +42,7 @@ import json
 from matplotlib.pyplot import savefig
 import numpy as np
 from matplotlib import pyplot as plt
+import dask.array as da
 
 from RMutils.util_RM import do_rmclean_hogbom
 from RMutils.util_RM import measure_FDF_parms
@@ -81,7 +82,7 @@ def run_rmclean(mDict, aDict, cutoff,
     RMSFArr=aDict["RMSFArr"]
 
 
-    lambdaSqArr_m2 = np.power(C/freqArr_Hz, 2.0)
+    lambdaSqArr_m2 = da.power(C/freqArr_Hz, 2.0)
 
     # If the cutoff is negative, assume it is a sigma level
     if verbose: log("Expected RMS noise = %.4g flux units" % (mDict["dFDFth"]))
@@ -99,7 +100,7 @@ def run_rmclean(mDict, aDict, cutoff,
                                 phiArr_radm2    = phiArr_radm2,
                                 RMSFArr         = RMSFArr,
                                 phi2Arr_radm2   = phi2Arr_radm2,
-                                fwhmRMSFArr     = np.array(mDict["fwhmRMSF"]),
+                                fwhmRMSFArr     = da.array(mDict["fwhmRMSF"]),
                                 cutoff          = cutoff,
                                 maxIter         = maxIter,
                                 gain            = gain,
@@ -217,9 +218,9 @@ def saveOutput(mDict_cl, aDict_cl, prefixOut="", verbose=False, log=print):
         log (function): function to use when printing verbose messages.
     """
     # Get data
-    phiArr_radm2 = aDict_cl["phiArr_radm2"]
-    cleanFDF = aDict_cl["cleanFDF"]
-    ccArr = aDict_cl["ccArr"]
+    phiArr_radm2 = aDict_cl["phiArr_radm2"].compute()
+    cleanFDF = aDict_cl["cleanFDF"].compute()
+    ccArr = aDict_cl["ccArr"].compute()
 
     # Save the deconvolved FDF and CC model to ASCII files
     if verbose: log("Saving the clean FDF and component model to ASCII files.")
@@ -258,11 +259,11 @@ def readFiles(fdfFile, rmsfFile, weightFile, rmSynthFile, nBits):
     dtComplex = "complex" + str(2*nBits)
 
     # Read the RMSF from the ASCII file
-    phi2Arr_radm2, RMSFreal, RMSFimag = np.loadtxt(rmsfFile, unpack=True, dtype=dtFloat)
+    phi2Arr_radm2, RMSFreal, RMSFimag = da.from_array(np.loadtxt(rmsfFile, unpack=True, dtype=dtFloat))
     # Read the frequency vector for the lambda^2 array
-    freqArr_Hz, weightArr = np.loadtxt(weightFile, unpack=True, dtype=dtFloat)
+    freqArr_Hz, weightArr = da.from_array(np.loadtxt(weightFile, unpack=True, dtype=dtFloat))
     # Read the FDF from the ASCII file
-    phiArr_radm2, FDFreal, FDFimag = np.loadtxt(fdfFile, unpack=True, dtype=dtFloat)
+    phiArr_radm2, FDFreal, FDFimag = da.from_array(np.loadtxt(fdfFile, unpack=True, dtype=dtFloat))
     # Read the RM-synthesis parameters from the JSON file
     mDict = json.load(open(rmSynthFile, "r"))
     dirtyFDF = FDFreal + 1j * FDFimag
@@ -299,24 +300,24 @@ def plot_clean_spec(phiArr_radm2, dirtyFDF, cleanFDF, ccArr, residFDF,
     ax1 = fig.add_subplot(211)
     ax2 = fig.add_subplot(212, sharex=ax1)
 
-    dirtyFDF=np.squeeze(dirtyFDF)
-    cleanFDF=np.squeeze(cleanFDF)
-    ccArr=np.squeeze(ccArr)
-    residFDF=np.squeeze(residFDF)
+    dirtyFDF=da.squeeze(dirtyFDF)
+    cleanFDF=da.squeeze(cleanFDF)
+    ccArr=da.squeeze(ccArr)
+    residFDF=da.squeeze(residFDF)
 
 
     ax1.cla()
     ax2.cla()
-    ax1.step(phiArr_radm2, np.abs(dirtyFDF),
+    ax1.step(phiArr_radm2, da.absolute(dirtyFDF),
              color="grey", marker="None", mfc="w", mec="g", ms=10,
              where="mid", label="Dirty FDF")
-    ax1.step(phiArr_radm2, np.abs(ccArr), color="g",
+    ax1.step(phiArr_radm2, da.absolute(ccArr), color="g",
              marker="None", mfc="w", mec="g", ms=10, where="mid",
              label="Clean Components")
-    ax1.step(phiArr_radm2, np.abs(residFDF), color="magenta",
+    ax1.step(phiArr_radm2, da.absolute(residFDF), color="magenta",
              marker="None", mfc="w", mec="g", ms=10, where="mid",
              label="Residual FDF")
-    ax1.step(phiArr_radm2, np.abs(cleanFDF), color="k",
+    ax1.step(phiArr_radm2, da.absolute(cleanFDF), color="k",
              marker="None", mfc="w", mec="g", ms=10, where="mid", lw=1.5,
              label="Clean FDF")
     ax1.axhline(cutoff, color="r", ls="--", label="Clean cutoff")
@@ -329,10 +330,10 @@ def plot_clean_spec(phiArr_radm2, dirtyFDF, cleanFDF, ccArr, residFDF,
     leg.get_frame().set_linewidth(0.5)
     leg.get_frame().set_alpha(0.5)
     [label.set_visible(False) for label in ax1.get_xticklabels()]
-    ax2.step(phiArr_radm2, np.abs(residFDF), color="magenta",
+    ax2.step(phiArr_radm2, da.absolute(residFDF), color="magenta",
              marker="None", mfc="w", mec="g", ms=10, where="mid",
              label="Residual FDF")
-    ax2.step(phiArr_radm2, np.abs(ccArr), color="g",
+    ax2.step(phiArr_radm2, da.absolute(ccArr), color="g",
              marker="None", mfc="w", mec="g", ms=10, where="mid",
              label="Clean Components")
     ax2.axhline(cutoff, color="r", ls="--", label="Clean cutoff")
@@ -402,29 +403,31 @@ def main():
         if not os.path.exists(f):
             print("File does not exist: '{:}'.".format(f), end=' ')
             sys.exit()
+
+
     nBits = 32
     dataDir, dummy = os.path.split(args.dataFile[0])
     mDict, aDict = readFiles(fdfFile, rmsfFile, weightFile, rmSynthFile, nBits)
     # Run RM-CLEAN on the spectrum
     mDict_cl, aDict_cl = run_rmclean(mDict        = mDict,
-                                     aDict        = aDict,
-                                     cutoff       = args.cutoff,
-                                     maxIter      = args.maxIter,
-                                     gain         = args.gain,
-                                     nBits        = nBits,
-                                     showPlots    = args.showPlots,
-                                     prefixOut    = fileRoot,
-                                     verbose      = args.verbose,
-                                     saveFigures  = args.saveOutput
+                                    aDict        = aDict,
+                                    cutoff       = args.cutoff,
+                                    maxIter      = args.maxIter,
+                                    gain         = args.gain,
+                                    nBits        = nBits,
+                                    showPlots    = args.showPlots,
+                                    prefixOut    = fileRoot,
+                                    verbose      = args.verbose,
+                                    saveFigures  = args.saveOutput
                                 )
 
     # Save output
     if args.saveOutput:
         saveOutput(mDict_cl,
-                   aDict_cl,
-                   prefixOut    = fileRoot,
-                   verbose      = args.verbose
-                   )
+                aDict_cl,
+                prefixOut    = fileRoot,
+                verbose      = args.verbose
+                )
 
 
 
