@@ -309,6 +309,9 @@ def writefits(dataArr, headtemplate, fitRMSF=False, prefixOut="", outDir="",
     #Move Faraday depth axis to appropriate position to match header.
     FDFcube=da.moveaxis(FDFcube,0,Ndim-freq_axis)
     if not_rmsf is not True: RMSFcube=da.moveaxis(RMSFcube,0,Ndim-freq_axis)
+    FDF_zarr_complex = outDir + "/" + prefixOut + "FDFcube_complex.zarr"
+    FDFcube.to_zarr(FDF_zarr_complex)
+    FDFcube = da.from_zarr(FDF_zarr_complex)
 
     # Write cubes to Zarr to begin computation
     FDF_zarr_real = outDir + "/" + prefixOut + "FDFcube_real.zarr"
@@ -359,6 +362,9 @@ def writefits(dataArr, headtemplate, fitRMSF=False, prefixOut="", outDir="",
 
     # Save the RMSF
     if not_rmsf is not True:
+        RMSF_zarr_complex = outDir + "/" + prefixOut + "RMSFcube_complex.zarr"
+        RMSFcube.to_zarr(RMSF_zarr_complex)
+        RMSFcube = da.from_zarr(RMSF_zarr_complex)
         # Write cubes to Zarr to begin computation
         RMSF_zarr_real = outDir + "/" + prefixOut + "RMSFcube_real.zarr"
         RMSF_zarr_imag = outDir + "/" + prefixOut + "RMSFcube_imag.zarr"
