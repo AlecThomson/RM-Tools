@@ -50,6 +50,7 @@ import dafits
 import xarray as xr
 import zarr
 from dask.distributed import Client, performance_report
+from contextlib import nullcontext
 
 if sys.version_info.major == 2:
     print('RM-tools will no longer run with Python 2! Please use Python 3.')
@@ -684,7 +685,7 @@ def main():
 
     client = Client(args.client)
 
-    with performance_report(report):
+    with (performance_report(report) if report is not None else nullcontext()):
         if verbose:
             print(f"Dask client running at '{client.dashboard_link}'")
         header,dataQ = readFitsCube(args.fitsQ[0], verbose)

@@ -44,6 +44,7 @@ import dafits
 import dask.array as da
 from dask.distributed import Client, performance_report
 import zarr
+from contextlib import nullcontext
 
 from RMutils.util_RM import do_rmclean_hogbom
 from RMutils.util_RM import fits_make_lin_axis
@@ -439,7 +440,7 @@ def main():
         if verbose:
             print(f"Saving report to '{report}'")
     client = Client(args.client)
-    with performance_report(report):
+    with (performance_report(report) if report is not None else nullcontext()):
         if verbose:
             print(f"Dask client running at '{client.dashboard_link}'")
         # Run RM-CLEAN on the cubes
