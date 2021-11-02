@@ -131,9 +131,9 @@ def run_rmclean(fitsFDF, fitsRMSF, cutoff, maxIter=1000, gain=0.1, nBits=32,
     new_Ndim=cleanFDF.ndim
     #The difference is the number of dimensions that need to be added:
     if old_Ndim-new_Ndim != 0: #add missing (degenerate) dimensions back in
-        cleanFDF=da.expand_dims(cleanFDF,axis=tuple(range(old_Ndim-new_Ndim)))
-        ccArr=da.expand_dims(ccArr,axis=tuple(range(old_Ndim-new_Ndim)))
-        residFDF=da.expand_dims(residFDF,axis=tuple(range(old_Ndim-new_Ndim)))
+        cleanFDF=np.expand_dims(cleanFDF,axis=tuple(range(old_Ndim-new_Ndim)))
+        ccArr=np.expand_dims(ccArr,axis=tuple(range(old_Ndim-new_Ndim)))
+        residFDF=np.expand_dims(residFDF,axis=tuple(range(old_Ndim-new_Ndim)))
     #New dimensions are added to the beginning of the axis ordering 
     #(revserse of FITS ordering)
     
@@ -187,11 +187,14 @@ def writefits(cleanFDF, ccArr, iterCountArr, residFDF, headtemp, nBits=32,
 
     if outDir=='':  #To prevent code breaking if file is in current directory
         outDir='.'
-
     # Write cubes to Zarr to begin computation
+    FDF_zarr_complex = outDir + "/" + prefixOut + "FDF_clean_complex.zarr"
     FDF_zarr_real = outDir + "/" + prefixOut + "FDF_clean_real.zarr"
     FDF_zarr_imag = outDir + "/" + prefixOut + "FDF_clean_imag.zarr"
     FDF_zarr_tot = outDir + "/" + prefixOut + "FDF_clean_tot.zarr"
+
+    cleanFDF.to_zarr(FDF_zarr_complex, overwrite=True)
+    cleanFDF = da.from_zarr(FDF_zarr_complex)
 
     FDFcube_real = da.real(cleanFDF).astype(dtFloat)
     FDFcube_imag = da.imag(cleanFDF).astype(dtFloat)
@@ -231,9 +234,13 @@ def writefits(cleanFDF, ccArr, iterCountArr, residFDF, headtemp, nBits=32,
         if (verbose): log("> %s" % fitsFileOut)
 
     # Write cubes to Zarr to begin computation
+    FDF_CC_zarr_complex = outDir + "/" + prefixOut + "FDF_CC_clean_complex.zarr"
     FDF_CC_zarr_real = outDir + "/" + prefixOut + "FDF_CC_clean_real.zarr"
     FDF_CC_zarr_imag = outDir + "/" + prefixOut + "FDF_CC_clean_imag.zarr"
     FDF_CC_zarr_tot = outDir + "/" + prefixOut + "FDF_CC_clean_tot.zarr"
+
+    ccArr.to_zarr(FDF_CC_zarr_complex, overwrite=True)
+    ccArr = da.from_zarr(FDF_CC_zarr_complex)
 
     FDF_CCcube_real = da.real(ccArr).astype(dtFloat)
     FDF_CCcube_imag = da.imag(ccArr).astype(dtFloat)
@@ -283,9 +290,8 @@ def writefits(cleanFDF, ccArr, iterCountArr, residFDF, headtemp, nBits=32,
     fitsFileOut = outDir + "/" + prefixOut + "CLEAN_nIter.fits"
     zarrFileOut = fitsFileOut.replace(".fits", ".zarr")
 
-    da.expand_dims(
-        iterCountArr.astype(dtFloat), 
-        axis=tuple(range(headtemp['NAXIS']-iterCountArr.ndim))).to_zarr(zarrFileOut)
+    # Using np.newaxis, as da.expand_dims doesn't work with dask.array
+    iterCountArr.astype(dtFloat)[np.newaxis].to_zarr(zarrFileOut, overwrite=True)
     iterCountArr = zarr.open(zarrFileOut, mode="r")
 
     if (verbose): log("> %s" % fitsFileOut)
