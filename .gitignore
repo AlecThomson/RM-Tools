@@ -141,3 +141,8 @@ cython_debug/
 # Tests
 simdata
 tests/models_ns
+tests/simdata
+tests/*.pdf
+*.pdf
+dask-worker-space
+tests/dask-worker-space
