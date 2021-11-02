@@ -146,3 +146,6 @@ tests/*.pdf
 *.pdf
 dask-worker-space
 tests/dask-worker-space
+
+# VScode
+.vscode/settings.json
