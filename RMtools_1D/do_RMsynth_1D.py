@@ -527,17 +527,18 @@ def saveOutput(outdict, arrdict, prefixOut, verbose):
     outFile = prefixOut + "_FDFdirty.dat"
     if verbose:
         print("> %s" % outFile)
-    np.savetxt(outFile, list(zip(arrdict["phiArr_radm2"], arrdict["dirtyFDF"].real, arrdict["dirtyFDF"].imag)))
+
+    np.savetxt(outFile, list(zip(arrdict["phiArr_radm2"].compute(), arrdict["dirtyFDF"].real.compute(), arrdict["dirtyFDF"].imag.compute())))
 
     outFile = prefixOut + "_RMSF.dat"
     if verbose:
         print("> %s" % outFile)
-    np.savetxt(outFile, list(zip(arrdict["phi2Arr_radm2"], arrdict["RMSFArr"].real, arrdict["RMSFArr"].imag)))
+    np.savetxt(outFile, list(zip(arrdict["phi2Arr_radm2"].compute(), arrdict["RMSFArr"].real.compute(), arrdict["RMSFArr"].imag.compute())))
 
     outFile = prefixOut + "_weight.dat"
     if verbose:
         print("> %s" % outFile)
-    np.savetxt(outFile, list(zip(arrdict["freqArr_Hz"], arrdict["weightArr"])))
+    np.savetxt(outFile, list(zip(arrdict["freqArr_Hz"].compute(), arrdict["weightArr"].compute())))
 
     # Save the measurements to a "key=value" text file
     outFile = prefixOut + "_RMsynth.dat"
