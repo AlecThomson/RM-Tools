@@ -778,8 +778,10 @@ def main():
     if not os.path.exists(args.dataFile[0]):
         print("File does not exist: '%s'." % args.dataFile[0])
         sys.exit()
+
     prefixOut, ext = os.path.splitext(args.dataFile[0])
-    dataDir, dummy = os.path.split(args.dataFile[0])
+    dataDir, _ = os.path.split(args.dataFile[0])
+    
     # Set the floating point precision
     nBits = 32
     if args.bit64:
