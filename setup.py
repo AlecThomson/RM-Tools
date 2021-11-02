@@ -11,7 +11,7 @@ from setuptools import find_packages, setup, Command
 NAME = 'RM-Tools'
 DESCRIPTION = 'RM-synthesis, RM-clean and QU-fitting on polarised radio spectra'
 URL = 'https://github.com/CIRADA-Tools/RM-Tools'
-REQUIRES_PYTHON = '>=3.6.0'
+REQUIRES_PYTHON = '>=3.7.0'
 VERSION = '1.1.1'
 DOWNLOAD_URL = 'https://github.com/CIRADA-Tools/RM-Tools/archive/v'+VERSION+'.tar.gz'
 
