@@ -63,6 +63,8 @@
 import sys
 import math as m
 import numpy as np
+import numba as nb
+from numba_progress import ProgressBar
 from scipy.stats import kurtosis
 from scipy.stats import skew
 from scipy.stats import skewtest
@@ -84,6 +86,16 @@ C = 2.99792458e8
 
 
 #-----------------------------------------------------------------------------#
+@nb.njit(parallel=True, fastmath=True,)
+def _rmsynth(FDFcube, phiArr_radm2, nPhi, KArr, pCube, a, progress):
+    """JIT compiled version of the RM-synthesis loop.
+    """
+    for i in nb.prange(nPhi):
+        arg = np.expand_dims(np.expand_dims(np.exp(-2.0j * phiArr_radm2[i] * a), axis=-1), axis=-1)
+        FDFcube[i,:,:] =  KArr * np.sum(pCube * arg, axis=0)
+        progress.update(1)
+    return FDFcube
+
 def do_rmsynth_planes(dataQ, dataU, lambdaSqArr_m2, phiArr_radm2,
                       weightArr=None, lam0Sq_m2=None, nBits=32, verbose=False,
                       log=print):
@@ -175,10 +187,8 @@ def do_rmsynth_planes(dataQ, dataU, lambdaSqArr_m2, phiArr_radm2,
 
     # Do the RM-synthesis on each plane
     a = lambdaSqArr_m2 - lam0Sq_m2
-    for i in trange(nPhi, desc="Running RM-synthesis by channel", disable=not verbose):
-        arg = np.exp(-2.0j * phiArr_radm2[i] * a)[:, np.newaxis,np.newaxis]
-        FDFcube[i,:,:] =  KArr * np.sum(pCube * arg, axis=0)
-
+    with ProgressBar(total=nPhi, desc="Running RM-synthesis by channel", disable=not verbose) as progress:
+        FDFcube = _rmsynth(FDFcube, phiArr_radm2, nPhi, KArr, pCube, a, progress)
     # Remove redundant dimensions in the FDF array
     FDFcube = np.squeeze(FDFcube)
 
