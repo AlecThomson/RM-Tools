@@ -155,7 +155,6 @@ def do_rmsynth_planes(dataQ, dataU, lambdaSqArr_m2, phiArr_radm2,
     nX = dataQ.shape[-1]
     nY = dataQ.shape[-2]
     nPhi = phiArr_radm2.shape[0]
-    FDFcube = np.zeros((nPhi, nY, nX), dtype=dtComplex)
 
     # lam0Sq_m2 is the weighted mean of lambda^2 distribution (B&dB Eqn. 32)
     # Calculate a global lam0Sq_m2 value, ignoring isolated flagged voxels
@@ -175,9 +174,12 @@ def do_rmsynth_planes(dataQ, dataU, lambdaSqArr_m2, phiArr_radm2,
 
     # Do the RM-synthesis on each plane
     a = lambdaSqArr_m2 - lam0Sq_m2
+    FDF_planes = []
     for i in trange(nPhi, desc="Running RM-synthesis by channel", disable=not verbose):
         arg = np.exp(-2.0j * phiArr_radm2[i] * a)[:, np.newaxis,np.newaxis]
-        FDFcube[i,:,:] =  KArr * np.sum(pCube * arg, axis=0)
+        FDF_plane = KArr * np.sum(pCube * arg, axis=0)
+        FDF_planes.append(FDF_plane)
+    FDFcube = np.stack(FDF_planes, axis=0)
 
     # Remove redundant dimensions in the FDF array
     FDFcube = np.squeeze(FDFcube)
@@ -272,20 +274,15 @@ def get_rmsf_planes(lambdaSqArr_m2, phiArr_radm2, weightArr=None, mskArr=None,
     # If full planes are flagged then set corresponding weights to zero
     xySum =  np.sum(np.sum(mskArr, axis=1), axis=1)
     mskPlanes = np.where(xySum==nPix, 0, 1)
-    weightArr *= mskPlanes
+    weightArr = weightArr * mskPlanes
 
     # Check for isolated clumps of flags (# flags in a plane not 0 or nPix)
-    flagTotals = np.unique(xySum).tolist()
-    try:
-        flagTotals.remove(0)
-    except Exception:
-        pass
-    try:
-        flagTotals.remove(nPix)
-    except Exception:
-        pass
+    flagTotals = np.unique(xySum)
+    idx = np.logical_or(flagTotals==0, flagTotals==nPix)
+    flagTotals = flagTotals[~idx]
+
     do1Dcalc = True
-    if len(flagTotals)>0:
+    if flagTotals.size>0:
         do1Dcalc = False
 
     # lam0Sq is the weighted mean of LambdaSq distribution (B&dB Eqn. 32)

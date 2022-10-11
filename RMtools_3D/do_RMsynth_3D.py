@@ -42,6 +42,9 @@ import numpy as np
 import astropy.io.fits as pf
 import dask.array as da
 import zarr
+from dask.distributed import Client, progress
+from dask.diagnostics import ProgressBar
+from IPython import embed
 
 from RMutils.util_RM import do_rmsynth_planes
 from RMutils.util_RM import get_rmsf_planes
@@ -211,7 +214,7 @@ def run_rmsynth(dataQ, dataU, freqArr_Hz, dataI=None, rmsArr=None,
     return dataArr
 
 def writefits(dataArr, headtemplate, fitRMSF=False, prefixOut="", outDir="",
-                nBits = 32, write_seperate_FDF=False, not_rmsf=False, verbose=False, log=print):
+                nBits = 32, write_seperate_FDF=False, not_rmsf=False, verbose=False, use_dask=False, log=print):
     """Write data to disk in FITS
 
 
@@ -247,12 +250,22 @@ def writefits(dataArr, headtemplate, fitRMSF=False, prefixOut="", outDir="",
         log (function): Which logging function to use.
 
     """
+
     if not_rmsf:
         FDFcube, phiArr_radm2, lam0Sq_m2, lambdaSqArr_m2 = dataArr
 
     else:
         FDFcube, phiArr_radm2, RMSFcube, phi2Arr_radm2, fwhmRMSFCube,fitStatArr, lam0Sq_m2, lambdaSqArr_m2 = dataArr
 
+    # Write arrays to zarr
+    if use_dask:
+        FDFcube.to_zarr(outDir + "/" + prefixOut + "FDFcube.zarr", overwrite=True)
+        FDFcube = zarr.open(outDir + "/" + prefixOut + "FDFcube.zarr", mode='r')
+        lam0Sq_m2 = lam0Sq_m2.compute()
+
+        if not not_rmsf:
+            RMSFcube.to_zarr(outDir + "/" + prefixOut + "RMSFcube.zarr", overwrite=True)
+            RMSFcube = zarr.open(outDir + "/" + prefixOut + "RMSFcube.zarr", mode='r')
     # Default data types
     dtFloat = "float" + str(nBits)
     dtComplex = "complex" + str(2*nBits)
@@ -534,7 +547,6 @@ def readFitsCube(file, verbose, log = print, use_dask=False):
             _z_data = zarr.open(zarr_file, mode="r+")
             _z_data.attrs['header'] = head.tostring()
             data = da.from_zarr(zarr_file)
-
     return head, data
 
 
@@ -633,23 +645,7 @@ def main():
     freqArr_Hz = readFreqFile(args.freqFile[0], verbose)
 
     if args.use_dask:
-            dataArr = da.map_blocks(
-                run_rmsynth,
-                dataQ     = dataQ,
-                dataU        = dataU,
-                freqArr_Hz   = freqArr_Hz,
-                dataI        = dataI,
-                rmsArr       = rmsArr,
-                phiMax_radm2 = args.phiMax_radm2,
-                dPhi_radm2   = args.dPhi_radm2,
-                nSamples     = args.nSamples,
-                weightType   = args.weightType,
-                fitRMSF      = args.fitRMSF,
-                nBits        = 32,
-                verbose      = verbose,
-                not_rmsf = args.not_RMSF
-            )
-
+        client = Client()
 
     # Run RM-synthesis on the cubes
     dataArr = run_rmsynth(dataQ     = dataQ,
@@ -664,7 +660,8 @@ def main():
                           fitRMSF      = args.fitRMSF,
                           nBits        = 32,
                           verbose      = verbose,
-                          not_rmsf = args.not_RMSF)
+                          not_rmsf = args.not_RMSF,
+                          )
 
     # Write to files
     writefits(dataArr,
@@ -675,7 +672,12 @@ def main():
               write_seperate_FDF = args.write_seperate_FDF,
               not_rmsf           = args.not_RMSF,
               nBits              = 32,
-              verbose            = verbose)
+              verbose            = verbose,
+              use_dask = args.use_dask
+        )
+
+    if args.use_dask:
+        client.close()
 
 
 #-----------------------------------------------------------------------------#
