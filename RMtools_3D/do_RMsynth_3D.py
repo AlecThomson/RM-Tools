@@ -40,6 +40,8 @@ import time
 import math as m
 import numpy as np
 import astropy.io.fits as pf
+import dask.array as da
+import zarr
 
 from RMutils.util_RM import do_rmsynth_planes
 from RMutils.util_RM import get_rmsf_planes
@@ -186,7 +188,7 @@ def run_rmsynth(dataQ, dataU, freqArr_Hz, dataI=None, rmsArr=None,
     # nearest two planes.
     with np.errstate(divide='ignore', invalid='ignore'):
         freq0_Hz = np.true_divide(C , m.sqrt(lam0Sq_m2))
-                                  
+
     if dataI is not None:
         idx = np.abs(freqArr_Hz - freq0_Hz).argmin()
         if freqArr_Hz[idx]<freq0_Hz:
@@ -399,7 +401,7 @@ def writefits(dataArr, headtemplate, fitRMSF=False, prefixOut="", outDir="",
 
 
     #Generate peak maps:
-        
+
     maxPI,peakRM = create_peak_maps(FDFcube,phiArr_radm2,Ndim-freq_axis)
     # Save a maximum polarised intensity map
     fitsFileOut = outDir + "/" + prefixOut + "FDF_maxPI.fits"
@@ -435,7 +437,7 @@ def create_peak_maps(FDFcube,phiArr_radm2,phi_axis=0):
     Inputs:
         FDFcube: output cube from run_rmsynth
         phiArr_radm2: array of Faraday depth values, from run_rmsynth
-        phi_axis (int): number of the axis for Faraday depth (in python order, 
+        phi_axis (int): number of the axis for Faraday depth (in python order,
                          not FITS order). Defaults to zero (first axis).
     Returns:
         maxPI: array of same dimensions as FDFcube exceppt collapsed along
@@ -443,15 +445,15 @@ def create_peak_maps(FDFcube,phiArr_radm2,phi_axis=0):
                 intensity for each pixel
         peakRM: as maxPI, but with the Faraday depth location of the peak
     """
-    
+
     maxPI=np.max(np.abs(FDFcube), axis=phi_axis)
     peakRM_indices = np.argmax(np.abs(FDFcube), axis=phi_axis)
     peakRM=phiArr_radm2[peakRM_indices]
-    
+
     return maxPI, peakRM
 
-    
-    
+
+
 
 
 
@@ -475,7 +477,7 @@ def find_freq_axis(header):
     return freq_axis
 
 
-def readFitsCube(file, verbose, log = print):
+def readFitsCube(file, verbose, log = print, use_dask=False):
     """The old version of this function could only accept 3 or 4 axis input
     (and implicitly assumed that in the 4 axis case that axis 3 was degenerate).
     I'm trying to somewhat generalize this, so that it will accept NAXIS=1..3
@@ -491,6 +493,8 @@ def readFitsCube(file, verbose, log = print):
         log("Err: File not found")
 
     if(verbose): log("Reading " + file + " ...")
+
+
     data = pf.getdata(file)
     head = pf.getheader(file)
     if(verbose): log("done.")
@@ -502,7 +506,7 @@ def readFitsCube(file, verbose, log = print):
             print('NAXIS{} = {}'.format(i,head['NAXIS'+str(i)]),end='  ')
         print()
 
-    freq_axis=find_freq_axis(head) 
+    freq_axis=find_freq_axis(head)
     #If the frequency axis isn't the last one, rotate the array until it is.
     #Recall that pyfits reverses the axis ordering, so we want frequency on
     #axis 0 of the numpy array.
@@ -517,6 +521,19 @@ def readFitsCube(file, verbose, log = print):
 
     if data.ndim > 3:
         raise Exception('Data cube has too many (non-degenerate) axes!')
+
+    if use_dask:
+        zarr_file = file.replace('.fits','.zarr')
+        if os.path.exists(zarr_file):
+            data = da.from_zarr(zarr_file)
+            _z_data = zarr.open(zarr_file, mode="r")
+            head = pf.Header.fromstring(_z_data.attrs['header'])
+        else:
+            data = da.from_array(data)
+            data.to_zarr(zarr_file)
+            _z_data = zarr.open(zarr_file, mode="r+")
+            _z_data.attrs['header'] = head.tostring()
+            data = da.from_zarr(zarr_file)
 
     return head, data
 
@@ -592,6 +609,7 @@ def main():
                         help="Verbose [False].")
     parser.add_argument("-R", dest="not_RMSF", action="store_true",
                         help="Skip calculation of RMSF? [False]")
+    parser.add_argument("--use_dask", dest="use_dask", action="store_true", help="Use dask for parallelization [False]")
     args = parser.parse_args()
 
     # Sanity checks
@@ -602,7 +620,7 @@ def main():
     dataDir, dummy = os.path.split(args.fitsQ[0])
     verbose=args.verbose
     if args.fitsI is not None:
-        dataI = readFitsCube(args.fitsI, verbose)[1]
+        dataI = readFitsCube(args.fitsI, verbose, use_dask=args.use_dask)[1]
     else:
         dataI=None
     if args.noiseFile is not None:
@@ -610,12 +628,33 @@ def main():
     else:
         rmsArr=None
 
-    header,dataQ = readFitsCube(args.fitsQ[0], verbose)
+    header,dataQ = readFitsCube(args.fitsQ[0], verbose, use_dask=args.use_dask)
+    dataU = readFitsCube(args.fitsU[0], verbose, use_dask=args.use_dask)[1]
+    freqArr_Hz = readFreqFile(args.freqFile[0], verbose)
+
+    if args.use_dask:
+            dataArr = da.map_blocks(
+                run_rmsynth,
+                dataQ     = dataQ,
+                dataU        = dataU,
+                freqArr_Hz   = freqArr_Hz,
+                dataI        = dataI,
+                rmsArr       = rmsArr,
+                phiMax_radm2 = args.phiMax_radm2,
+                dPhi_radm2   = args.dPhi_radm2,
+                nSamples     = args.nSamples,
+                weightType   = args.weightType,
+                fitRMSF      = args.fitRMSF,
+                nBits        = 32,
+                verbose      = verbose,
+                not_rmsf = args.not_RMSF
+            )
+
 
     # Run RM-synthesis on the cubes
     dataArr = run_rmsynth(dataQ     = dataQ,
-                          dataU        = readFitsCube(args.fitsU[0], verbose)[1],
-                          freqArr_Hz   = readFreqFile(args.freqFile[0], verbose),
+                          dataU        = dataU,
+                          freqArr_Hz   = freqArr_Hz,
                           dataI        = dataI,
                           rmsArr       = rmsArr,
                           phiMax_radm2 = args.phiMax_radm2,
