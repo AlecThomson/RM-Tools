@@ -37,6 +37,7 @@
 import sys
 import os
 import time
+import contextlib
 import math as m
 import numpy as np
 import astropy.io.fits as pf
@@ -650,41 +651,40 @@ def main():
     dataU = readFitsCube(args.fitsU[0], verbose, use_dask=args.use_dask)[1]
     freqArr_Hz = readFreqFile(args.freqFile[0], verbose)
 
-    if args.use_dask:
-        client = Client()
+
+    client = Client() if args.use_dask else contextlib.nullcontext()
+    if args.use_dask and verbose:
         print(f"Follow progress at '{client.dashboard_link}'")
 
-    # Run RM-synthesis on the cubes
-    dataArr = run_rmsynth(dataQ     = dataQ,
-                          dataU        = dataU,
-                          freqArr_Hz   = freqArr_Hz,
-                          dataI        = dataI,
-                          rmsArr       = rmsArr,
-                          phiMax_radm2 = args.phiMax_radm2,
-                          dPhi_radm2   = args.dPhi_radm2,
-                          nSamples     = args.nSamples,
-                          weightType   = args.weightType,
-                          fitRMSF      = args.fitRMSF,
-                          nBits        = 32,
-                          verbose      = verbose,
-                          not_rmsf = args.not_RMSF,
-                          )
+    with client:
+        # Run RM-synthesis on the cubes
+        dataArr = run_rmsynth(dataQ     = dataQ,
+                            dataU        = dataU,
+                            freqArr_Hz   = freqArr_Hz,
+                            dataI        = dataI,
+                            rmsArr       = rmsArr,
+                            phiMax_radm2 = args.phiMax_radm2,
+                            dPhi_radm2   = args.dPhi_radm2,
+                            nSamples     = args.nSamples,
+                            weightType   = args.weightType,
+                            fitRMSF      = args.fitRMSF,
+                            nBits        = 32,
+                            verbose      = verbose,
+                            not_rmsf = args.not_RMSF,
+                            )
 
-    # Write to files
-    writefits(dataArr,
-              headtemplate       = header,
-              fitRMSF            = False,
-              prefixOut          = args.prefixOut,
-              outDir             = dataDir,
-              write_seperate_FDF = args.write_seperate_FDF,
-              not_rmsf           = args.not_RMSF,
-              nBits              = 32,
-              verbose            = verbose,
-              use_dask = args.use_dask
-        )
-
-    if args.use_dask:
-        client.close()
+        # Write to files
+        writefits(dataArr,
+                headtemplate       = header,
+                fitRMSF            = False,
+                prefixOut          = args.prefixOut,
+                outDir             = dataDir,
+                write_seperate_FDF = args.write_seperate_FDF,
+                not_rmsf           = args.not_RMSF,
+                nBits              = 32,
+                verbose            = verbose,
+                use_dask = args.use_dask
+            )
 
 
 #-----------------------------------------------------------------------------#
