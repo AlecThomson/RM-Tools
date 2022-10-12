@@ -259,6 +259,8 @@ def writefits(dataArr, headtemplate, fitRMSF=False, prefixOut="", outDir="",
 
     # Write arrays to zarr
     if use_dask:
+        if verbose:
+            print("Writing output zarr files")
         FDFcube.to_zarr(outDir + "/" + prefixOut + "FDFcube.zarr", overwrite=True)
         FDFcube = zarr.open(outDir + "/" + prefixOut + "FDFcube.zarr", mode='r')
         lam0Sq_m2 = lam0Sq_m2.compute()
@@ -538,10 +540,14 @@ def readFitsCube(file, verbose, log = print, use_dask=False):
     if use_dask:
         zarr_file = file.replace('.fits','.zarr')
         if os.path.exists(zarr_file):
+            if verbose:
+                print(f"Loading data from zarr file '{zarr_file}'")
             data = da.from_zarr(zarr_file)
             _z_data = zarr.open(zarr_file, mode="r")
             head = pf.Header.fromstring(_z_data.attrs['header'])
         else:
+            if verbose:
+                print(f"Saving data to zarr file '{zarr_file}'")
             data = da.from_array(data)
             data.to_zarr(zarr_file)
             _z_data = zarr.open(zarr_file, mode="r+")
@@ -646,6 +652,7 @@ def main():
 
     if args.use_dask:
         client = Client()
+        print(f"Follow progress at '{client.dashboard_link}'")
 
     # Run RM-synthesis on the cubes
     dataArr = run_rmsynth(dataQ     = dataQ,
