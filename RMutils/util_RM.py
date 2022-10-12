@@ -71,6 +71,7 @@ from scipy.stats import anderson
 from scipy.stats import kstest
 from scipy.stats import norm
 from tqdm.auto import tqdm, trange
+from IPython import embed
 
 from RMutils.mpfit import mpfit
 from RMutils.util_misc import toscalar
@@ -314,7 +315,6 @@ def get_rmsf_planes(lambdaSqArr_m2, phiArr_radm2, weightArr=None, mskArr=None,
             else:
                 mp = fit_rmsf(phi2Arr, np.abs(RMSFArr))
             if mp is None or mp.status<1:
-                 pass
                  log("Err: failed to fit the RMSF.")
                  log("     Defaulting to analytical value.")
             else:
@@ -681,10 +681,14 @@ def fit_rmsf(xData, yData, thresh=0.4, ampThresh=0.4):
         validIndx = np.where(msk2==1.0)
         xData = xData[validIndx]
         yData = yData[validIndx]
+        try:
+            yData = yData.compute_chunk_sizes()
+        except AttributeError:
+            pass
 
         # Estimate starting parameters
         a = 1.0
-        b = xData[np.argmax(yData)]
+        b = xData[yData == yData.max()][0]
         w = np.nanmax(xData)-np.nanmin(xData)
         inParms=[ {'value': a, 'fixed':False, 'parname': 'amp'},
                   {'value': b, 'fixed':False, 'parname': 'offset'},
@@ -708,10 +712,10 @@ def fit_rmsf(xData, yData, thresh=0.4, ampThresh=0.4):
 
         # Use mpfit to perform the fitting
         mp = mpfit(errFn, parinfo=inParms, quiet=True)
-
         return mp
 
-    except Exception:
+    except Exception as e:
+        print("Error in fit_rmsf: {}".format(e))
         return None
 
 
@@ -734,12 +738,17 @@ def detect_peak(a, thresh=0.4):
     below a threshold.
     Returns a mask array like the input array with 1s over the extent of the
     peak and 0s elsewhere."""
-
     # Find the peak
     iPk = np.argmax(a)  # If the peak is flat, this is the left index
 
     # find first point below threshold right of peak
-    ishift = np.where(a[iPk:]<thresh)[0][0]
+    _ishift = np.where(a[iPk:]<thresh)[0]
+    try:
+        _ishift = _ishift.compute_chunk_sizes()
+    # Catch dask vs numpy array
+    except AttributeError:
+        pass
+    ishift = _ishift[0]
     iR = iPk+ishift
     iL = iPk-ishift+1
 
