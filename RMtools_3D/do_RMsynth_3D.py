@@ -39,6 +39,7 @@ import os
 import time
 import contextlib
 import math as m
+from e13tools import isin
 import numpy as np
 import astropy.io.fits as pf
 import dask.array as da
@@ -180,6 +181,7 @@ def run_rmsynth(dataQ, dataU, freqArr_Hz, dataI=None, rmsArr=None,
                             fitRMSFreal      = False,
                             nBits            = 32,
                             verbose          = verbose,
+                            use_dask         = isinstance(dataQ, da.Array),
                             log              = log)
     endTime = time.time()
     cputime = (endTime - startTime)
@@ -539,7 +541,8 @@ def readFitsCube(file, verbose, log = print, use_dask=False):
         raise Exception('Data cube has too many (non-degenerate) axes!')
 
     if use_dask:
-        chunks = [data.shape[0], 1, 1]
+        # chunks = [data.shape[0], 1, 1]
+        chunks = None
         zarr_file = file.replace('.fits','.zarr')
         if os.path.exists(zarr_file):
             if verbose:
@@ -550,7 +553,7 @@ def readFitsCube(file, verbose, log = print, use_dask=False):
         else:
             if verbose:
                 print(f"Saving data to zarr file '{zarr_file}'")
-            zarr.save(zarr_file, data, chunks=chunks)
+            zarr.save(zarr_file, zarr.array(data, chunks=chunks))
             _z_data = zarr.open(zarr_file, mode="r+")
             _z_data.attrs['header'] = head.tostring()
             data = da.from_zarr(zarr_file, chunks=chunks)

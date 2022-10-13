@@ -71,6 +71,7 @@ from scipy.stats import anderson
 from scipy.stats import kstest
 from scipy.stats import norm
 from tqdm.auto import tqdm, trange
+import dask.array as da
 from IPython import embed
 
 from RMutils.mpfit import mpfit
@@ -191,7 +192,7 @@ def do_rmsynth_planes(dataQ, dataU, lambdaSqArr_m2, phiArr_radm2,
 #-----------------------------------------------------------------------------#
 def get_rmsf_planes(lambdaSqArr_m2, phiArr_radm2, weightArr=None, mskArr=None,
                     lam0Sq_m2= None, double=True, fitRMSF=False,
-                    fitRMSFreal=False, nBits=32, verbose=False,
+                    fitRMSFreal=False, nBits=32, verbose=False, use_dask=False,
                     log=print):
     """Calculate the Rotation Measure Spread Function from inputs. This version
     returns a cube (1, 2 or 3D) of RMSF spectra based on the shape of a
@@ -270,7 +271,12 @@ def get_rmsf_planes(lambdaSqArr_m2, phiArr_radm2, weightArr=None, mskArr=None,
     nY = mskArr.shape[-2]
     nPix = nX * nY
     nPhi = phi2Arr.shape[0]
-    RMSFcube = np.ones((nPhi, nY, nX), dtype=dtComplex)
+    if use_dask:
+        print("Using dask array for RMSF")
+        RMSFcube = da.ones((nPhi, nY, nX), dtype=dtComplex)
+    else:
+        RMSFcube = np.ones((nPhi, nY, nX), dtype=dtComplex)
+
 
     # If full planes are flagged then set corresponding weights to zero
     xySum =  np.sum(np.sum(mskArr, axis=1), axis=1)
