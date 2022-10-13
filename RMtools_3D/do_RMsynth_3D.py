@@ -539,21 +539,21 @@ def readFitsCube(file, verbose, log = print, use_dask=False):
         raise Exception('Data cube has too many (non-degenerate) axes!')
 
     if use_dask:
+        chunks = [data.shape[0], 1, 1]
         zarr_file = file.replace('.fits','.zarr')
         if os.path.exists(zarr_file):
             if verbose:
                 print(f"Loading data from zarr file '{zarr_file}'")
-            data = da.from_zarr(zarr_file)
+            data = da.from_zarr(zarr_file, chunks=chunks)
             _z_data = zarr.open(zarr_file, mode="r")
             head = pf.Header.fromstring(_z_data.attrs['header'])
         else:
             if verbose:
                 print(f"Saving data to zarr file '{zarr_file}'")
-            data = da.from_array(data)
-            data.to_zarr(zarr_file)
+            zarr.save(zarr_file, data, chunks=chunks)
             _z_data = zarr.open(zarr_file, mode="r+")
             _z_data.attrs['header'] = head.tostring()
-            data = da.from_zarr(zarr_file)
+            data = da.from_zarr(zarr_file, chunks=chunks)
     return head, data
 
 
