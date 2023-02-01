@@ -37,9 +37,7 @@
 import sys
 import os
 import time
-import contextlib
 import math as m
-from e13tools import isin
 import numpy as np
 import astropy.io.fits as pf
 import dask.array as da
