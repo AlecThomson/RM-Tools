@@ -43,8 +43,6 @@ from e13tools import isin
 import numpy as np
 import astropy.io.fits as pf
 import dask.array as da
-import zarr
-from dask.distributed import Client, progress
 from dask.diagnostics import ProgressBar
 from IPython import embed
 
@@ -260,6 +258,12 @@ def writefits(dataArr, headtemplate, fitRMSF=False, prefixOut="", outDir="",
     else:
         FDFcube, phiArr_radm2, RMSFcube, phi2Arr_radm2, fwhmRMSFCube,fitStatArr, lam0Sq_m2, lambdaSqArr_m2 = dataArr
 
+    if use_dask:
+        with ProgressBar():
+            FDFcube = FDFcube.compute()
+            if not not_rmsf:
+                RMSFcube = RMSFcube.compute()
+
     # Default data types
     dtFloat = "float" + str(nBits)
     dtComplex = "complex" + str(2*nBits)
@@ -289,7 +293,8 @@ def writefits(dataArr, headtemplate, fitRMSF=False, prefixOut="", outDir="",
     header["CUNIT"+str(freq_axis)] = "rad/m^2"
     if not np.isfinite(lam0Sq_m2):
         lam0Sq_m2 = 0.
-    header["LAMSQ0"] = (lam0Sq_m2,'Lambda^2_0, in m^2')
+    header["LAMSQ0"] = (lam0Sq_m2.compute(),'Lambda^2_0, in m^2') if use_dask else (lam0Sq_m2,'Lambda^2_0, in m^2')
+
     if "DATAMAX" in header:
         del header["DATAMAX"]
     if "DATAMIN" in header:
@@ -530,7 +535,7 @@ def readFitsCube(file, verbose, log = print, use_dask=False):
         raise Exception('Data cube has too many (non-degenerate) axes!')
 
     if use_dask:
-        data = da.from_array(data)
+        data = da.from_array(data, chunks=(-1, 100, 100))
 
     return head, data
 
@@ -629,40 +634,34 @@ def main():
     dataU = readFitsCube(args.fitsU[0], verbose, use_dask=args.use_dask)[1]
     freqArr_Hz = readFreqFile(args.freqFile[0], verbose)
 
+    # Run RM-synthesis on the cubes
+    dataArr = run_rmsynth(dataQ     = dataQ,
+                        dataU        = dataU,
+                        freqArr_Hz   = freqArr_Hz,
+                        dataI        = dataI,
+                        rmsArr       = rmsArr,
+                        phiMax_radm2 = args.phiMax_radm2,
+                        dPhi_radm2   = args.dPhi_radm2,
+                        nSamples     = args.nSamples,
+                        weightType   = args.weightType,
+                        fitRMSF      = args.fitRMSF,
+                        nBits        = 32,
+                        verbose      = verbose,
+                        not_rmsf = args.not_RMSF,
+                        )
 
-    client = Client() if args.use_dask else contextlib.nullcontext()
-    if args.use_dask and verbose:
-        print(f"Follow progress at '{client.dashboard_link}'")
-
-    with client:
-        # Run RM-synthesis on the cubes
-        dataArr = run_rmsynth(dataQ     = dataQ,
-                            dataU        = dataU,
-                            freqArr_Hz   = freqArr_Hz,
-                            dataI        = dataI,
-                            rmsArr       = rmsArr,
-                            phiMax_radm2 = args.phiMax_radm2,
-                            dPhi_radm2   = args.dPhi_radm2,
-                            nSamples     = args.nSamples,
-                            weightType   = args.weightType,
-                            fitRMSF      = args.fitRMSF,
-                            nBits        = 32,
-                            verbose      = verbose,
-                            not_rmsf = args.not_RMSF,
-                            )
-
-        # Write to files
-        writefits(dataArr,
-                headtemplate       = header,
-                fitRMSF            = False,
-                prefixOut          = args.prefixOut,
-                outDir             = dataDir,
-                write_seperate_FDF = args.write_seperate_FDF,
-                not_rmsf           = args.not_RMSF,
-                nBits              = 32,
-                verbose            = verbose,
-                use_dask = args.use_dask
-            )
+    # Write to files
+    writefits(dataArr,
+            headtemplate       = header,
+            fitRMSF            = False,
+            prefixOut          = args.prefixOut,
+            outDir             = dataDir,
+            write_seperate_FDF = args.write_seperate_FDF,
+            not_rmsf           = args.not_RMSF,
+            nBits              = 32,
+            verbose            = verbose,
+            use_dask = args.use_dask
+        )
 
 
 #-----------------------------------------------------------------------------#
