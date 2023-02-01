@@ -260,17 +260,6 @@ def writefits(dataArr, headtemplate, fitRMSF=False, prefixOut="", outDir="",
     else:
         FDFcube, phiArr_radm2, RMSFcube, phi2Arr_radm2, fwhmRMSFCube,fitStatArr, lam0Sq_m2, lambdaSqArr_m2 = dataArr
 
-    # Write arrays to zarr
-    if use_dask:
-        if verbose:
-            print("Writing output zarr files")
-        FDFcube.to_zarr(outDir + "/" + prefixOut + "FDFcube.zarr", overwrite=True)
-        FDFcube = zarr.open(outDir + "/" + prefixOut + "FDFcube.zarr", mode='r')
-        lam0Sq_m2 = lam0Sq_m2.compute()
-
-        if not not_rmsf:
-            RMSFcube.to_zarr(outDir + "/" + prefixOut + "RMSFcube.zarr", overwrite=True)
-            RMSFcube = zarr.open(outDir + "/" + prefixOut + "RMSFcube.zarr", mode='r')
     # Default data types
     dtFloat = "float" + str(nBits)
     dtComplex = "complex" + str(2*nBits)
@@ -541,22 +530,8 @@ def readFitsCube(file, verbose, log = print, use_dask=False):
         raise Exception('Data cube has too many (non-degenerate) axes!')
 
     if use_dask:
-        # chunks = [data.shape[0], 1, 1]
-        chunks = None
-        zarr_file = file.replace('.fits','.zarr')
-        if os.path.exists(zarr_file):
-            if verbose:
-                print(f"Loading data from zarr file '{zarr_file}'")
-            data = da.from_zarr(zarr_file, chunks=chunks)
-            _z_data = zarr.open(zarr_file, mode="r")
-            head = pf.Header.fromstring(_z_data.attrs['header'])
-        else:
-            if verbose:
-                print(f"Saving data to zarr file '{zarr_file}'")
-            zarr.save(zarr_file, zarr.array(data, chunks=chunks))
-            _z_data = zarr.open(zarr_file, mode="r+")
-            _z_data.attrs['header'] = head.tostring()
-            data = da.from_zarr(zarr_file, chunks=chunks)
+        data = da.from_array(data)
+
     return head, data
 
 
