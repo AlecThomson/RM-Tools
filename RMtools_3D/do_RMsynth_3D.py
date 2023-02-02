@@ -533,7 +533,7 @@ def readFitsCube(file, verbose, log = print, use_dask=False):
         raise Exception('Data cube has too many (non-degenerate) axes!')
 
     if use_dask:
-        data = da.from_array(data, chunks=(-1, 100, 100))
+        data = da.from_array(data, chunks=(-1, 1, -1))
 
     return head, data
 
