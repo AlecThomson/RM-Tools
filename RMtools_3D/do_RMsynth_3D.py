@@ -534,6 +534,7 @@ def readFitsCube(file, verbose, log = print, use_dask=False):
 
     if use_dask:
         data = da.from_array(data, chunks=(-1, 1, -1))
+        print(f"Chunk size: {data.chunks}",end="")
 
     return head, data
 
