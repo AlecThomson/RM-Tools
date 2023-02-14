@@ -3,11 +3,12 @@
 
 
 
+import math
 import sys
 import warnings
-import math
 
 import numpy as np
+
 try:
     from scipy.cluster.vq import kmeans2
     HAVE_KMEANS = True

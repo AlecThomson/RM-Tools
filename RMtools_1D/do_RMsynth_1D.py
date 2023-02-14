@@ -34,32 +34,27 @@
 #                                                                             #
 #=============================================================================#
 
-import sys
-import os
-import time
-import traceback
 import json
 import math as m
-import numpy as np
+import os
+import sys
+import time
+import traceback
+
 import matplotlib.pyplot as plt
+import numpy as np
 from scipy.interpolate import interp1d
 
-from RMutils.util_RM import do_rmsynth
-from RMutils.util_RM import do_rmsynth_planes
-from RMutils.util_RM import get_rmsf_planes
-from RMutils.util_RM import measure_FDF_parms
-from RMutils.util_RM import measure_qu_complexity
-from RMutils.util_RM import measure_fdf_complexity
-from RMutils.util_misc import nanmedian
-from RMutils.util_misc import toscalar
-from RMutils.util_misc import create_frac_spectra,calculate_StokesI_model
-from RMutils.util_misc import poly5,powerlaw_poly5
-from RMutils.util_misc import MAD,renormalize_StokesI_model
-from RMutils.util_plotTk import plot_Ipqu_spectra_fig
-from RMutils.util_plotTk import plot_rmsf_fdf_fig
-from RMutils.util_plotTk import plot_complexity_fig
-from RMutils.util_plotTk import CustomNavbar
-from RMutils.util_plotTk import plot_rmsIQU_vs_nu_ax
+from RMutils.util_misc import (MAD, calculate_StokesI_model,
+                               create_frac_spectra, nanmedian, poly5,
+                               powerlaw_poly5, renormalize_StokesI_model,
+                               toscalar)
+from RMutils.util_plotTk import (CustomNavbar, plot_complexity_fig,
+                                 plot_Ipqu_spectra_fig, plot_rmsf_fdf_fig,
+                                 plot_rmsIQU_vs_nu_ax)
+from RMutils.util_RM import (do_rmsynth, do_rmsynth_planes, get_rmsf_planes,
+                             measure_fdf_complexity, measure_FDF_parms,
+                             measure_qu_complexity)
 
 if sys.version_info.major == 2:
     print('RM-tools will no longer run with Python 2! Please use Python 3.')

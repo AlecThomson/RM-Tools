@@ -5,7 +5,7 @@ The base sampler class implementing various helpful functions.
 
 """
 
-from __future__ import (division, print_function, absolute_import,
+from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
 __all__ = ["Sampler"]

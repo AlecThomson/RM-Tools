@@ -12,10 +12,11 @@ There are many cutout tools like it, but this one is mine.
 May 2019
 """
 
-import astropy.io.fits as pf
-from astropy.wcs import WCS
 import argparse
 import os
+
+import astropy.io.fits as pf
+from astropy.wcs import WCS
 
 
 def main():

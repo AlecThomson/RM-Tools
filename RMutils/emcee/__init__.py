@@ -1,21 +1,21 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from __future__ import (division, print_function, absolute_import,
+from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
-from .sampler import *
-from .mh import *
-from .ensemble import *
-from .ptsampler import *
-from . import utils
-from . import autocorr
 
+from . import autocorr, utils
+from .ensemble import *
+from .mh import *
+from .ptsampler import *
+from .sampler import *
 
 __version__ = "2.1.0"
 
 
 def test():
     from inspect import getmembers, ismethod
+
     from .tests import Tests
 
     print("Starting tests...")

@@ -68,21 +68,22 @@
 #                                                                             #
 #=============================================================================#
 
-import os
-import sys
 import copy
+import csv
+import json
+import math as m
+import os
 import re
+#import ConfigParser
+import sqlite3
+import sys
 import time
 import traceback
-import math as m
+
 import numpy as np
 import numpy.ma as ma
 import scipy.ndimage as ndi
 from scipy.stats import norm
-#import ConfigParser
-import sqlite3
-import csv
-import json
 
 from RMutils.mpfit import mpfit
 

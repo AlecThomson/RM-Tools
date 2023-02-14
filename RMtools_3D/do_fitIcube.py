@@ -33,25 +33,23 @@
 #                                                                             #
 #=============================================================================#
 
-import sys
-import os
-import time
-import traceback
 import argparse
 import math as m
-import numpy as np
-import astropy.io.fits as pf
-
-from RMutils.util_misc import MAD
-from RMutils.util_misc import fit_StokesI_model, calculate_StokesI_model
-from RMutils.util_misc import progress
-from RMutils.util_FITS import strip_fits_dims
-from RMtools_3D.do_RMsynth_3D import readFitsCube 
-from RMtools_3D.make_freq_file import  get_freq_array
-
-
-from functools import partial
 import multiprocessing as mp
+import os
+import sys
+import time
+import traceback
+from functools import partial
+
+import astropy.io.fits as pf
+import numpy as np
+
+from RMtools_3D.do_RMsynth_3D import readFitsCube
+from RMtools_3D.make_freq_file import get_freq_array
+from RMutils.util_FITS import strip_fits_dims
+from RMutils.util_misc import (MAD, calculate_StokesI_model, fit_StokesI_model,
+                               progress)
 
 #-----------------------------------------------------------------------------#
 

@@ -31,31 +31,25 @@
 #                                                                             #
 #=============================================================================#
 
-import sys
+import argparse
+import math as m
 import os
+import sys
 import time
 import traceback
-import math as m
-import numpy as np
+
 import matplotlib.pyplot as plt
-from matplotlib.ticker import MaxNLocator
-from RMutils.util_RM import extrap
-from RMutils.util_RM import calc_parabola_vertex
-from RMutils.util_RM import measure_qu_complexity
-from RMutils.util_RM import fit_rmsf
-from RMutils.util_misc import nanmedian
-from RMutils.util_misc import toscalar
-from RMutils.util_misc import create_frac_spectra
-from RMutils.util_misc import poly5
-from RMutils.util_misc import MAD
-from RMutils.util_plotTk import plot_Ipqu_spectra_fig
-from RMutils.util_plotTk import plot_complexity_fig
-from RMutils.util_plotTk import plot_dirtyFDF_ax
-from RMtools_1D.do_RMsynth_1D import saveOutput
-import argparse
+import numpy as np
 import scipy as sp
-import sys
-from RMutils.util_misc import progress
+from matplotlib.ticker import MaxNLocator
+
+from RMtools_1D.do_RMsynth_1D import saveOutput
+from RMutils.util_misc import (MAD, create_frac_spectra, nanmedian, poly5,
+                               progress, toscalar)
+from RMutils.util_plotTk import (plot_complexity_fig, plot_dirtyFDF_ax,
+                                 plot_Ipqu_spectra_fig)
+from RMutils.util_RM import (calc_parabola_vertex, extrap, fit_rmsf,
+                             measure_qu_complexity)
 
 if sys.version_info.major == 2:
     print('RM-tools will no longer run with Python 2! Please use Python 3.')

@@ -1,17 +1,19 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from __future__ import (division, print_function, absolute_import,
+from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
 __all__ = ["PTSampler"]
 
+import multiprocessing as multi
+
 import numpy as np
 import numpy.random as nr
-import multiprocessing as multi
 
 from . import autocorr
 from .sampler import Sampler
+
 
 def default_beta_ladder(ndim, ntemps=None, Tmax=None):
     """Returns a ladder of :math:`\beta \equiv 1/T` with temperatures

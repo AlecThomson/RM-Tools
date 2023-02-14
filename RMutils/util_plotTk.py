@@ -74,27 +74,25 @@
 #                                                                             #
 #=============================================================================#
 
+import io
+import math as m
 import os
 import sys
-import math as m
-import numpy as np
-import io
+import tkinter.ttk
 import traceback
+
 import astropy.io.fits as pf
 import matplotlib as mpl
 import matplotlib.pyplot as plt
-from matplotlib.ticker import MaxNLocator
-from matplotlib.patches import Polygon
-from matplotlib.ticker import FuncFormatter
-from matplotlib.figure import Figure
+import numpy as np
 from matplotlib.backends.backend_tkagg import NavigationToolbar2Tk
-import tkinter.ttk
+from matplotlib.figure import Figure
+from matplotlib.patches import Polygon
+from matplotlib.ticker import FuncFormatter, MaxNLocator
 
-from .util_plotFITS import plot_fits_map
-from .util_misc import xfloat
-from .util_misc import norm_cdf
-from .util_misc import nanmedian
 from .normalize import APLpyNormalize
+from .util_misc import nanmedian, norm_cdf, xfloat
+from .util_plotFITS import plot_fits_map
 
 # Alter the default linewidths etc.
 mpl.rcParams['lines.linewidth'] = 1.0

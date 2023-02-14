@@ -1,9 +1,10 @@
 #=============================================================================#
 #                          MODEL DEFINITION FILE                              #
 #=============================================================================#
-import numpy as np
 import bilby
-from bilby.core.prior import PriorDict, Constraint
+import numpy as np
+from bilby.core.prior import Constraint, PriorDict
+
 
 #-----------------------------------------------------------------------------#
 # Function defining the model.                                                #

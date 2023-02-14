@@ -34,11 +34,12 @@
 #                                                                             #
 #=============================================================================#
 
-import sys
 import os
+import sys
 import time
-import numpy as np
+
 import astropy.io.fits as pf
+import numpy as np
 
 try:
     import schwimmbad
@@ -46,8 +47,7 @@ try:
 except:
     parallel_available=False
 
-from RMutils.util_RM import do_rmclean_hogbom
-from RMutils.util_RM import fits_make_lin_axis
+from RMutils.util_RM import do_rmclean_hogbom, fits_make_lin_axis
 
 C = 2.997924538e8 # Speed of light [m/s]
 

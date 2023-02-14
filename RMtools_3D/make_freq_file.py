@@ -10,9 +10,10 @@
 
 
 
-from astropy.io import fits
-import numpy as np
 import argparse
+
+import numpy as np
+from astropy.io import fits
 from astropy.wcs import WCS
 
 

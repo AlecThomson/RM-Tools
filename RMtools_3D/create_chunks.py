@@ -16,11 +16,13 @@ need more memory than the size of a single chunk, and perhaps not even that much
 May 2019
 """
 
-import numpy as np
 import argparse
-import astropy.io.fits as pf
 import os.path as path
 from math import ceil, floor, log10
+
+import astropy.io.fits as pf
+import numpy as np
+
 #from RMutils.util_misc import progress  
 
 def progress(width, percent):

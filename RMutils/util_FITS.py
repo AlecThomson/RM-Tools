@@ -42,14 +42,15 @@
 #                                                                             #
 #=============================================================================#
 
-import os
-import sys
-import shutil
-import re
 import math as m
-import numpy as np
+import os
+import re
+import shutil
+import sys
+
 import astropy.io.fits as pf
 import astropy.wcs.wcs as pw
+import numpy as np
 
 
 #-----------------------------------------------------------------------------#

@@ -22,15 +22,15 @@ Contributed by Peter K. G. Williams <peter@newton.cx>.
 
 """
 
-from __future__ import (division, print_function, absolute_import,
+from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
 __all__ = ["InterruptiblePool"]
 
-import signal
 import functools
-from multiprocessing.pool import Pool
+import signal
 from multiprocessing import TimeoutError
+from multiprocessing.pool import Pool
 
 
 def _initializer_wrapper(actual_initializer, *rest):

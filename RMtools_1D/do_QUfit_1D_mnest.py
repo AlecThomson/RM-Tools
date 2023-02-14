@@ -46,27 +46,26 @@
 #                                                                             #
 # =============================================================================#
 
-from shutil import Error
-import sys
-import os
-import shutil
+import argparse
 import copy
-import time
 import importlib
 import json
-import argparse
+import os
+import shutil
+import sys
+import time
 import traceback
-import numpy as np
-import matplotlib.pyplot as plt
+from shutil import Error
+
 import bilby
+import matplotlib.pyplot as plt
+import numpy as np
 
 from RMtools_1D.do_RMsynth_1D import readFile
-from RMutils.util_misc import create_frac_spectra
-from RMutils.util_misc import calculate_StokesI_model
-from RMutils.util_misc import toscalar
-from RMutils.util_plotTk import plot_Ipqu_spectra_fig
-from RMutils.util_plotTk import CustomNavbar
 from RMutils import corner
+from RMutils.util_misc import (calculate_StokesI_model, create_frac_spectra,
+                               toscalar)
+from RMutils.util_plotTk import CustomNavbar, plot_Ipqu_spectra_fig
 
 C = 2.997924538e8  # Speed of light [m/s]
 

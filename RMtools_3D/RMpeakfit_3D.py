@@ -8,15 +8,15 @@
 # Initial version: Cameron Van Eck, Dec 2020
 """
 
-import sys
 import os
-import numpy as np
-import astropy.io.fits as pf
-from RMutils.util_RM import measure_FDF_parms
-from RMutils.util_misc import interp_images,progress  
-from RMutils.util_RM import fits_make_lin_axis
-from RMtools_3D.do_RMsynth_3D import readFitsCube, readFreqFile
+import sys
 
+import astropy.io.fits as pf
+import numpy as np
+
+from RMtools_3D.do_RMsynth_3D import readFitsCube, readFreqFile
+from RMutils.util_misc import interp_images, progress
+from RMutils.util_RM import fits_make_lin_axis, measure_FDF_parms
 
 C = 2.997924538e8 # Speed of light [m/s]
 

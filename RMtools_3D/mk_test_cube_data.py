@@ -74,24 +74,20 @@ freq0_Hz = startFreq_Hz
 
 # END USER EDITS -------------------------------------------------------------#
 
-import os
-import sys
 import argparse
-import shutil
 import math as m
-import numpy as np
-import astropy.wcs.wcs as pw
+import os
+import shutil
+import sys
 
-from RMutils.util_misc import twodgaussian
-from RMutils.util_misc import create_IQU_spectra_burn
-from RMutils.util_misc import create_IQU_spectra_diff 
-from RMutils.util_misc import csv_read_to_list
-from RMutils.util_misc import split_repeat_lst
-from RMutils.util_misc import calc_stats
-from RMutils.util_misc import progress
-from RMutils.util_misc import extrap
-from RMutils.util_FITS import strip_fits_dims
-from RMutils.util_FITS import create_simple_fits_hdu
+import astropy.wcs.wcs as pw
+import numpy as np
+
+from RMutils.util_FITS import create_simple_fits_hdu, strip_fits_dims
+from RMutils.util_misc import (calc_stats, create_IQU_spectra_burn,
+                               create_IQU_spectra_diff, csv_read_to_list,
+                               extrap, progress, split_repeat_lst,
+                               twodgaussian)
 
 C = 2.99792458e8
 

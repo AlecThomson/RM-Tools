@@ -3,6 +3,7 @@
 import subprocess
 import unittest
 
+
 class test_cli(unittest.TestCase):
     def test_cli_rmsynth1d(self):
         """Tests that the CLI `rmsynth1d` runs."""

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from __future__ import (division, print_function, absolute_import,
+from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
 __all__ = ["function", "integrated_time"]
@@ -86,6 +86,7 @@ def integrated_time(x, axis=0, window=50, fast=False):
 
 if __name__ == "__main__":
     import time
+
     import acor
 
     N = 400000

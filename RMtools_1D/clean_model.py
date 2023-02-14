@@ -8,10 +8,13 @@ clean components produced by RMclean1D.
 Author: cvaneck, Aug 2021
 """
 
+import json
+
 import numpy as np
+
 from RMtools_1D.do_RMsynth_1D import readFile as read_freqFile
 from RMutils.util_misc import calculate_StokesI_model
-import json
+
 
 def calculate_QU_model(freqArr, phiArr, CCArr, lambdaSq_0, Iparms=None):
     """Compute the predicted Stokes Q and U values for each channel from a

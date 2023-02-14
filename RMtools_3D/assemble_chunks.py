@@ -9,13 +9,15 @@ output files from 3D RM synthesis back into larger cubes.
 @author: cvaneck
 """
 
-import numpy as np
 import argparse
-import astropy.io.fits as pf
 import os.path as path
-from math import ceil, floor, log10
-from glob import glob
 import re
+from glob import glob
+from math import ceil, floor, log10
+
+import astropy.io.fits as pf
+import numpy as np
+
 #from RMutils.util_misc import progress  
 
 

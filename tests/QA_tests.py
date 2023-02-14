@@ -15,14 +15,16 @@ QU fitting, which uses random numbers internally that can't be controlled.
 Created on Fri Oct 25 10:00:24 2019
 @author: Cameron Van Eck
 """
+import json
 import os
-import numpy as np
-import subprocess
 import shutil
+import subprocess
+import unittest
+
+import numpy as np
 from astropy.io import fits as pf
 from scipy.ndimage import gaussian_filter
-import unittest
-import json
+
 
 def Faraday_thin_complex_polarization(freq_array,RM,Polint,initial_angle):
     """freq_array = channel frequencies in Hz

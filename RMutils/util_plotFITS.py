@@ -17,21 +17,18 @@
 #=============================================================================#
 
 import math as m
-import numpy as np
+
 import astropy.io.fits as pf
 import astropy.wcs.wcs as pw
 import matplotlib as mpl
 import matplotlib.pyplot as plt
-from matplotlib.ticker import MultipleLocator
-from matplotlib.ticker import MaxNLocator
-from matplotlib.ticker import FuncFormatter
-from matplotlib.patches import Ellipse
-from matplotlib.patches import Polygon
+import numpy as np
+from matplotlib.patches import Ellipse, Polygon
+from matplotlib.ticker import FuncFormatter, MaxNLocator, MultipleLocator
 
 from .normalize import APLpyNormalize
-from .util_FITS import strip_fits_dims
-from .util_FITS import mkWCSDict
-from .util_misc  import calc_stats
+from .util_FITS import mkWCSDict, strip_fits_dims
+from .util_misc import calc_stats
 
 
 #-----------------------------------------------------------------------------#

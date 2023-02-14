@@ -34,17 +34,16 @@
 #                                                                             #
 #=============================================================================#
 
-import sys
-import os
-import time
 import math as m
-import numpy as np
+import os
+import sys
+import time
+
 import astropy.io.fits as pf
+import numpy as np
 
-from RMutils.util_RM import do_rmsynth_planes
-from RMutils.util_RM import get_rmsf_planes
 from RMutils.util_misc import interp_images
-
+from RMutils.util_RM import do_rmsynth_planes, get_rmsf_planes
 
 if sys.version_info.major == 2:
     print('RM-tools will no longer run with Python 2! Please use Python 3.')

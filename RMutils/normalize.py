@@ -1,9 +1,8 @@
 # The APLpyNormalize class is largely based on code provided by Sarah Graves.
 
+import matplotlib.cbook as cbook
 import numpy as np
 import numpy.ma as ma
-
-import matplotlib.cbook as cbook
 from matplotlib.colors import Normalize
 
 

@@ -3,11 +3,11 @@
 
 
 import logging
-import numpy as np
+
 import matplotlib.pyplot as pl
-from matplotlib.ticker import MaxNLocator, NullLocator
+import numpy as np
 from matplotlib.colors import LinearSegmentedColormap, colorConverter
-from matplotlib.ticker import ScalarFormatter
+from matplotlib.ticker import MaxNLocator, NullLocator, ScalarFormatter
 
 try:
     from scipy.ndimage import gaussian_filter

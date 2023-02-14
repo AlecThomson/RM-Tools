@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""Common procedures used with RM-synthesis scripts."""
+
 #=============================================================================#
 #                                                                             #
 # NAME:     util_RM.py                                                        #
@@ -60,24 +63,16 @@
 #                                                                             #
 #=============================================================================#
 
-import sys
 import math as m
+import sys
+
 import numpy as np
-from scipy.stats import kurtosis
-from scipy.stats import skew
-from scipy.stats import skewtest
-from scipy.stats import kurtosistest
-from scipy.stats import anderson
-from scipy.stats import kstest
-from scipy.stats import norm
+from scipy.stats import (anderson, kstest, kurtosis, kurtosistest, norm, skew,
+                         skewtest)
 
 from RMutils.mpfit import mpfit
-from RMutils.util_misc import progress
-from RMutils.util_misc import toscalar
-from RMutils.util_misc import calc_parabola_vertex
-from RMutils.util_misc import create_pqu_spectra_burn
-from RMutils.util_misc import calc_mom2_FDF
-from RMutils.util_misc import MAD
+from RMutils.util_misc import (MAD, calc_mom2_FDF, calc_parabola_vertex,
+                               create_pqu_spectra_burn, progress, toscalar)
 
 # Constants
 C = 2.99792458e8
@@ -1666,6 +1661,7 @@ def plot_complexity(freqArr_Hz, qArr, uArr, dqArr, duArr, fracPol, psi0_deg,
 
     import matplotlib.pyplot as plt
     from matplotlib.ticker import MaxNLocator
+
     from .util_plotTk import plot_pqu_vs_lamsq_ax
 
     lamSqArr_m2 = np.power(C/freqArr_Hz, 2.0)

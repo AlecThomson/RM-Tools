@@ -33,10 +33,11 @@
 #                                                                             #
 #=============================================================================#
  
-import sys
-import os
 #import time
 import argparse
+import os
+import sys
+
 #import pdb
 
 if sys.version_info.major == 2:
@@ -44,11 +45,13 @@ if sys.version_info.major == 2:
     exit()
 
 
-from astropy.io import fits
-from RMtools_3D.make_freq_file import get_freq_array
-from RMtools_1D.do_RMsynth_1D import run_rmsynth, saveOutput
 import numpy as np
 from astropy import wcs
+from astropy.io import fits
+
+from RMtools_1D.do_RMsynth_1D import run_rmsynth, saveOutput
+from RMtools_3D.make_freq_file import get_freq_array
+
 C = 2.997924538e8 # Speed of light [m/s]
 
 
