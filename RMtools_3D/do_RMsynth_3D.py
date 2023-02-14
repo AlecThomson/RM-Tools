@@ -38,12 +38,11 @@ import math as m
 import os
 import sys
 import time
-
 from pathlib import Path
+
 import astropy.io.fits as pf
 
 from RMutils.util_misc import interp_images
-
 
 if sys.version_info.major == 2:
     raise PythonVersionError('RM-tools will no longer run with Python 2! Please use Python 3.')

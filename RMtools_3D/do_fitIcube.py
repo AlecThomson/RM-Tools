@@ -48,7 +48,8 @@ import numpy as np
 from RMtools_3D.do_RMsynth_3D import readFitsCube
 from RMtools_3D.make_freq_file import get_freq_array
 from RMutils.util_FITS import strip_fits_dims
-from RMutils.util_misc import MAD, calculate_StokesI_model, fit_StokesI_model, progress
+from RMutils.util_misc import (MAD, calculate_StokesI_model, fit_StokesI_model,
+                               progress)
 
 # -----------------------------------------------------------------------------#
 

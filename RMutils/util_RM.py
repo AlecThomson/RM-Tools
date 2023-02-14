@@ -65,20 +65,15 @@
 
 import math as m
 import sys
-from typing import Union, Tuple
+from typing import Tuple, Union
 
 import numpy as np
-from scipy.stats import anderson, kstest, kurtosis, kurtosistest, norm, skew, skewtest
+from scipy.stats import (anderson, kstest, kurtosis, kurtosistest, norm, skew,
+                         skewtest)
 
 from RMutils.mpfit import mpfit
-from RMutils.util_misc import (
-    MAD,
-    calc_mom2_FDF,
-    calc_parabola_vertex,
-    create_pqu_spectra_burn,
-    progress,
-    toscalar,
-)
+from RMutils.util_misc import (MAD, calc_mom2_FDF, calc_parabola_vertex,
+                               create_pqu_spectra_burn, progress, toscalar)
 
 # Constants
 C = 2.99792458e8
