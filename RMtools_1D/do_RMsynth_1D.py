@@ -45,16 +45,31 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy.interpolate import interp1d
 
-from RMutils.util_misc import (MAD, calculate_StokesI_model,
-                               create_frac_spectra, nanmedian, poly5,
-                               powerlaw_poly5, renormalize_StokesI_model,
-                               toscalar)
-from RMutils.util_plotTk import (CustomNavbar, plot_complexity_fig,
-                                 plot_Ipqu_spectra_fig, plot_rmsf_fdf_fig,
-                                 plot_rmsIQU_vs_nu_ax)
-from RMutils.util_RM import (do_rmsynth, do_rmsynth_planes, get_rmsf_planes,
-                             measure_fdf_complexity, measure_FDF_parms,
-                             measure_qu_complexity)
+from RMutils.util_misc import (
+    MAD,
+    calculate_StokesI_model,
+    create_frac_spectra,
+    nanmedian,
+    poly5,
+    powerlaw_poly5,
+    renormalize_StokesI_model,
+    toscalar,
+)
+from RMutils.util_plotTk import (
+    CustomNavbar,
+    plot_complexity_fig,
+    plot_Ipqu_spectra_fig,
+    plot_rmsf_fdf_fig,
+    plot_rmsIQU_vs_nu_ax,
+)
+from RMutils.util_RM import (
+    do_rmsynth,
+    do_rmsynth_planes,
+    get_rmsf_planes,
+    measure_fdf_complexity,
+    measure_FDF_parms,
+    measure_qu_complexity,
+)
 
 if sys.version_info.major == 2:
     print("RM-tools will no longer run with Python 2! Please use Python 3.")

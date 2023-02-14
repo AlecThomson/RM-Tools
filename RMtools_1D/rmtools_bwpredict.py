@@ -39,9 +39,11 @@ import sys
 import matplotlib.pyplot as plt
 import numpy as np
 
-from RMtools_1D.rmtools_bwdepol import (adjoint_theory,
-                                        estimate_channel_bandwidth,
-                                        plot_adjoint_info)
+from RMtools_1D.rmtools_bwdepol import (
+    adjoint_theory,
+    estimate_channel_bandwidth,
+    plot_adjoint_info,
+)
 
 if sys.version_info.major == 2:
     print("RM-tools will no longer run with Python 2! Please use Python 3.")

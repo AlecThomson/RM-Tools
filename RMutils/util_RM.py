@@ -68,12 +68,17 @@ import sys
 from typing import Tuple, Union
 
 import numpy as np
-from scipy.stats import (anderson, kstest, kurtosis, kurtosistest, norm, skew,
-                         skewtest)
+from scipy.stats import anderson, kstest, kurtosis, kurtosistest, norm, skew, skewtest
 
 from RMutils.mpfit import mpfit
-from RMutils.util_misc import (MAD, calc_mom2_FDF, calc_parabola_vertex,
-                               create_pqu_spectra_burn, progress, toscalar)
+from RMutils.util_misc import (
+    MAD,
+    calc_mom2_FDF,
+    calc_parabola_vertex,
+    create_pqu_spectra_burn,
+    progress,
+    toscalar,
+)
 
 # Constants
 C = 2.99792458e8
@@ -85,9 +90,9 @@ def do_rmsynth_planes(
     dataU: np.ndarray,
     lambdaSqArr_m2: np.ndarray,
     phiArr_radm2: np.ndarray,
-    weightArr: Union[None, np.ndarray]=None,
-    lam0Sq_m2: Union[None, np.ndarray]=None,
-    nBits: int=32,
+    weightArr: Union[None, np.ndarray] = None,
+    lam0Sq_m2: Union[None, np.ndarray] = None,
+    nBits: int = 32,
 ):
     """Perform RM-synthesis on Stokes Q and U cubes (1,2 or 3D). This version
     of the routine loops through spectral planes and is faster than the pixel-

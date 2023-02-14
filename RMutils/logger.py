@@ -15,9 +15,7 @@ ch.setLevel(logging.DEBUG)
 
 
 # Create formatter
-formatter = logging.Formatter(
-    "%(levelname)s %(module)s - %(funcName)s: %(message)s"
-)
+formatter = logging.Formatter("%(levelname)s %(module)s - %(funcName)s: %(message)s")
 
 # Add formatter to ch
 ch.setFormatter(formatter)

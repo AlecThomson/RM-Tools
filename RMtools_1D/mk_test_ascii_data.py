@@ -53,9 +53,14 @@ import sys
 
 import numpy as np
 
-from RMutils.util_misc import (calc_stats, create_IQU_spectra_burn,
-                               create_IQU_spectra_diff, csv_read_to_list,
-                               extrap, split_repeat_lst)
+from RMutils.util_misc import (
+    calc_stats,
+    create_IQU_spectra_burn,
+    create_IQU_spectra_diff,
+    csv_read_to_list,
+    extrap,
+    split_repeat_lst,
+)
 
 C = 2.99792458e8
 

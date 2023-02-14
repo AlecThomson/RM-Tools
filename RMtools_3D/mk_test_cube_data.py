@@ -84,10 +84,16 @@ import astropy.wcs.wcs as pw
 import numpy as np
 
 from RMutils.util_FITS import create_simple_fits_hdu, strip_fits_dims
-from RMutils.util_misc import (calc_stats, create_IQU_spectra_burn,
-                               create_IQU_spectra_diff, csv_read_to_list,
-                               extrap, progress, split_repeat_lst,
-                               twodgaussian)
+from RMutils.util_misc import (
+    calc_stats,
+    create_IQU_spectra_burn,
+    create_IQU_spectra_diff,
+    csv_read_to_list,
+    extrap,
+    progress,
+    split_repeat_lst,
+    twodgaussian,
+)
 
 C = 2.99792458e8
 
