@@ -65,6 +65,7 @@
 
 import math as m
 import sys
+from typing import Union, Tuple
 
 import numpy as np
 from scipy.stats import anderson, kstest, kurtosis, kurtosistest, norm, skew, skewtest
@@ -85,15 +86,13 @@ C = 2.99792458e8
 
 # -----------------------------------------------------------------------------#
 def do_rmsynth_planes(
-    dataQ,
-    dataU,
-    lambdaSqArr_m2,
-    phiArr_radm2,
-    weightArr=None,
-    lam0Sq_m2=None,
-    nBits=32,
-    verbose=False,
-    log=print,
+    dataQ: np.ndarray,
+    dataU: np.ndarray,
+    lambdaSqArr_m2: np.ndarray,
+    phiArr_radm2: np.ndarray,
+    weightArr: Union[None, np.ndarray]=None,
+    lam0Sq_m2: Union[None, np.ndarray]=None,
+    nBits: int=32,
 ):
     """Perform RM-synthesis on Stokes Q and U cubes (1,2 or 3D). This version
     of the routine loops through spectral planes and is faster than the pixel-
