@@ -312,8 +312,8 @@ class test_RMtools(unittest.TestCase):
             "values[2] differs from expectation.",
         )
         self.assertTrue(
-            abs(mDict["chiSqRed"] - 1.09) / 1.09 < 0.01,
-            "chiSqRed differs from expectation.",
+            abs(mDict["chi_sqRed"] - 1.09) / 1.09 < 0.01,
+            "chi_sqRed differs from expectation.",
         )
         self.assertTrue(
             abs(mDict["BIC"] + 558) / 558 < 0.01, "BIC differs from expectation."

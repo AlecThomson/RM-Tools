@@ -16,13 +16,13 @@ from RMtools_1D.do_RMsynth_1D import readFile as read_freqFile
 from RMutils.util_misc import calculate_StokesI_model
 
 
-def calculate_QU_model(freqArr, phiArr, CCArr, lambdaSq_0, Iparms=None):
+def calculate_QU_model(freq_arr, phi_arr, CC_arr, lambda_sq_0, Iparms=None):
     """Compute the predicted Stokes Q and U values for each channel from a
     set of clean components (CCs), with optional accounting for Stokes I model.
-    Inputs: freqArr: array of channel frequencies, in Hz
-            phiArr: array of Faraday depth values for the clean component array
+    Inputs: freq_arr: array of channel frequencies, in Hz
+            phi_arr: array of Faraday depth values for the clean component array
             CCarr: array of (complex) clean components.
-            lambdaSq_0: scalar value of the reference wavelength squared to
+            lambda_sq_0: scalar value of the reference wavelength squared to
                         which all the polarization angles are referenced.
             Iparms: list of Stokes I polynomial values. If None, all Stokes I
                     values will be set to 1.
@@ -34,10 +34,10 @@ def calculate_QU_model(freqArr, phiArr, CCArr, lambdaSq_0, Iparms=None):
     """
 
     C = 2.997924538e8  # Speed of light [m/s]
-    lambdaSqArr_m2 = np.power(C / freqArr, 2.0)
+    lambda_sq_arr_m2 = np.power(C / freq_arr, 2.0)
 
-    a = lambdaSqArr_m2 - lambdaSq_0
-    quarr = np.sum(CCArr[:, np.newaxis] * np.exp(2.0j * np.outer(phiArr, a)), axis=0)
+    a = lambda_sq_arr_m2 - lambda_sq_0
+    quarr = np.sum(CC_arr[:, np.newaxis] * np.exp(2.0j * np.outer(phi_arr, a)), axis=0)
 
     fitDict = {}
     # TODO: Pass in fit function, which is currently not output by rmsynth1d
@@ -46,16 +46,16 @@ def calculate_QU_model(freqArr, phiArr, CCArr, lambdaSq_0, Iparms=None):
         fitDict["p"] = Iparms
     else:
         fitDict["p"] = [0, 0, 0, 0, 0, 1]
-    fitDict["reference_frequency_Hz"] = C / np.sqrt(lambdaSq_0)
-    StokesI_model = calculate_StokesI_model(fitDict, freqArr)
+    fitDict["reference_frequency_Hz"] = C / np.sqrt(lambda_sq_0)
+    StokesI_model = calculate_StokesI_model(fitDict, freq_arr)
 
     QUarr = StokesI_model * quarr
 
     return QUarr, StokesI_model
 
 
-def save_model(filename, freqArr, Imodel, QUarr):
-    np.savetxt(filename, list(zip(freqArr, Imodel, QUarr.real, QUarr.imag)))
+def save_model(filename, freq_arr, Imodel, QUarr):
+    np.savetxt(filename, list(zip(freq_arr, Imodel, QUarr.real, QUarr.imag)))
 
 
 def read_files(freqfile, rmSynthfile, CCfile):
@@ -68,24 +68,24 @@ def read_files(freqfile, rmSynthfile, CCfile):
             rmSynthfile (str): filename of RMsynth JSON output.
             CCfile (str): filename of clean component model file (_FDFmodel.dat)/
 
-    Returns: phiArr: array of Faraday depth values for CC spectrum
+    Returns: phi_arr: array of Faraday depth values for CC spectrum
             CCarr: array of (complex) clean components
             Iparms: list of Stokes I model parameters.
-            lambdaSq_0: scalar value of lambda^2_0, in m^2.
+            lambda_sq_0: scalar value of lambda^2_0, in m^2.
     """
 
-    phiArr, CCreal, CCimag = np.loadtxt(CCfile, unpack=True, dtype="float")
-    CCArr = CCreal + 1j * CCimag
+    phi_arr, CCreal, CCimag = np.loadtxt(CCfile, unpack=True, dtype="float")
+    CC_arr = CCreal + 1j * CCimag
 
     # TODO: change filename to JSON if needed?
     synth_mDict = json.load(open(rmSynthfile, "r"))
     Iparms = [float(x) for x in synth_mDict["polyCoeffs"].split(",")]
-    lambdaSq_0 = synth_mDict["lam0Sq_m2"]
+    lambda_sq_0 = synth_mDict["lam0_sq_m2"]
 
     data = read_freqFile(freqfile, 64, verbose=False, debug=False)
-    freqArr = data[0]
+    freq_arr = data[0]
 
-    return phiArr, CCArr, Iparms, lambdaSq_0, freqArr
+    return phi_arr, CC_arr, Iparms, lambda_sq_0, freq_arr
 
 
 def main():
@@ -96,7 +96,7 @@ def main():
     import argparse
 
     descStr = """
-    Generate Stokes QU model based on clean components and (optional) 
+    Generate Stokes QU model based on clean components and (optional)
     Stokes I model. Requires inputs to rmsynth1D and outputs of rmsynth1d and
     rmclean1d. Saves ASCII file containing arrays of IQU for each channel.
     """
@@ -131,12 +131,12 @@ def main():
     )
     args = parser.parse_args()
 
-    phiArr, CCArr, Iparms, lambdaSq_0, freqArr = read_files(
+    phi_arr, CC_arr, Iparms, lambda_sq_0, freq_arr = read_files(
         args.freqfile, args.rmSynthfile, args.CCfile
     )
-    QUarr, Imodel = calculate_QU_model(freqArr, phiArr, CCArr, lambdaSq_0, Iparms)
+    QUarr, Imodel = calculate_QU_model(freq_arr, phi_arr, CC_arr, lambda_sq_0, Iparms)
 
-    save_model(args.outfile, freqArr, Imodel, QUarr)
+    save_model(args.outfile, freq_arr, Imodel, QUarr)
 
 
 if __name__ == "__main__":

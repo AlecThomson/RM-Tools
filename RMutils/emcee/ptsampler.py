@@ -211,7 +211,7 @@ class PTSampler(Sampler):
         here.  For example, :class:`multi.Pool` will do.
 
     :param betas: (optional)
-        Array giving the inverse temperatures, :math:`\\beta=1/T`,
+        _array giving the inverse temperatures, :math:`\\beta=1/T`,
         used in the ladder.  The default is chosen so that a Gaussian
         posterior in the given number of dimensions will have a 0.25
         tswap acceptance rate.

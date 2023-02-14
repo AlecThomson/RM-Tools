@@ -157,16 +157,16 @@ def l2_to_freq_array(lambda_square_array):
     return np.sqrt(f)
 
 
-def adjoint_theory(adjoint_vars, dQUArr, show_progress=False, log=print):
+def adjoint_theory(adjoint_vars, dQU_arr, show_progress=False, log=print):
     """Calculates the theoretical sensitivity and noise for the adjoint method
 
     Parameters
     ----------
     adjoint_vars: list
                   list like object containing organized as
-                  [widths_Hz, freqArr_Hz, phiArr_radm2, K, weightArr]
+                  [widths_Hz, freq_arr_Hz, phi_arr_radm2, K, weight_arr]
 
-    dQUArr: array like
+    dQU_arr: array like
             array containing the error in Stokes Q, and U
 
     show_progress: Boolean
@@ -178,17 +178,17 @@ def adjoint_theory(adjoint_vars, dQUArr, show_progress=False, log=print):
     Returns
     -------
     adjoint_info: list
-                  list containing phiArr, and the theoretical noise and
+                  list containing phi_arr, and the theoretical noise and
                   sensitivity organized as
-                  [phiArr_radm2, adjoint_sens, adjoint_noise]
+                  [phi_arr_radm2, adjoint_sens, adjoint_noise]
 
     """
 
-    widths_Hz, freqArr_Hz, phiArr_radm2, K, weightArr = adjoint_vars
-    adjoint_noise = np.ones(len(phiArr_radm2))
-    adjoint_sens = np.ones(len(phiArr_radm2))
+    widths_Hz, freq_arr_Hz, phi_arr_radm2, K, weight_arr = adjoint_vars
+    adjoint_noise = np.ones(len(phi_arr_radm2))
+    adjoint_sens = np.ones(len(phi_arr_radm2))
 
-    nPhi = len(phiArr_radm2)
+    nPhi = len(phi_arr_radm2)
     if show_progress:
         log("Calculating Theoretical Sensitivity & Noise")
         progress(40, 0)
@@ -196,16 +196,16 @@ def adjoint_theory(adjoint_vars, dQUArr, show_progress=False, log=print):
         if show_progress:
             progress(40, ((i + 1) * 100.0 / nPhi))
 
-        r_i = rotation_operator(widths_Hz, freqArr_Hz, phiArr_radm2[i])
+        r_i = rotation_operator(widths_Hz, freq_arr_Hz, phi_arr_radm2[i])
         adjoint_noise2 = (
-            np.sum((weightArr * dQUArr) ** 2 * np.abs(r_i) ** 2)
-            / np.sum(weightArr) ** 2
+            np.sum((weight_arr * dQU_arr) ** 2 * np.abs(r_i) ** 2)
+            / np.sum(weight_arr) ** 2
         )  # equation 34
         adjoint_noise[i] = np.sqrt(adjoint_noise2)
 
-        adjoint_sens[i] = K * np.sum(weightArr * (np.abs(r_i) ** 2))
+        adjoint_sens[i] = K * np.sum(weight_arr * (np.abs(r_i) ** 2))
 
-    adjoint_info = [phiArr_radm2, adjoint_sens, adjoint_noise]
+    adjoint_info = [phi_arr_radm2, adjoint_sens, adjoint_noise]
     return adjoint_info
 
 
@@ -214,10 +214,10 @@ def plot_adjoint_info(mylist, units="Jy/beam"):
     fig, ax = plt.subplots(2, dpi=100, figsize=(12, 8))
     fig.subplots_adjust(wspace=0.4, hspace=0.4)
 
-    [phiArr_radm2, adjoint_sens, adjoint_noise] = mylist
+    [phi_arr_radm2, adjoint_sens, adjoint_noise] = mylist
 
     ax[1].plot(
-        phiArr_radm2,
+        phi_arr_radm2,
         adjoint_sens / adjoint_noise * np.max(adjoint_noise),
     )
     ax[1].set_xlabel("$\phi$ (rad m$^{-2}$)")
@@ -225,7 +225,7 @@ def plot_adjoint_info(mylist, units="Jy/beam"):
     ax[1].set_title("Theoretical S:N after bandwidth depolarization")
     # plot 2
     ax[0].plot(
-        phiArr_radm2,
+        phi_arr_radm2,
         adjoint_sens,
     )
     ax[0].set_xlabel("$\phi$ (rad m$^{-2}$)")
@@ -285,7 +285,7 @@ def analytical_chan_pol(f, ban, phi, xi_knot=0, p=1):
     return avg_p_tilda
 
 
-def bwdepol_simulation(peak_rm, freqArr_Hz, widths_Hz):
+def bwdepol_simulation(peak_rm, freq_arr_Hz, widths_Hz):
     """Farday thin simulated source of the same RM as the measured source,
     with unit intensity
 
@@ -294,7 +294,7 @@ def bwdepol_simulation(peak_rm, freqArr_Hz, widths_Hz):
     peak_rm: float
              peak in Faraday depth value (in rad/m^2) for sim
 
-    freqArr_hz: array like
+    freq_arr_hz: array like
                 frequency array (in Hz)
 
     width_Hz: float
@@ -308,15 +308,15 @@ def bwdepol_simulation(peak_rm, freqArr_Hz, widths_Hz):
 
     """
     if widths_Hz == None:
-        widths_Hz = estimate_channel_bandwidth(freqArr_Hz)
+        widths_Hz = estimate_channel_bandwidth(freq_arr_Hz)
 
-    p_tilda = analytical_chan_pol(freqArr_Hz, widths_Hz, peak_rm)
-    size_f = len(freqArr_Hz)
+    p_tilda = analytical_chan_pol(freq_arr_Hz, widths_Hz, peak_rm)
+    size_f = len(freq_arr_Hz)
     dq = np.ones(size_f)
     du = np.ones(size_f)
 
     # format  = [freq_Hz, q, u,  dq, du]
-    data = [freqArr_Hz, np.real(p_tilda), np.imag(p_tilda), dq, du]
+    data = [freq_arr_Hz, np.real(p_tilda), np.imag(p_tilda), dq, du]
     return data
 
 
@@ -386,8 +386,8 @@ def gauss(p, peak_rm):
 
 def bwdepol_plot_RMSF_ax(
     ax,
-    phiArr,
-    RMSFArr,
+    phi_arr,
+    RMSF_arr,
     peak_rm,
     fwhmRMSF=None,
     axisYright=False,
@@ -405,20 +405,20 @@ def bwdepol_plot_RMSF_ax(
         ax.xaxis.set_label_position("top")
 
     # Plot the RMSF
-    ax.step(phiArr, RMSFArr.real, where="mid", color="tab:blue", lw=0.5, label="Real")
+    ax.step(phi_arr, RMSF_arr.real, where="mid", color="tab:blue", lw=0.5, label="Real")
     ax.step(
-        phiArr, RMSFArr.imag, where="mid", color="tab:red", lw=0.5, label="Imaginary"
+        phi_arr, RMSF_arr.imag, where="mid", color="tab:red", lw=0.5, label="Imaginary"
     )
-    ax.step(phiArr, np.abs(RMSFArr), where="mid", color="k", lw=1.0, label="PI")
+    ax.step(phi_arr, np.abs(RMSF_arr), where="mid", color="k", lw=1.0, label="PI")
     ax.axhline(0, color="grey")
     if doTitle:
         ax.text(0.05, 0.84, "RMSF", transform=ax.transAxes)
 
     # Plot the Gaussian fit
     if fwhmRMSF is not None:
-        yGauss = np.max(np.abs(RMSFArr)) * gauss([1.0, 0.0, fwhmRMSF], peak_rm)(phiArr)
+        yGauss = np.max(np.abs(RMSF_arr)) * gauss([1.0, 0.0, fwhmRMSF], peak_rm)(phi_arr)
         ax.plot(
-            phiArr,
+            phi_arr,
             yGauss,
             color="g",
             marker="None",
@@ -433,8 +433,8 @@ def bwdepol_plot_RMSF_ax(
     # Scaling
     ax.yaxis.set_major_locator(MaxNLocator(4))
     ax.xaxis.set_major_locator(MaxNLocator(4))
-    xRange = np.nanmax(phiArr) - np.nanmin(phiArr)
-    ax.set_xlim(np.nanmin(phiArr) - xRange * 0.01, np.nanmax(phiArr) + xRange * 0.01)
+    xRange = np.nanmax(phi_arr) - np.nanmin(phi_arr)
+    ax.set_xlim(np.nanmin(phi_arr) - xRange * 0.01, np.nanmax(phi_arr) + xRange * 0.01)
     ax.set_ylabel("Normalised Units")
     ax.set_xlabel("$\phi$ rad m$^{-2}$")
     ax.axhline(0, color="grey")
@@ -445,10 +445,10 @@ def bwdepol_plot_RMSF_ax(
 
 
 def bwdepol_plot_rmsf_fdf_fig(
-    phiArr,
+    phi_arr,
     FDF,
-    phi2Arr,
-    RMSFArr,
+    phi2_arr,
+    RMSF_arr,
     peak_rm,
     fwhmRMSF=None,
     gaussParm=[],
@@ -465,8 +465,8 @@ def bwdepol_plot_rmsf_fdf_fig(
     ax1 = fig.add_subplot(211)
     bwdepol_plot_RMSF_ax(
         ax=ax1,
-        phiArr=phi2Arr,
-        RMSFArr=RMSFArr,
+        phi_arr=phi2_arr,
+        RMSF_arr=RMSF_arr,
         peak_rm=peak_rm,
         fwhmRMSF=fwhmRMSF,
         doTitle=True,
@@ -477,8 +477,8 @@ def bwdepol_plot_rmsf_fdf_fig(
     ax2 = fig.add_subplot(212, sharex=ax1)
     plot_dirtyFDF_ax(
         ax=ax2,
-        phiArr=phiArr,
-        FDFArr=FDF,
+        phi_arr=phi_arr,
+        FDF_arr=FDF,
         gaussParm=gaussParm,
         vLine=vLine,
         doTitle=True,
@@ -490,13 +490,13 @@ def bwdepol_plot_rmsf_fdf_fig(
 # -----------------------------------------------------------------------------#
 # modified for adjoint
 def bwdepol_get_rmsf_planes(
-    freqArr_Hz,
+    freq_arr_Hz,
     widths_Hz,
-    phiArr_radm2,
+    phi_arr_radm2,
     peak_rm,
-    weightArr=None,
-    mskArr=None,
-    lam0Sq_m2=None,
+    weight_arr=None,
+    msk_arr=None,
+    lam0_sq_m2=None,
     double=True,
     fitRMSF=True,
     fitRMSFreal=False,
@@ -519,11 +519,11 @@ def bwdepol_get_rmsf_planes(
 
     Parameters
     ----------
-    freqArr_Hz      ... vector of frequency values
-    phiArr_radm2    ... vector of trial Faraday depth values
-    weightArr       ... vector of weights, default [None] is no weighting
-    maskArr         ... cube of mask values used to shape return cube [None]
-    lam0Sq_m2       ... force a reference lambda^2 value (def=calculate) [None]
+    freq_arr_Hz      ... vector of frequency values
+    phi_arr_radm2    ... vector of trial Faraday depth values
+    weight_arr       ... vector of weights, default [None] is no weighting
+    mask_arr         ... cube of mask values used to shape return cube [None]
+    lam0_sq_m2       ... force a reference lambda^2 value (def=calculate) [None]
     double          ... pad the Faraday depth to double-size [True]
     fitRMSF         ... fit the main lobe of the RMSF with a Gaussian [False]
     fitRMSFreal     ... fit RMSF.real, rather than abs(RMSF) [False]
@@ -538,13 +538,13 @@ def bwdepol_get_rmsf_planes(
               a cube (1, 2 or 3D) of RMSF spectra based on the shape of a
               boolean mask array
 
-    phi2Arr: array
+    phi2_arr: array
              array of the Faraday Depth (in rad/m^2)
 
-    fwhmRMSFArr: array
+    fwhmRMSF_arr: array
                  fwhm of the RMSF
 
-    statArr: array
+    stat_arr: array
 
     """
 
@@ -554,56 +554,56 @@ def bwdepol_get_rmsf_planes(
 
     # For cleaning the RMSF should extend by 1/2 on each side in phi-space
     if double:
-        nPhi = phiArr_radm2.shape[0]
+        nPhi = phi_arr_radm2.shape[0]
         nExt = np.ceil(nPhi / 2.0)
-        resampIndxArr = np.arange(2.0 * nExt + nPhi) - nExt
-        phi2Arr = extrap(resampIndxArr, np.arange(nPhi, dtype="int"), phiArr_radm2)
+        resampIndx_arr = np.arange(2.0 * nExt + nPhi) - nExt
+        phi2_arr = extrap(resampIndx_arr, np.arange(nPhi, dtype="int"), phi_arr_radm2)
     else:
-        phi2Arr = phiArr_radm2
+        phi2_arr = phi_arr_radm2
 
     # Set the weight array
-    if weightArr is None:
-        weightArr = np.ones(freqArr_Hz.shape, dtype=dtFloat)
-    weightArr = np.where(np.isnan(weightArr), 0.0, weightArr)
+    if weight_arr is None:
+        weight_arr = np.ones(freq_arr_Hz.shape, dtype=dtFloat)
+    weight_arr = np.where(np.isnan(weight_arr), 0.0, weight_arr)
 
     # Set the mask array (default to 1D, no masked channels)
-    if mskArr is None:
-        mskArr = np.zeros_like(freqArr_Hz, dtype="bool")
+    if msk_arr is None:
+        msk_arr = np.zeros_like(freq_arr_Hz, dtype="bool")
         nDims = 1
     else:
-        mskArr = mskArr.astype("bool")
-        nDims = len(mskArr.shape)
+        msk_arr = msk_arr.astype("bool")
+        nDims = len(msk_arr.shape)
 
     # Sanity checks on array sizes
-    if not weightArr.shape == freqArr_Hz.shape:
+    if not weight_arr.shape == freq_arr_Hz.shape:
         log("Err: wavelength^2 and weight arrays must be the same shape.")
         return None, None, None, None
     if not nDims <= 3:
         log("Err: mask dimensions must be <= 3.")
         return None, None, None, None
-    if not mskArr.shape[0] == freqArr_Hz.shape[0]:
+    if not msk_arr.shape[0] == freq_arr_Hz.shape[0]:
         log("Err: mask depth does not match lambda^2 vector (%d vs %d).", end=" ")
-        (mskArr.shape[0], freqArr_Hz.shape[-1])
+        (msk_arr.shape[0], freq_arr_Hz.shape[-1])
         log("     Check that the mask is in [z, y, x] order.")
         return None, None, None, None
 
     # Reshape the mask array to 3 dimensions
     if nDims == 1:
-        mskArr = np.reshape(mskArr, (mskArr.shape[0], 1, 1))
+        msk_arr = np.reshape(msk_arr, (msk_arr.shape[0], 1, 1))
     elif nDims == 2:
-        mskArr = np.reshape(mskArr, (mskArr.shape[0], mskArr.shape[1], 1))
+        msk_arr = np.reshape(msk_arr, (msk_arr.shape[0], msk_arr.shape[1], 1))
 
     # Initialise the complex RM Spread Function cube
-    nX = mskArr.shape[-1]
-    nY = mskArr.shape[-2]
+    nX = msk_arr.shape[-1]
+    nY = msk_arr.shape[-2]
     nPix = nX * nY
-    nPhi = phi2Arr.shape[0]
+    nPhi = phi2_arr.shape[0]
     RMSFcube = np.ones((nPhi, nY, nX), dtype=dtComplex)
 
     # If full planes are flagged then set corresponding weights to zero
-    xySum = np.sum(np.sum(mskArr, axis=1), axis=1)
+    xySum = np.sum(np.sum(msk_arr, axis=1), axis=1)
     mskPlanes = np.where(xySum == nPix, 0, 1)
-    weightArr *= mskPlanes
+    weight_arr *= mskPlanes
 
     # Check for isolated clumps of flags (# flags in a plane not 0 or nPix)
     flagTotals = np.unique(xySum).tolist()
@@ -616,23 +616,23 @@ def bwdepol_get_rmsf_planes(
     except Exception:
         pass
 
-    lambdaSqArr_m2 = np.power(C / freqArr_Hz, 2.0)
+    lambda_sq_arr_m2 = np.power(C / freq_arr_Hz, 2.0)
     # Calculate the analytical FWHM width of the main lobe
     fwhmRMSF = (
-        2.0 * m.sqrt(3.0) / (np.nanmax(lambdaSqArr_m2) - np.nanmin(lambdaSqArr_m2))
+        2.0 * m.sqrt(3.0) / (np.nanmax(lambda_sq_arr_m2) - np.nanmin(lambda_sq_arr_m2))
     )
 
     # Create simulated data set with simRM = peakRM
-    RMSF_data = bwdepol_simulation(peak_rm, freqArr_Hz, widths_Hz)
-    # RMSFArr = fdf from bwdepol_simulation
-    RMSFArr, _, _ = do_adjoint_rmsynth_planes(
-        freqArr_Hz,
+    RMSF_data = bwdepol_simulation(peak_rm, freq_arr_Hz, widths_Hz)
+    # RMSF_arr = fdf from bwdepol_simulation
+    RMSF_arr, _, _ = do_adjoint_rmsynth_planes(
+        freq_arr_Hz,
         RMSF_data[1],
         RMSF_data[2],
-        phiArr_radm2,
+        phi_arr_radm2,
         widths_Hz=widths_Hz,
-        weightArr=weightArr,
-        lam0Sq_m2=lam0Sq_m2,
+        weight_arr=weight_arr,
+        lam0_sq_m2=lam0_sq_m2,
         verbose=verbose,
         log=print,
     )
@@ -640,9 +640,8 @@ def bwdepol_get_rmsf_planes(
     # Fit the RMSF main lobe
     fitStatus = -1
     if fitRMSF:
-        if verbose:
-            log("Fitting Gaussian to the main lobe.")
-        mp = fit_rmsf(phi2Arr, np.abs(RMSFArr) / np.max(np.abs(RMSFArr)))
+        logger.info("Fitting Gaussian to the main lobe.")
+        mp = fit_rmsf(phi2_arr, np.abs(RMSF_arr) / np.max(np.abs(RMSF_arr)))
         if mp is None or mp.status < 1:
             pass
             log("Err: failed to fit the RMSF.")
@@ -652,28 +651,28 @@ def bwdepol_get_rmsf_planes(
             fitStatus = mp.status
 
     # Replicate along X and Y axes
-    RMSFcube = np.tile(RMSFArr[:, np.newaxis, np.newaxis], (1, nY, nX))
-    fwhmRMSFArr = np.ones((nY, nX), dtype=dtFloat) * fwhmRMSF
-    statArr = np.ones((nY, nX), dtype="int") * fitStatus
+    RMSFcube = np.tile(RMSF_arr[:, np.newaxis, np.newaxis], (1, nY, nX))
+    fwhmRMSF_arr = np.ones((nY, nX), dtype=dtFloat) * fwhmRMSF
+    stat_arr = np.ones((nY, nX), dtype="int") * fitStatus
 
     # Remove redundant dimensions
-    fwhmRMSFArr = np.squeeze(fwhmRMSFArr)
-    statArr = np.squeeze(statArr)
+    fwhmRMSF_arr = np.squeeze(fwhmRMSF_arr)
+    stat_arr = np.squeeze(stat_arr)
     RMSFcube = RMSFcube.reshape(-1)
 
-    return RMSFcube, phi2Arr, fwhmRMSFArr, statArr
+    return RMSFcube, phi2_arr, fwhmRMSF_arr, stat_arr
 
 
 # -----------------------------------------------------------------------------#
 def bwdepol_measure_FDF_parms(
     FDF,
-    phiArr,
+    phi_arr,
     fwhmRMSF,
     adjoint_sens,
     adjoint_noise,
     dFDF=None,
-    lamSqArr_m2=None,
-    lam0Sq=None,
+    lam_sq_arr_m2=None,
+    lam0_sq=None,
     snrDoBiasCorrect=5.0,
 ):
     """
@@ -707,7 +706,7 @@ def bwdepol_measure_FDF_parms(
     # changed all absFDF to rm_fdf
     # Since this is normalized by theoretical noise, it's effectively testing
     # the noise relative to the theoretical noise.
-    dPhi = np.nanmin(np.diff(phiArr))
+    dPhi = np.nanmin(np.diff(phi_arr))
     fwhmRMSF_chan = np.ceil(fwhmRMSF / dPhi)
     iL = int(max(0, indxPeakPIchan - fwhmRMSF_chan * 2))
     iR = int(min(len(absFDF), indxPeakPIchan + fwhmRMSF_chan * 2))
@@ -726,7 +725,7 @@ def bwdepol_measure_FDF_parms(
     dFDFrms = dFDFrms * adjoint_noise[indxPeakPIchan]
 
     # Measure the RM of the peak channel
-    phiPeakPIchan = phiArr[indxPeakPIchan]
+    phiPeakPIchan = phi_arr[indxPeakPIchan]
     snrPIchan = ampPeakPIchan * adjoint_sens[indxPeakPIchan] / dFDF
     dPhiPeakPIchan = fwhmRMSF / (2.0 * snrPIchan)
 
@@ -745,17 +744,17 @@ def bwdepol_measure_FDF_parms(
 
     # Calculate the derotated polarisation angle and uncertainty
     polAngle0Chan_deg = (
-        np.degrees(np.radians(polAngleChan_deg) - phiPeakPIchan * lam0Sq) % 180
+        np.degrees(np.radians(polAngleChan_deg) - phiPeakPIchan * lam0_sq) % 180
     )
-    nChansGood = np.sum(np.where(lamSqArr_m2 == lamSqArr_m2, 1.0, 0.0))
-    varLamSqArr_m2 = (
-        np.sum(lamSqArr_m2**2.0) - np.sum(lamSqArr_m2) ** 2.0 / nChansGood
+    nChansGood = np.sum(np.where(lam_sq_arr_m2 == lam_sq_arr_m2, 1.0, 0.0))
+    varLam_sq_arr_m2 = (
+        np.sum(lam_sq_arr_m2**2.0) - np.sum(lam_sq_arr_m2) ** 2.0 / nChansGood
     ) / (nChansGood - 1)
     dPolAngle0Chan_rad = np.sqrt(
         dampPeakPI**2.0
         * nChansGood
         / (4.0 * (nChansGood - 2.0) * ampPeakPIchan**2.0)
-        * ((nChansGood - 1) / nChansGood + lam0Sq**2.0 / varLamSqArr_m2)
+        * ((nChansGood - 1) / nChansGood + lam0_sq**2.0 / varLam_sq_arr_m2)
     )
     dPolAngle0Chan_deg = np.degrees(dPolAngle0Chan_rad)
 
@@ -777,11 +776,11 @@ def bwdepol_measure_FDF_parms(
     # Only do the 3-point fit if peak is 1-channel from either edge
     if indxPeakPIchan > 0 and indxPeakPIchan < len(FDF) - 1:
         phiPeakPIfit, ampPeakPIfit = calc_parabola_vertex(
-            phiArr[indxPeakPIchan - 1],
+            phi_arr[indxPeakPIchan - 1],
             amp_fdf[indxPeakPIchan - 1],
-            phiArr[indxPeakPIchan],
+            phi_arr[indxPeakPIchan],
             amp_fdf[indxPeakPIchan],
-            phiArr[indxPeakPIchan + 1],
+            phi_arr[indxPeakPIchan + 1],
             amp_fdf[indxPeakPIchan + 1],
         )
 
@@ -799,10 +798,10 @@ def bwdepol_measure_FDF_parms(
         # Calculate the polarisation angle from the fitted peak
         # Uncertainty from Eqn A.12 in Brentjens & De Bruyn 2005
         indxPeakPIfit = np.interp(
-            phiPeakPIfit, phiArr, np.arange(phiArr.shape[-1], dtype="f4")
+            phiPeakPIfit, phi_arr, np.arange(phi_arr.shape[-1], dtype="f4")
         )
-        peakFDFimagFit = np.interp(phiPeakPIfit, phiArr, FDF.imag)
-        peakFDFrealFit = np.interp(phiPeakPIfit, phiArr, FDF.real)
+        peakFDFimagFit = np.interp(phiPeakPIfit, phi_arr, FDF.imag)
+        peakFDFrealFit = np.interp(phiPeakPIfit, phi_arr, FDF.real)
         polAngleFit_deg = (
             0.5 * np.degrees(np.arctan2(peakFDFimagFit, peakFDFrealFit)) % 180
         )
@@ -811,12 +810,12 @@ def bwdepol_measure_FDF_parms(
         # Calculate the derotated polarisation angle and uncertainty
         # Uncertainty from Eqn A.20 in Brentjens & De Bruyn 2005
         polAngle0Fit_deg = (
-            np.degrees(np.radians(polAngleFit_deg) - phiPeakPIfit * lam0Sq)
+            np.degrees(np.radians(polAngleFit_deg) - phiPeakPIfit * lam0_sq)
         ) % 180
         dPolAngle0Fit_rad = np.sqrt(
             nChansGood
             / (4.0 * (nChansGood - 2.0) * snrPIfit**2.0)
-            * ((nChansGood - 1) / nChansGood + lam0Sq**2.0 / varLamSqArr_m2)
+            * ((nChansGood - 1) / nChansGood + lam0_sq**2.0 / varLam_sq_arr_m2)
         )
         dPolAngle0Fit_deg = np.degrees(dPolAngle0Fit_rad)
 
@@ -857,13 +856,13 @@ def bwdepol_measure_FDF_parms(
 
 # -----------------------------------------------------------------------------#
 def do_adjoint_rmsynth_planes(
-    freqArr_Hz,
-    dataQ,
-    dataU,
-    phiArr_radm2,
+    freq_arr_Hz,
+    data_Q,
+    data_U,
+    phi_arr_radm2,
     widths_Hz=None,
-    weightArr=None,
-    lam0Sq_m2=None,
+    weight_arr=None,
+    lam0_sq_m2=None,
     nBits=64,
     verbose=False,
     log=print,
@@ -879,11 +878,11 @@ def do_adjoint_rmsynth_planes(
 
     Parameters
     ----------
-    dataQ           ... 1, 2 or 3D Stokes Q data array
-    dataU           ... 1, 2 or 3D Stokes U data array
-    lambdaSqArr_m2  ... vector of wavelength^2 values (assending freq order)
-    phiArr_radm2    ... vector of trial Faraday depth values
-    weightArr       ... vector of weights, default [None] is Uniform (all 1s)
+    data_Q           ... 1, 2 or 3D Stokes Q data array
+    data_U           ... 1, 2 or 3D Stokes U data array
+    lambda_sq_arr_m2  ... vector of wavelength^2 values (assending freq order)
+    phi_arr_radm2    ... vector of trial Faraday depth values
+    weight_arr       ... vector of weights, default [None] is Uniform (all 1s)
     nBits           ... precision of data arrays [32]
     verbose         ... print feedback during calculation [False]
     log             ... function to be used to output messages [print]
@@ -893,14 +892,14 @@ def do_adjoint_rmsynth_planes(
     FDFcube: array
              Faraday Dispersion Function (FDF)
 
-    lam0Sq_m2: array
-               lam0Sq_m2 is the weighted mean of lambda^2 distribution
+    lam0_sq_m2: array
+               lam0_sq_m2 is the weighted mean of lambda^2 distribution
                (B&dB Eqn. 32)
 
     adjoint_vars: list
                   information to generate theoretical noise, sensitivity
-                  adjoint_vars = [widths_Hz, freqArr_Hz, phiArr_radm2, K,
-                                  weightArr]
+                  adjoint_vars = [widths_Hz, freq_arr_Hz, phi_arr_radm2, K,
+                                  weight_arr]
 
     """
 
@@ -908,27 +907,27 @@ def do_adjoint_rmsynth_planes(
     dtFloat = "float" + str(nBits)
     dtComplex = "complex" + str(2 * nBits)
 
-    lambdaSqArr_m2 = np.power(C / freqArr_Hz, 2.0)
+    lambda_sq_arr_m2 = np.power(C / freq_arr_Hz, 2.0)
     # Set the weight array
-    if weightArr is None:
-        weightArr = np.ones(lambdaSqArr_m2.shape, dtype=dtFloat)
-    weightArr = np.where(np.isnan(weightArr), 0.0, weightArr)
+    if weight_arr is None:
+        weight_arr = np.ones(lambda_sq_arr_m2.shape, dtype=dtFloat)
+    weight_arr = np.where(np.isnan(weight_arr), 0.0, weight_arr)
 
     # Sanity check on array sizes
-    if not weightArr.shape == lambdaSqArr_m2.shape:
+    if not weight_arr.shape == lambda_sq_arr_m2.shape:
         log("Err: Lambda^2 and weight arrays must be the same shape.")
         return None, None
-    if not dataQ.shape == dataU.shape:
+    if not data_Q.shape == data_U.shape:
         log("Err: Stokes Q and U data arrays must be the same shape.")
         return None, None
-    nDims = len(dataQ.shape)
+    nDims = len(data_Q.shape)
     if not nDims <= 3:
         log("Err: data dimensions must be <= 3.")
         return None, None
-    if not dataQ.shape[0] == lambdaSqArr_m2.shape[0]:
+    if not data_Q.shape[0] == lambda_sq_arr_m2.shape[0]:
         log(
             "Err: Data depth does not match lambda^2 vector ({} vs {}).".format(
-                dataQ.shape[0], lambdaSqArr_m2.shape[0]
+                data_Q.shape[0], lambda_sq_arr_m2.shape[0]
             ),
             end=" ",
         )
@@ -937,15 +936,15 @@ def do_adjoint_rmsynth_planes(
 
     # Reshape the data arrays to 3 dimensions
     if nDims == 1:
-        dataQ = np.reshape(dataQ, (dataQ.shape[0], 1, 1))
-        dataU = np.reshape(dataU, (dataU.shape[0], 1, 1))
+        data_Q = np.reshape(data_Q, (data_Q.shape[0], 1, 1))
+        data_U = np.reshape(data_U, (data_U.shape[0], 1, 1))
     elif nDims == 2:
-        dataQ = np.reshape(dataQ, (dataQ.shape[0], dataQ.shape[1], 1))
-        dataU = np.reshape(dataU, (dataU.shape[0], dataU.shape[1], 1))
+        data_Q = np.reshape(data_Q, (data_Q.shape[0], data_Q.shape[1], 1))
+        data_U = np.reshape(data_U, (data_U.shape[0], data_U.shape[1], 1))
 
     # Create a complex polarised cube, B&dB Eqns. (8) and (14)
-    # Array has dimensions [nFreq, nY, nX]
-    pCube = (dataQ + 1j * dataU) * weightArr[:, np.newaxis, np.newaxis]
+    # _array has dimensions [nFreq, nY, nX]
+    pCube = (data_Q + 1j * data_U) * weight_arr[:, np.newaxis, np.newaxis]
 
     # Check for NaNs (flagged data) in the cube & set to zero
     mskCube = np.isnan(pCube)
@@ -954,27 +953,27 @@ def do_adjoint_rmsynth_planes(
     # If full planes are flagged then set corresponding weights to zero
     mskPlanes = np.sum(np.sum(~mskCube, axis=1), axis=1)
     mskPlanes = np.where(mskPlanes == 0, 0, 1)
-    weightArr *= mskPlanes
+    weight_arr *= mskPlanes
 
     # Initialise the complex Faraday Dispersion Function cube
-    nX = dataQ.shape[-1]
-    nY = dataQ.shape[-2]
-    nPhi = phiArr_radm2.shape[0]
+    nX = data_Q.shape[-1]
+    nY = data_Q.shape[-2]
+    nPhi = phi_arr_radm2.shape[0]
     FDFcube = np.zeros((nPhi, nY, nX), dtype=dtComplex)
 
-    # lam0Sq_m2 is the weighted mean of lambda^2 distribution (B&dB Eqn. 32)
-    # Calculate a global lam0Sq_m2 value, ignoring isolated flagged voxels
-    K = 1.0 / np.sum(weightArr)
-    if lam0Sq_m2 is None:
-        lam0Sq_m2 = K * np.sum(weightArr * lambdaSqArr_m2)
+    # lam0_sq_m2 is the weighted mean of lambda^2 distribution (B&dB Eqn. 32)
+    # Calculate a global lam0_sq_m2 value, ignoring isolated flagged voxels
+    K = 1.0 / np.sum(weight_arr)
+    if lam0_sq_m2 is None:
+        lam0_sq_m2 = K * np.sum(weight_arr * lambda_sq_arr_m2)
 
     # The K value used to scale each FDF spectrum must take into account
     # flagged voxels data in the datacube and can be position dependent
-    weightCube = np.invert(mskCube) * weightArr[:, np.newaxis, np.newaxis]
+    weightCube = np.invert(mskCube) * weight_arr[:, np.newaxis, np.newaxis]
     with np.errstate(divide="ignore", invalid="ignore"):
-        KArr = np.true_divide(1.0, np.sum(weightCube, axis=0))
-        KArr[KArr == np.inf] = 0
-        KArr = np.nan_to_num(KArr)
+        K_arr = np.true_divide(1.0, np.sum(weightCube, axis=0))
+        K_arr[K_arr == np.inf] = 0
+        K_arr = np.nan_to_num(K_arr)
 
     # Do the RM-synthesis on each plane
     if verbose:
@@ -983,24 +982,24 @@ def do_adjoint_rmsynth_planes(
 
     # calculate channel widths if necessary
     if widths_Hz == None:
-        widths_Hz = estimate_channel_bandwidth(freqArr_Hz)
+        widths_Hz = estimate_channel_bandwidth(freq_arr_Hz)
     for i in range(nPhi):
         if verbose:
             progress(40, ((i + 1) * 100.0 / nPhi))
-        cor = np.exp(2j * phiArr_radm2[i] * lam0Sq_m2)
-        r_i = rotation_operator(widths_Hz, freqArr_Hz, phiArr_radm2[i])[
+        cor = np.exp(2j * phi_arr_radm2[i] * lam0_sq_m2)
+        r_i = rotation_operator(widths_Hz, freq_arr_Hz, phi_arr_radm2[i])[
             :, np.newaxis, np.newaxis
         ]
         arg0 = pCube * cor * np.conj(r_i)
         arg = arg0
-        FDFcube[i, :, :] = KArr * np.sum(arg, axis=0)
+        FDFcube[i, :, :] = K_arr * np.sum(arg, axis=0)
 
     # information to generate theoretical noise, sensitivity
-    adjoint_vars = [widths_Hz, freqArr_Hz, phiArr_radm2, K, weightArr]
+    adjoint_vars = [widths_Hz, freq_arr_Hz, phi_arr_radm2, K, weight_arr]
 
     # Remove redundant dimensions in the FDF array
     FDFcube = np.squeeze(FDFcube)
-    return FDFcube, lam0Sq_m2, adjoint_vars
+    return FDFcube, lam0_sq_m2, adjoint_vars
 
 
 # -----------------------------------------------------------------------------#
@@ -1071,28 +1070,24 @@ def run_adjoint_rmsynth(
 
     # freq_Hz, I, Q, U, dI, dQ, dU
     if data.shape[0] == 7:
-        if verbose:
-            log("> Seven columns found, trying [freq_Hz, I, Q, U, dI, dQ, dU]", end=" ")
-        (freqArr_Hz, IArr, QArr, UArr, dIArr, dQArr, dUArr) = data
+        logger.info("> Seven columns found, trying [freq_Hz, I, Q, U, dI, dQ, dU]", end=" ")
+        (freq_arr_Hz, I_arr, Q_arr, U_arr, dI_arr, dQ_arr, dU_arr) = data
         widths_Hz = None
     elif data.shape[0] == 8:
-        if verbose:
-            log(
+        logger.info(
                 "> Eight columns found, trying [freq_Hz, widths_Hz, I, Q, U, dI, dQ, dU]",
                 end=" ",
             )
-        (freqArr_Hz, widths_Hz, IArr, QArr, UArr, dIArr, dQArr, dUArr) = data
+        (freq_arr_Hz, widths_Hz, I_arr, Q_arr, U_arr, dI_arr, dQ_arr, dU_arr) = data
     elif data.shape[0] == 6:
-        if verbose:
-            log(
+        logger.info(
                 "> Six columns found, trying [freq_Hz, widths_Hz, Q, U, dQ, dU]",
                 end=" ",
             )
-        (freqArr_Hz, width_Hz, QArr, UArr, dQArr, dUArr) = data
+        (freq_arr_Hz, width_Hz, Q_arr, U_arr, dQ_arr, dU_arr) = data
     elif data.shape[0] == 5:
-        if verbose:
-            log("> Five columns found, trying [freq_Hz, Q, U, dQ, dU]", end=" ")
-        (freqArr_Hz, QArr, UArr, dQArr, dUArr) = data
+        logger.info("> Five columns found, trying [freq_Hz, Q, U, dQ, dU]", end=" ")
+        (freq_arr_Hz, Q_arr, U_arr, dQ_arr, dU_arr) = data
         widths_Hz = None
         noStokesI = True
     else:
@@ -1105,24 +1100,23 @@ def run_adjoint_rmsynth(
 
     # If no Stokes I present, create a dummy spectrum = unity
     if noStokesI:
-        if verbose:
-            log("Warn: no Stokes I data in use.")
-        IArr = np.ones_like(QArr)
-        dIArr = np.zeros_like(QArr)
+        logger.info("Warn: no Stokes I data in use.")
+        I_arr = np.ones_like(Q_arr)
+        dI_arr = np.zeros_like(Q_arr)
 
     # Convert to GHz for convenience
-    freqArr_GHz = freqArr_Hz / 1e9
-    dQUArr = (dQArr + dUArr) / 2.0
+    freq_arr_GHz = freq_arr_Hz / 1e9
+    dQU_arr = (dQ_arr + dU_arr) / 2.0
 
     # Fit the Stokes I spectrum and create the fractional spectra
-    IModArr, qArr, uArr, dqArr, duArr, fitDict = create_frac_spectra(
-        freqArr=freqArr_GHz,
-        IArr=IArr,
-        QArr=QArr,
-        UArr=UArr,
-        dIArr=dIArr,
-        dQArr=dQArr,
-        dUArr=dUArr,
+    IMod_arr, q_arr, u_arr, dq_arr, du_arr, fitDict = create_frac_spectra(
+        freq_arr=freq_arr_GHz,
+        I_arr=I_arr,
+        Q_arr=Q_arr,
+        U_arr=U_arr,
+        dI_arr=dI_arr,
+        dQ_arr=dQ_arr,
+        dU_arr=dU_arr,
         polyOrd=polyOrd,
         verbose=True,
         debug=debug,
@@ -1130,21 +1124,20 @@ def run_adjoint_rmsynth(
 
     # Plot the data and the Stokes I model fit
     if showPlots:
-        if verbose:
-            log("Plotting the input data and spectral index fit.")
-        freqHirArr_Hz = np.linspace(freqArr_Hz[0], freqArr_Hz[-1], 10000)
-        IModHirArr = poly5(fitDict["p"])(freqHirArr_Hz / 1e9)
+        logger.info("Plotting the input data and spectral index fit.")
+        freqHir_arr_Hz = np.linspace(freq_arr_Hz[0], freq_arr_Hz[-1], 10000)
+        IModHir_arr = poly5(fitDict["p"])(freqHir_arr_Hz / 1e9)
         specFig = plt.figure(figsize=(12.0, 8))
         plot_Ipqu_spectra_fig(
-            freqArr_Hz=freqArr_Hz,
-            IArr=IArr,
-            qArr=qArr,
-            uArr=uArr,
-            dIArr=dIArr,
-            dqArr=dqArr,
-            duArr=duArr,
-            freqHirArr_Hz=freqHirArr_Hz,
-            IModArr=IModHirArr,
+            freq_arr_Hz=freq_arr_Hz,
+            I_arr=I_arr,
+            q_arr=q_arr,
+            u_arr=u_arr,
+            dI_arr=dI_arr,
+            dq_arr=dq_arr,
+            du_arr=du_arr,
+            freqHir_arr_Hz=freqHir_arr_Hz,
+            IMod_arr=IModHir_arr,
             fig=specFig,
             units=units,
         )
@@ -1154,97 +1147,97 @@ def run_adjoint_rmsynth(
             rmsFig = plt.figure(figsize=(12.0, 8))
             ax = rmsFig.add_subplot(111)
             ax.plot(
-                freqArr_Hz / 1e9,
-                dQUArr,
+                freq_arr_Hz / 1e9,
+                dQU_arr,
                 marker="o",
                 color="k",
                 lw=0.5,
                 label="rms <QU>",
             )
             ax.plot(
-                freqArr_Hz / 1e9, dQArr, marker="o", color="b", lw=0.5, label="rms Q"
+                freq_arr_Hz / 1e9, dQ_arr, marker="o", color="b", lw=0.5, label="rms Q"
             )
             ax.plot(
-                freqArr_Hz / 1e9, dUArr, marker="o", color="r", lw=0.5, label="rms U"
+                freq_arr_Hz / 1e9, dU_arr, marker="o", color="r", lw=0.5, label="rms U"
             )
-            xRange = (np.nanmax(freqArr_Hz) - np.nanmin(freqArr_Hz)) / 1e9
+            xRange = (np.nanmax(freq_arr_Hz) - np.nanmin(freq_arr_Hz)) / 1e9
             ax.set_xlim(
-                np.min(freqArr_Hz) / 1e9 - xRange * 0.05,
-                np.max(freqArr_Hz) / 1e9 + xRange * 0.05,
+                np.min(freq_arr_Hz) / 1e9 - xRange * 0.05,
+                np.max(freq_arr_Hz) / 1e9 + xRange * 0.05,
             )
             ax.set_xlabel("$\\nu$ (GHz)")
             ax.set_ylabel("RMS " + units)
             ax.set_title("RMS noise in Stokes Q, U and <Q,U> spectra")
 
     # Calculate some wavelength parameters
-    lambdaSqArr_m2 = np.power(C / freqArr_Hz, 2.0)
-    # dFreq_Hz = np.nanmin(np.abs(np.diff(freqArr_Hz)))
-    lambdaSqRange_m2 = np.nanmax(lambdaSqArr_m2) - np.nanmin(lambdaSqArr_m2)
-    # dLambdaSqMin_m2 = np.nanmin(np.abs(np.diff(lambdaSqArr_m2)))
-    dLambdaSqMax_m2 = np.nanmax(np.abs(np.diff(lambdaSqArr_m2)))
+    lambda_sq_arr_m2 = np.power(C / freq_arr_Hz, 2.0)
+    # dFreq_Hz = np.nanmin(np.abs(np.diff(freq_arr_Hz)))
+    lambda_sqRange_m2 = np.nanmax(lambda_sq_arr_m2) - np.nanmin(lambda_sq_arr_m2)
+    # dLambda_sqMin_m2 = np.nanmin(np.abs(np.diff(lambda_sq_arr_m2)))
+    dLambda_sqMax_m2 = np.nanmax(np.abs(np.diff(lambda_sq_arr_m2)))
 
     # Set the Faraday depth range
-    fwhmRMSF_radm2 = 2.0 * m.sqrt(3.0) / lambdaSqRange_m2
+    fwhmRMSF_radm2 = 2.0 * m.sqrt(3.0) / lambda_sqRange_m2
     if dPhi_radm2 is None:
         dPhi_radm2 = fwhmRMSF_radm2 / nSamples
     if phiMax_radm2 is None:
-        phiMax_radm2 = m.sqrt(3.0) / dLambdaSqMax_m2
+        phiMax_radm2 = m.sqrt(3.0) / dLambda_sqMax_m2
         phiMax_radm2 = max(phiMax_radm2, 600.0)  # Force the minimum phiMax
 
     # Faraday depth sampling. Zero always centred on middle channel
     nChanRM = int(round(abs((phiMax_radm2 - 0.0) / dPhi_radm2)) * 2.0 + 1.0)
     startPhi_radm2 = -(nChanRM - 1.0) * dPhi_radm2 / 2.0
     stopPhi_radm2 = +(nChanRM - 1.0) * dPhi_radm2 / 2.0
-    phiArr_radm2 = np.linspace(startPhi_radm2, stopPhi_radm2, nChanRM)
-    phiArr_radm2 = phiArr_radm2.astype(dtFloat)
+    phi_arr_radm2 = np.linspace(startPhi_radm2, stopPhi_radm2, nChanRM)
+    phi_arr_radm2 = phi_arr_radm2.astype(dtFloat)
     if verbose:
         log(
-            "PhiArr = %.2f to %.2f by %.2f (%d chans)."
-            % (phiArr_radm2[0], phiArr_radm2[-1], float(dPhi_radm2), nChanRM)
+            "Phi_arr = %.2f to %.2f by %.2f (%d chans)."
+            % (phi_arr_radm2[0], phi_arr_radm2[-1], float(dPhi_radm2), nChanRM)
         )
 
     # Calculate the weighting as 1/sigma^2 or all 1s (uniform)
     if weightType == "variance":
-        weightArr = 1.0 / np.power(dQUArr, 2.0)
+        weight_arr = 1.0 / np.power(dQU_arr, 2.0)
     else:
         weightType = "uniform"
-        weightArr = np.ones(freqArr_Hz.shape, dtype=dtFloat)
+        weight_arr = np.ones(freq_arr_Hz.shape, dtype=dtFloat)
     if verbose:
         log("Weight type is '%s'." % weightType)
 
     startTime = time.time()
 
     # Perform adjoint RM-synthesis on the spectrum
-    dirtyFDF, lam0Sq_m2, adjoint_vars = do_adjoint_rmsynth_planes(
-        freqArr_Hz=freqArr_Hz,
+    dirtyFDF, lam0_sq_m2, adjoint_vars = do_adjoint_rmsynth_planes(
+        freq_arr_Hz=freq_arr_Hz,
         widths_Hz=widths_Hz,
-        dataQ=qArr,
-        dataU=uArr,
-        phiArr_radm2=phiArr_radm2,
-        weightArr=weightArr,
+        data_Q=q_arr,
+        data_U=u_arr,
+        phi_arr_radm2=phi_arr_radm2,
+        weight_arr=weight_arr,
         nBits=nBits,
         verbose=verbose,
         log=log,
     )
 
     # generate adjoint_noise and adjoint__sens
-    adjoint_info = adjoint_theory(adjoint_vars, dQUArr, show_progress=False)
-    phiArr_radm2, adjoint_sens, adjoint_noise = adjoint_info
+    adjoint_info = adjoint_theory(adjoint_vars, dQU_arr, show_progress=False)
+    phi_arr_radm2, adjoint_sens, adjoint_noise = adjoint_info
 
     # calculate peak RM
     absFDF = np.abs(dirtyFDF)
     rm_fdf = absFDF / adjoint_noise  # used for finding peak in RM
     indxPeakPIchan = np.nanargmax(rm_fdf[1:-1]) + 1
-    peak_rm = phiArr_radm2[indxPeakPIchan]
+    peak_rm = phi_arr_radm2[indxPeakPIchan]
 
     # Calculate the Rotation Measure Spread Function
-    RMSFArr, phi2Arr_radm2, fwhmRMSFArr, fitStatArr = bwdepol_get_rmsf_planes(
-        freqArr_Hz=freqArr_Hz,
+    RMSF_arr, phi2_arr_radm2, fwhmRMSF_arr, fitStat_arr = bwdepol_get_rmsf_planes(
+        freq_arr_Hz=freq_arr_Hz,
         widths_Hz=widths_Hz,
-        phiArr_radm2=phiArr_radm2,
-        weightArr=weightArr,
-        mskArr=~np.isfinite(qArr),
-        lam0Sq_m2=lam0Sq_m2,
+        phi_arr_radm2=phi_arr_radm2,
+        weight_arr=weight_arr,
+        msk_arr=~np.isfinite(q_arr),
+        lam0_sq_m2=lam0_sq_m2,
         double=True,
         fitRMSF=fitRMSF,
         fitRMSFreal=False,
@@ -1253,23 +1246,23 @@ def run_adjoint_rmsynth(
         log=log,
         peak_rm=peak_rm,
     )
-    fwhmRMSF = float(fwhmRMSFArr)
+    fwhmRMSF = float(fwhmRMSF_arr)
     endTime = time.time()
     cputime = endTime - startTime
     if verbose:
         log("> RM-synthesis completed in %.2f seconds." % cputime)
 
-    # Determine the Stokes I value at lam0Sq_m2 from the Stokes I model
+    # Determine the Stokes I value at lam0_sq_m2 from the Stokes I model
     # Multiply the dirty FDF by Ifreq0 to recover the PI
-    freq0_Hz = C / m.sqrt(lam0Sq_m2)
+    freq0_Hz = C / m.sqrt(lam0_sq_m2)
     Ifreq0 = poly5(fitDict["p"])(freq0_Hz / 1e9)
     dirtyFDF *= Ifreq0  # FDF is in fracpol units initially, convert back to flux
 
     # Calculate the theoretical noise in the FDF !!
     # Old formula only works for wariance weights!
-    weightArr = np.where(np.isnan(weightArr), 0.0, weightArr)
+    weight_arr = np.where(np.isnan(weight_arr), 0.0, weight_arr)
     dFDFth = np.sqrt(
-        np.sum(weightArr**2 * np.nan_to_num(dQUArr) ** 2) / (np.sum(weightArr)) ** 2
+        np.sum(weight_arr**2 * np.nan_to_num(dQU_arr) ** 2) / (np.sum(weight_arr)) ** 2
     )
 
     # Measure the parameters of the dirty FDF
@@ -1277,23 +1270,23 @@ def run_adjoint_rmsynth(
 
     mDict = bwdepol_measure_FDF_parms(
         FDF=dirtyFDF,
-        phiArr=phiArr_radm2,
+        phi_arr=phi_arr_radm2,
         fwhmRMSF=fwhmRMSF,
         adjoint_sens=adjoint_sens,
         adjoint_noise=adjoint_noise,
         dFDF=dFDFth,
-        lamSqArr_m2=lambdaSqArr_m2,
-        lam0Sq=lam0Sq_m2,
+        lam_sq_arr_m2=lambda_sq_arr_m2,
+        lam0_sq=lam0_sq_m2,
     )
 
     mDict["Ifreq0"] = toscalar(Ifreq0)
     mDict["polyCoeffs"] = ",".join([str(x) for x in fitDict["p"]])
     mDict["IfitStat"] = fitDict["fitStatus"]
-    mDict["IfitChiSqRed"] = fitDict["chiSqRed"]
-    mDict["lam0Sq_m2"] = toscalar(lam0Sq_m2)
+    mDict["IfitChi_sqRed"] = fitDict["chi_sqRed"]
+    mDict["lam0_sq_m2"] = toscalar(lam0_sq_m2)
     mDict["freq0_Hz"] = toscalar(freq0_Hz)
     mDict["fwhmRMSF"] = toscalar(fwhmRMSF)
-    mDict["dQU"] = toscalar(nanmedian(dQUArr))
+    mDict["dQU"] = toscalar(nanmedian(dQU_arr))
     # mDict["dFDFth"] = toscalar(dFDFth)
     mDict["units"] = units
 
@@ -1303,23 +1296,23 @@ def run_adjoint_rmsynth(
         log("Caution: Stokes I model has low signal-to-noise.")
 
     # Add information on nature of channels:
-    good_channels = np.where(np.logical_and(weightArr != 0, np.isfinite(qArr)))[0]
-    mDict["min_freq"] = float(np.min(freqArr_Hz[good_channels]))
-    mDict["max_freq"] = float(np.max(freqArr_Hz[good_channels]))
+    good_channels = np.where(np.logical_and(weight_arr != 0, np.isfinite(q_arr)))[0]
+    mDict["min_freq"] = float(np.min(freq_arr_Hz[good_channels]))
+    mDict["max_freq"] = float(np.max(freq_arr_Hz[good_channels]))
     mDict["N_channels"] = good_channels.size
     if widths_Hz != None:
         mDict["median_channel_width"] = float(np.median(widths_Hz))
     else:
-        mDict["median_channel_width"] = float(np.median(np.diff(freqArr_Hz)))
+        mDict["median_channel_width"] = float(np.median(np.diff(freq_arr_Hz)))
 
     # Measure the complexity of the q and u spectra
     mDict["fracPol"] = mDict["ampPeakPIfit"] / (Ifreq0)
     mD, pD = measure_qu_complexity(
-        freqArr_Hz=freqArr_Hz,
-        qArr=qArr,
-        uArr=uArr,
-        dqArr=dqArr,
-        duArr=duArr,
+        freq_arr_Hz=freq_arr_Hz,
+        q_arr=q_arr,
+        u_arr=u_arr,
+        dq_arr=dq_arr,
+        du_arr=du_arr,
         fracPol=mDict["fracPol"],
         psi0_deg=mDict["polAngle0Fit_deg"],
         RM_radm2=mDict["phiPeakPIfit_rm2"],
@@ -1329,28 +1322,28 @@ def run_adjoint_rmsynth(
     # Debugging plots for spectral complexity measure
     if debug:
         tmpFig = plot_complexity_fig(
-            xArr=pD["xArrQ"],
-            qArr=pD["yArrQ"],
-            dqArr=pD["dyArrQ"],
-            sigmaAddqArr=pD["sigmaAddArrQ"],
-            chiSqRedqArr=pD["chiSqRedArrQ"],
-            probqArr=pD["probArrQ"],
-            uArr=pD["yArrU"],
-            duArr=pD["dyArrU"],
-            sigmaAdduArr=pD["sigmaAddArrU"],
-            chiSqReduArr=pD["chiSqRedArrU"],
-            probuArr=pD["probArrU"],
+            x_arr=pD["x_arrQ"],
+            q_arr=pD["y_arrQ"],
+            dq_arr=pD["dy_arrQ"],
+            sigmaAddq_arr=pD["sigmaAdd_arrQ"],
+            chi_sqRedq_arr=pD["chi_sqRed_arrQ"],
+            probq_arr=pD["prob_arrQ"],
+            u_arr=pD["y_arrU"],
+            du_arr=pD["dy_arrU"],
+            sigmaAddu_arr=pD["sigmaAdd_arrU"],
+            chi_sqRedu_arr=pD["chi_sqRed_arrU"],
+            probu_arr=pD["prob_arrU"],
             mDict=mDict,
         )
         tmpFig.show()
 
     # add array dictionary
     aDict = dict()
-    aDict["phiArr_radm2"] = phiArr_radm2
-    aDict["phi2Arr_radm2"] = phi2Arr_radm2
-    aDict["RMSFArr"] = RMSFArr
-    aDict["freqArr_Hz"] = freqArr_Hz
-    aDict["weightArr"] = weightArr
+    aDict["phi_arr_radm2"] = phi_arr_radm2
+    aDict["phi2_arr_radm2"] = phi2_arr_radm2
+    aDict["RMSF_arr"] = RMSF_arr
+    aDict["freq_arr_Hz"] = freq_arr_Hz
+    aDict["weight_arr"] = weight_arr
     aDict["dirtyFDF"] = dirtyFDF / adjoint_sens
 
     if verbose:
@@ -1399,10 +1392,10 @@ def run_adjoint_rmsynth(
         plot_adjoint_info(adjoint_info, units=units)
         fdfFig = plt.figure(figsize=(12.0, 8))
         bwdepol_plot_rmsf_fdf_fig(
-            phiArr=phiArr_radm2,
+            phi_arr=phi_arr_radm2,
             FDF=(dirtyFDF / adjoint_sens),
-            phi2Arr=phiArr_radm2,
-            RMSFArr=RMSFArr,
+            phi2_arr=phi_arr_radm2,
+            RMSF_arr=RMSF_arr,
             peak_rm=peak_rm,
             fwhmRMSF=fwhmRMSF,
             vLine=mDict["phiPeakPIfit_rm2"],

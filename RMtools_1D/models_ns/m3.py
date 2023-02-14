@@ -10,27 +10,27 @@ from bilby.core.prior import Constraint, PriorDict
 # Function defining the model.                                                #
 #                                                                             #
 #  pDict       = Dictionary of parameters, created by parsing inParms, below. #
-#  lamSqArr_m2 = Array of lambda-squared values                               #
-#  quArr       = Complex array containing the Re and Im spectra.              #
+#  lam_sq_arr_m2 = _array of lambda-squared values                               #
+#  qu_arr       = Complex array containing the Re and Im spectra.              #
 # -----------------------------------------------------------------------------#
-def model(pDict, lamSqArr_m2):
+def model(pDict, lam_sq_arr_m2):
     """Two separate Faraday components, averaged within same telescope beam
     (i.e., unresolved), with a common Burn depolarisation term."""
 
     # Calculate the complex fractional q and u spectra
-    pArr1 = pDict["fracPol1"] * np.ones_like(lamSqArr_m2)
-    pArr2 = pDict["fracPol2"] * np.ones_like(lamSqArr_m2)
-    quArr1 = pArr1 * np.exp(
-        2j * (np.radians(pDict["psi01_deg"]) + pDict["RM1_radm2"] * lamSqArr_m2)
+    p_arr1 = pDict["fracPol1"] * np.ones_like(lam_sq_arr_m2)
+    p_arr2 = pDict["fracPol2"] * np.ones_like(lam_sq_arr_m2)
+    qu_arr1 = p_arr1 * np.exp(
+        2j * (np.radians(pDict["psi01_deg"]) + pDict["RM1_radm2"] * lam_sq_arr_m2)
     )
-    quArr2 = pArr2 * np.exp(
-        2j * (np.radians(pDict["psi02_deg"]) + pDict["RM2_radm2"] * lamSqArr_m2)
+    qu_arr2 = p_arr2 * np.exp(
+        2j * (np.radians(pDict["psi02_deg"]) + pDict["RM2_radm2"] * lam_sq_arr_m2)
     )
-    quArr = (quArr1 + quArr2) * np.exp(
-        -2.0 * pDict["sigmaRM_radm2"] ** 2.0 * lamSqArr_m2**2.0
+    qu_arr = (qu_arr1 + qu_arr2) * np.exp(
+        -2.0 * pDict["sigmaRM_radm2"] ** 2.0 * lam_sq_arr_m2**2.0
     )
 
-    return quArr
+    return qu_arr
 
 
 # -----------------------------------------------------------------------------#

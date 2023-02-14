@@ -85,27 +85,24 @@ def run_rmclean(
         aDict_cl (dict): Data output by RMCLEAN.
 
     """
-    phiArr_radm2 = aDict["phiArr_radm2"]
-    freqArr_Hz = aDict["freqArr_Hz"]
-    weightArr = aDict["weightArr"]
+    phi_arr_radm2 = aDict["phi_arr_radm2"]
+    freq_arr_Hz = aDict["freq_arr_Hz"]
+    weight_arr = aDict["weight_arr"]
     dirtyFDF = aDict["dirtyFDF"]
-    phi2Arr_radm2 = aDict["phi2Arr_radm2"]
-    RMSFArr = aDict["RMSFArr"]
+    phi2_arr_radm2 = aDict["phi2_arr_radm2"]
+    RMSF_arr = aDict["RMSF_arr"]
 
-    lambdaSqArr_m2 = np.power(C / freqArr_Hz, 2.0)
+    lambda_sq_arr_m2 = np.power(C / freq_arr_Hz, 2.0)
 
     # If the cutoff is negative, assume it is a sigma level
     if verbose:
         log("Expected RMS noise = %.4g flux units" % (mDict["dFDFth"]))
     if cutoff < 0:
-        if verbose:
-            log("Using a sigma cutoff of %.1f." % (-1 * cutoff))
+        logger.info("Using a sigma cutoff of %.1f." % (-1 * cutoff))
         cutoff = -1 * mDict["dFDFth"] * cutoff
-        if verbose:
-            log("Absolute value = %.3g" % cutoff)
+        logger.info("Absolute value = %.3g" % cutoff)
     else:
-        if verbose:
-            log(
+        logger.info(
                 "Using an absolute cutoff of %.3g (%.1f x expected RMS)."
                 % (cutoff, cutoff / mDict["dFDFth"])
             )
@@ -114,26 +111,23 @@ def run_rmclean(
         window = np.nan
     else:
         if window < 0:
-            if verbose:
-                log("Using a window sigma cutoff of %.1f." % (-1 * window))
+            logger.info("Using a window sigma cutoff of %.1f." % (-1 * window))
             window = -1 * mDict["dFDFth"] * window
-            if verbose:
-                log("Absolute value = %.3g" % window)
+            logger.info("Absolute value = %.3g" % window)
         else:
-            if verbose:
-                log(
+            logger.info(
                     "Using an absolute window cutoff of %.3g (%.1f x expected RMS)."
                     % (window, window / mDict["dFDFth"])
                 )
 
     startTime = time.time()
     # Perform RM-clean on the spectrum
-    cleanFDF, ccArr, iterCountArr, residFDF = do_rmclean_hogbom(
+    cleanFDF, cc_arr, iterCount_arr, residFDF = do_rmclean_hogbom(
         dirtyFDF=dirtyFDF,
-        phiArr_radm2=phiArr_radm2,
-        RMSFArr=RMSFArr,
-        phi2Arr_radm2=phi2Arr_radm2,
-        fwhmRMSFArr=np.array(mDict["fwhmRMSF"]),
+        phi_arr_radm2=phi_arr_radm2,
+        RMSF_arr=RMSF_arr,
+        phi2_arr_radm2=phi2_arr_radm2,
+        fwhmRMSF_arr=np.array(mDict["fwhmRMSF"]),
         cutoff=cutoff,
         maxIter=maxIter,
         gain=gain,
@@ -144,16 +138,16 @@ def run_rmclean(
 
     # ALTERNATIVE RM_CLEAN CODE ----------------------------------------------#
     """
-    cleanFDF, ccArr, fwhmRMSF, iterCount = \
+    cleanFDF, cc_arr, fwhmRMSF, iterCount = \
               do_rmclean(dirtyFDF     = dirtyFDF,
-                         phiArr       = phiArr_radm2,
-                         lamSqArr     = lamSqArr_m2,
+                         phi_arr       = phi_arr_radm2,
+                         lam_sq_arr     = lam_sq_arr_m2,
                          cutoff       = cutoff,
                          maxIter      = maxIter,
                          gain         = gain,
-                         weight       = weightArr,
-                         RMSFArr      = RMSFArr,
-                         RMSFphiArr   = phi2Arr_radm2,
+                         weight       = weight_arr,
+                         RMSF_arr      = RMSF_arr,
+                         RMSFphi_arr   = phi2_arr_radm2,
                          fwhmRMSF     = mDict["fwhmRMSF"],
                          doPlots      = True)
     """
@@ -167,17 +161,17 @@ def run_rmclean(
     # Measure the parameters of the deconvolved FDF
     mDict_cl = measure_FDF_parms(
         FDF=cleanFDF,
-        phiArr=phiArr_radm2,
+        phi_arr=phi_arr_radm2,
         fwhmRMSF=mDict["fwhmRMSF"],
         dFDF=mDict["dFDFth"],
-        lamSqArr_m2=lambdaSqArr_m2,
-        lam0Sq=mDict["lam0Sq_m2"],
+        lam_sq_arr_m2=lambda_sq_arr_m2,
+        lam0_sq=mDict["lam0_sq_m2"],
     )
     mDict_cl["cleanCutoff"] = cutoff
-    mDict_cl["nIter"] = int(iterCountArr)
+    mDict_cl["nIter"] = int(iterCount_arr)
 
     # Measure the complexity of the clean component spectrum
-    mDict_cl["mom2CCFDF"] = measure_fdf_complexity(phiArr=phiArr_radm2, FDF=ccArr)
+    mDict_cl["mom2CCFDF"] = measure_fdf_complexity(phi_arr=phi_arr_radm2, FDF=cc_arr)
 
     # Calculating observed errors (based on dFDFcorMAD)
     mDict_cl["dPhiObserved_rm2"] = (
@@ -247,10 +241,10 @@ def run_rmclean(
     # Pause to display the figure
     if showPlots or saveFigures:
         fdfFig = plot_clean_spec(
-            phiArr_radm2,
+            phi_arr_radm2,
             dirtyFDF,
             cleanFDF,
-            ccArr,
+            cc_arr,
             residFDF,
             cutoff,
             window,
@@ -271,11 +265,11 @@ def run_rmclean(
 
     # add array dictionary
     aDict_cl = dict()
-    aDict_cl["phiArr_radm2"] = phiArr_radm2
-    aDict_cl["freqArr_Hz"] = freqArr_Hz
+    aDict_cl["phi_arr_radm2"] = phi_arr_radm2
+    aDict_cl["freq_arr_Hz"] = freq_arr_Hz
     aDict_cl["cleanFDF"] = cleanFDF
-    aDict_cl["ccArr"] = ccArr
-    aDict_cl["iterCountArr"] = iterCountArr
+    aDict_cl["cc_arr"] = cc_arr
+    aDict_cl["iterCount_arr"] = iterCount_arr
     aDict_cl["residFDF"] = residFDF
 
     return mDict_cl, aDict_cl
@@ -295,9 +289,9 @@ def saveOutput(mDict_cl, aDict_cl, prefixOut="", verbose=False, log=print):
         log (function): function to use when printing verbose messages.
     """
     # Get data
-    phiArr_radm2 = aDict_cl["phiArr_radm2"]
+    phi_arr_radm2 = aDict_cl["phi_arr_radm2"]
     cleanFDF = aDict_cl["cleanFDF"]
-    ccArr = aDict_cl["ccArr"]
+    cc_arr = aDict_cl["cc_arr"]
 
     # Save the deconvolved FDF and CC model to ASCII files
     if verbose:
@@ -305,11 +299,11 @@ def saveOutput(mDict_cl, aDict_cl, prefixOut="", verbose=False, log=print):
     outFile = prefixOut + "_FDFclean.dat"
     if verbose:
         log("> %s" % outFile)
-    np.savetxt(outFile, list(zip(phiArr_radm2, cleanFDF.real, cleanFDF.imag)))
+    np.savetxt(outFile, list(zip(phi_arr_radm2, cleanFDF.real, cleanFDF.imag)))
     outFile = prefixOut + "_FDFmodel.dat"
     if verbose:
         log("> %s" % outFile)
-    np.savetxt(outFile, list(zip(phiArr_radm2, ccArr.real, ccArr.imag)))
+    np.savetxt(outFile, list(zip(phi_arr_radm2, cc_arr.real, cc_arr.imag)))
 
     # Save the RM-clean measurements to a "key=value" text file
     if verbose:
@@ -353,38 +347,38 @@ def readFiles(fdfFile, rmsfFile, weightFile, rmSynthFile, nBits):
     dtComplex = "complex" + str(2 * nBits)
 
     # Read the RMSF from the ASCII file
-    phi2Arr_radm2, RMSFreal, RMSFimag = np.loadtxt(rmsfFile, unpack=True, dtype=dtFloat)
+    phi2_arr_radm2, RMSFreal, RMSFimag = np.loadtxt(rmsfFile, unpack=True, dtype=dtFloat)
     # Read the frequency vector for the lambda^2 array
-    freqArr_Hz, weightArr = np.loadtxt(weightFile, unpack=True, dtype=dtFloat)
+    freq_arr_Hz, weight_arr = np.loadtxt(weightFile, unpack=True, dtype=dtFloat)
     # Read the FDF from the ASCII file
-    phiArr_radm2, FDFreal, FDFimag = np.loadtxt(fdfFile, unpack=True, dtype=dtFloat)
+    phi_arr_radm2, FDFreal, FDFimag = np.loadtxt(fdfFile, unpack=True, dtype=dtFloat)
     # Read the RM-synthesis parameters from the JSON file
     mDict = json.load(open(rmSynthFile, "r"))
     dirtyFDF = FDFreal + 1j * FDFimag
-    RMSFArr = RMSFreal + 1j * RMSFimag
+    RMSF_arr = RMSFreal + 1j * RMSFimag
 
     # add array dictionary
     aDict = dict()
-    aDict["phiArr_radm2"] = phiArr_radm2
-    aDict["phi2Arr_radm2"] = phi2Arr_radm2
-    aDict["RMSFArr"] = RMSFArr
-    aDict["freqArr_Hz"] = freqArr_Hz
-    aDict["weightArr"] = weightArr
+    aDict["phi_arr_radm2"] = phi_arr_radm2
+    aDict["phi2_arr_radm2"] = phi2_arr_radm2
+    aDict["RMSF_arr"] = RMSF_arr
+    aDict["freq_arr_Hz"] = freq_arr_Hz
+    aDict["weight_arr"] = weight_arr
     aDict["dirtyFDF"] = dirtyFDF
 
     return mDict, aDict
 
 
 def plot_clean_spec(
-    phiArr_radm2, dirtyFDF, cleanFDF, ccArr, residFDF, cutoff, window, units
+    phi_arr_radm2, dirtyFDF, cleanFDF, cc_arr, residFDF, cutoff, window, units
 ):
     """
     Plotting code for CLEANed Faraday depth spectra.
     Inputs:
-        phiArr_radm2 (array): array of Faraday depth values.
+        phi_arr_radm2 (array): array of Faraday depth values.
         dirty FDF (array): dirty Faraday depth spectrum.
         cleanFDF (array): cleaned (restored) Faraday depth spectrum
-        ccArr (array): clean component array
+        cc_arr (array): clean component array
         residFDF (array): residual Faraday depth spectrum
         cutoff (float): clean threshold
         window (float): window threshold
@@ -398,13 +392,13 @@ def plot_clean_spec(
 
     dirtyFDF = np.squeeze(dirtyFDF)
     cleanFDF = np.squeeze(cleanFDF)
-    ccArr = np.squeeze(ccArr)
+    cc_arr = np.squeeze(cc_arr)
     residFDF = np.squeeze(residFDF)
 
     ax1.cla()
     ax2.cla()
     ax1.step(
-        phiArr_radm2,
+        phi_arr_radm2,
         np.abs(dirtyFDF),
         color="grey",
         marker="None",
@@ -415,8 +409,8 @@ def plot_clean_spec(
         label="Dirty FDF",
     )
     ax1.step(
-        phiArr_radm2,
-        np.abs(ccArr),
+        phi_arr_radm2,
+        np.abs(cc_arr),
         color="g",
         marker="None",
         mfc="w",
@@ -426,7 +420,7 @@ def plot_clean_spec(
         label="Clean Components",
     )
     ax1.step(
-        phiArr_radm2,
+        phi_arr_radm2,
         np.abs(residFDF),
         color="magenta",
         marker="None",
@@ -437,7 +431,7 @@ def plot_clean_spec(
         label="Residual FDF",
     )
     ax1.step(
-        phiArr_radm2,
+        phi_arr_radm2,
         np.abs(cleanFDF),
         color="k",
         marker="None",
@@ -466,7 +460,7 @@ def plot_clean_spec(
     leg.get_frame().set_alpha(0.5)
     [label.set_visible(False) for label in ax1.get_xticklabels()]
     ax2.step(
-        phiArr_radm2,
+        phi_arr_radm2,
         np.abs(residFDF),
         color="magenta",
         marker="None",
@@ -477,8 +471,8 @@ def plot_clean_spec(
         label="Residual FDF",
     )
     ax2.step(
-        phiArr_radm2,
-        np.abs(ccArr),
+        phi_arr_radm2,
+        np.abs(cc_arr),
         color="g",
         marker="None",
         mfc="w",

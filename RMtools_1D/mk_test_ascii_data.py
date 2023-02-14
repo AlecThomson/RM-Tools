@@ -79,7 +79,7 @@ def main():
     one source.
 
     The spectra are populated with polarised sources whose properties are given
-    in an external CSV-format catalogue file. Two types of model may be 
+    in an external CSV-format catalogue file. Two types of model may be
     specified in the file, assuming a total flux & spectral index:
 
         # MODEL TYPE 1: One or more components affected by Burn depolarisation.
@@ -113,7 +113,7 @@ def main():
         #
         # Column  |  Description
         #---------------------------------------------------
-        # [0]     |  Model type [2]      
+        # [0]     |  Model type [2]
         # [1]     |  X coordinate (deg)    ... dummy value
         # [2]     |  Y coordinate (deg)    ... dummy value
         # [3]     |  Major axis (arcsec)   ... dummy value
@@ -144,7 +144,7 @@ def main():
 
     ./mk_test_ascii_data.py catalogue.csv -f 1.10e9,1.20e9,1.60e9,1.65e9
 
-    ./mk_test_ascii_data.py catalogue.csv -n NOISE.TXT 
+    ./mk_test_ascii_data.py catalogue.csv -n NOISE.TXT
 
     """
 
@@ -230,9 +230,9 @@ def main():
 
     # Read the RMS noise template
     try:
-        noiseTmpArr = np.loadtxt(noiseTmpFile, unpack=True)
+        noiseTmp_arr = np.loadtxt(noiseTmpFile, unpack=True)
     except Exception:
-        noiseTmpArr = None
+        noiseTmp_arr = None
 
     # Call the function to create the ASCII data files on disk
     nSrc = create_IQU_ascii_data(
@@ -242,7 +242,7 @@ def main():
         endFreq_Hz,
         nChans,
         rmsNoise,
-        noiseTmpArr,
+        noiseTmp_arr,
         flagRanges_Hz,
         freq0_Hz,
     )
@@ -256,7 +256,7 @@ def create_IQU_ascii_data(
     endFreq_Hz,
     nChans,
     rmsNoise,
-    noiseTmpArr=None,
+    noiseTmp_arr=None,
     flagRanges_Hz=[],
     freq0_Hz=None,
 ):
@@ -265,33 +265,33 @@ def create_IQU_ascii_data(
     """
 
     # Sample frequency space
-    freqArr_Hz = np.linspace(startFreq_Hz, endFreq_Hz, nChans)
-    freqNoFlgArr_Hz = freqArr_Hz.copy()
+    freq_arr_Hz = np.linspace(startFreq_Hz, endFreq_Hz, nChans)
+    freqNoFlg_arr_Hz = freq_arr_Hz.copy()
     dFreq_Hz = (endFreq_Hz - startFreq_Hz) / (nChans - 1)
     print(
         "\nSampling frequencies %.2f - %.2f MHz by %.2f MHz."
-        % (freqArr_Hz[0] / 1e6, freqArr_Hz[-1] / 1e6, dFreq_Hz / 1e6)
+        % (freq_arr_Hz[0] / 1e6, freq_arr_Hz[-1] / 1e6, dFreq_Hz / 1e6)
     )
     if len(flagRanges_Hz) > 0:
         print("Flagging frequency ranges:")
         print("> ", flagRanges_Hz)
-    for i in range(len(freqArr_Hz)):
+    for i in range(len(freq_arr_Hz)):
         for fRng in flagRanges_Hz:
-            if freqArr_Hz[i] >= fRng[0] and freqArr_Hz[i] <= fRng[1]:
-                freqArr_Hz[i] = np.nan
+            if freq_arr_Hz[i] >= fRng[0] and freq_arr_Hz[i] <= fRng[1]:
+                freq_arr_Hz[i] = np.nan
 
     # Create normalised noise array from a template or assume all ones.
     print("Input RMS noise is %.3g mJy" % rmsNoise)
-    if noiseTmpArr is None:
+    if noiseTmp_arr is None:
         print("Assuming flat noise versus frequency curve.")
-        noiseArr = np.ones(freqArr_Hz.shape, dtype="f8")
+        noise_arr = np.ones(freq_arr_Hz.shape, dtype="f8")
     else:
         print("Scaling noise by external template curve.")
-        xp = noiseTmpArr[0]
-        yp = noiseTmpArr[1]
+        xp = noiseTmp_arr[0]
+        yp = noiseTmp_arr[1]
         mDict = calc_stats(yp)
         yp /= mDict["median"]
-        noiseArr = extrap(freqArr_Hz, xp, yp)
+        noise_arr = extrap(freq_arr_Hz, xp, yp)
 
     # Check the catalogue file exists
     if not os.path.exists(inCatFile):
@@ -333,18 +333,18 @@ def create_IQU_ascii_data(
         if modelType == 1:
 
             # Parse the parameters of multiple components
-            preLst, parmArr = split_repeat_lst(e[1:], 7, 4)
+            preLst, parm_arr = split_repeat_lst(e[1:], 7, 4)
 
             # Create the model spectra from multiple thin components
             # modified by external depolarisation
-            IArr, QArr, UArr = create_IQU_spectra_burn(
-                freqArr_Hz=freqArr_Hz,
+            I_arr, Q_arr, U_arr = create_IQU_spectra_burn(
+                freq_arr_Hz=freq_arr_Hz,
                 fluxI=preLst[5],
                 SI=preLst[6],
-                fracPolArr=parmArr[0],
-                psi0Arr_deg=parmArr[1],
-                RMArr_radm2=parmArr[2],
-                sigmaRMArr_radm2=parmArr[3],
+                fracPol_arr=parm_arr[0],
+                psi0_arr_deg=parm_arr[1],
+                RM_arr_radm2=parm_arr[2],
+                sigmaRM_arr_radm2=parm_arr[3],
                 freq0_Hz=freq0_Hz,
             )
 
@@ -352,32 +352,32 @@ def create_IQU_ascii_data(
         elif modelType == 2:
 
             # Parse the parameters of multiple components
-            preLst, parmArr = split_repeat_lst(e[1:], 7, 3)
+            preLst, parm_arr = split_repeat_lst(e[1:], 7, 3)
 
             # Create the model spectra from multiple components
             # modified by internal Faraday depolarisation
-            IArr, QArr, UArr = create_IQU_spectra_diff(
-                freqArr_Hz=freqArr_Hz,
+            I_arr, Q_arr, U_arr = create_IQU_spectra_diff(
+                freq_arr_Hz=freq_arr_Hz,
                 fluxI=preLst[5],
                 SI=preLst[6],
-                fracPolArr=parmArr[0],
-                psi0Arr_deg=parmArr[1],
-                RMArr_radm2=parmArr[2],
+                fracPol_arr=parm_arr[0],
+                psi0_arr_deg=parm_arr[1],
+                RM_arr_radm2=parm_arr[2],
                 freq0_Hz=freq0_Hz,
             )
         else:
             continue
 
         # Add scatter to the data to simulate noise
-        IArr += np.random.normal(scale=rmsNoise, size=IArr.shape) * noiseArr
-        QArr += np.random.normal(scale=rmsNoise, size=QArr.shape) * noiseArr
-        UArr += np.random.normal(scale=rmsNoise, size=UArr.shape) * noiseArr
-        dIArr = noiseArr * rmsNoise
-        dIArr *= np.random.normal(loc=1.0, scale=0.05, size=noiseArr.shape)
-        dQArr = noiseArr * rmsNoise
-        dQArr *= np.random.normal(loc=1.0, scale=0.05, size=noiseArr.shape)
-        dUArr = noiseArr * rmsNoise
-        dUArr *= np.random.normal(loc=1.0, scale=0.05, size=noiseArr.shape)
+        I_arr += np.random.normal(scale=rmsNoise, size=I_arr.shape) * noise_arr
+        Q_arr += np.random.normal(scale=rmsNoise, size=Q_arr.shape) * noise_arr
+        U_arr += np.random.normal(scale=rmsNoise, size=U_arr.shape) * noise_arr
+        dI_arr = noise_arr * rmsNoise
+        dI_arr *= np.random.normal(loc=1.0, scale=0.05, size=noise_arr.shape)
+        dQ_arr = noise_arr * rmsNoise
+        dQ_arr *= np.random.normal(loc=1.0, scale=0.05, size=noise_arr.shape)
+        dU_arr = noise_arr * rmsNoise
+        dU_arr *= np.random.normal(loc=1.0, scale=0.05, size=noise_arr.shape)
 
         # Save spectra to disk
         outFileName = "Source%d.dat" % (i + 1)
@@ -385,7 +385,7 @@ def create_IQU_ascii_data(
         print("> Writing ASCII file '%s' ..." % outFileName, end=" ")
         np.savetxt(
             outFilePath,
-            np.column_stack((freqArr_Hz, IArr, QArr, UArr, dIArr, dQArr, dUArr)),
+            np.column_stack((freq_arr_Hz, I_arr, Q_arr, U_arr, dI_arr, dQ_arr, dU_arr)),
         )
         print("done.")
         successCount += 1

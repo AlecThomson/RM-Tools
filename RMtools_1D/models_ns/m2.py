@@ -9,21 +9,21 @@ import numpy as np
 # Function defining the model.                                                #
 #                                                                             #
 #  pDict       = Dictionary of parameters, created by parsing inParms, below. #
-#  lamSqArr_m2 = Array of lambda-squared values                               #
-#  quArr       = Complex array containing the Re and Im spectra.              #
+#  lam_sq_arr_m2 = _array of lambda-squared values                               #
+#  qu_arr       = Complex array containing the Re and Im spectra.              #
 # -----------------------------------------------------------------------------#
-def model(pDict, lamSqArr_m2):
+def model(pDict, lam_sq_arr_m2):
     """Single Faraday component with Burn depolarisation"""
 
     # Calculate the complex fractional q and u spectra
-    pArr = pDict["fracPol"] * np.ones_like(lamSqArr_m2)
-    quArr = (
-        pArr
-        * np.exp(2j * (np.radians(pDict["psi0_deg"]) + pDict["RM_radm2"] * lamSqArr_m2))
-        * np.exp(-2.0 * pDict["sigmaRM_radm2"] ** 2.0 * lamSqArr_m2**2.0)
+    p_arr = pDict["fracPol"] * np.ones_like(lam_sq_arr_m2)
+    qu_arr = (
+        p_arr
+        * np.exp(2j * (np.radians(pDict["psi0_deg"]) + pDict["RM_radm2"] * lam_sq_arr_m2))
+        * np.exp(-2.0 * pDict["sigmaRM_radm2"] ** 2.0 * lam_sq_arr_m2**2.0)
     )
 
-    return quArr
+    return qu_arr
 
 
 # -----------------------------------------------------------------------------#

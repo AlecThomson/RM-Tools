@@ -23,12 +23,12 @@ C = 2.997924538e8  # Speed of light [m/s]
 
 def pixelwise_peak_fitting(
     FDF,
-    phiArr,
+    phi_arr,
     fwhmRMSF,
-    lamSqArr_m2,
-    lam0Sq,
+    lam_sq_arr_m2,
+    lam0_sq,
     product_list,
-    noiseArr=None,
+    noise_arr=None,
     stokesIcube=None,
 ):
     """
@@ -38,10 +38,10 @@ def pixelwise_peak_fitting(
     Inputs:
         FDF: FDF cube (3D array). This is assumed to be in astropy axis ordering
             (Phi, dec, ra)
-        phiArr: (1D) array of phi values
+        phi_arr: (1D) array of phi values
         fwhmRMSF: 2D array of RMSF FWHM values
-        lamSqArr_m2: 1D array of channel lambda^2 values.
-        lam0Sq: scalar value for lambda^2_0, the reference wavelength squared.
+        lam_sq_arr_m2: 1D array of channel lambda^2 values.
+        lam0_sq: scalar value for lambda^2_0, the reference wavelength squared.
         product_list: list containing the names of the fitting products to save.
         dFDF: 2D array of theoretical noise values. If not supplied, the
             peak fitting will default to using the measured noise.
@@ -49,14 +49,14 @@ def pixelwise_peak_fitting(
     """
 
     # FDF: output by synth3d or clean3d
-    # phiArr: can be generated from FDF cube
+    # phi_arr: can be generated from FDF cube
     # fwhm: 2D map produced synth3D
     # dFDFth: not currently produced (default mode not to input noise!)
     #   If not present, measure_FDF_parms uses the corMAD noise.
     #
-    # lamSqArr is only needed for computing errors in derotated angles
+    # lam_sq_arr is only needed for computing errors in derotated angles
     #   This could be compressed to a map or single value from RMsynth?
-    # lam0Sq is necessary for de-rotation
+    # lam0_sq is necessary for de-rotation
 
     map_size = FDF.shape[1:]
 
@@ -70,35 +70,35 @@ def pixelwise_peak_fitting(
     for parameter in product_list:
         map_dict[parameter] = np.zeros(map_size)
 
-    freqArr_Hz = C / np.sqrt(lamSqArr_m2)
-    freq0_Hz = C / np.sqrt(lam0Sq)
+    freq_arr_Hz = C / np.sqrt(lam_sq_arr_m2)
+    freq0_Hz = C / np.sqrt(lam0_sq)
     if stokesIcube is not None:
-        idx = np.abs(freqArr_Hz - freq0_Hz).argmin()
-        if freqArr_Hz[idx] < freq0_Hz:
-            Ifreq0Arr = interp_images(
+        idx = np.abs(freq_arr_Hz - freq0_Hz).argmin()
+        if freq_arr_Hz[idx] < freq0_Hz:
+            Ifreq0_arr = interp_images(
                 stokesIcube[idx, :, :], stokesIcube[idx + 1, :, :], f=0.5
             )
-        elif freqArr_Hz[idx] > freq0_Hz:
-            Ifreq0Arr = interp_images(
+        elif freq_arr_Hz[idx] > freq0_Hz:
+            Ifreq0_arr = interp_images(
                 stokesIcube[idx - 1, :, :], stokesIcube[idx, :, :], f=0.5
             )
         else:
-            Ifreq0Arr = stokesIcube[idx, :, :]
+            Ifreq0_arr = stokesIcube[idx, :, :]
     else:
-        Ifreq0Arr = np.ones(map_size)
-        stokesIcube = np.ones((freqArr_Hz.size, map_size[0], map_size[1]))
+        Ifreq0_arr = np.ones(map_size)
+        stokesIcube = np.ones((freq_arr_Hz.size, map_size[0], map_size[1]))
 
     # compute weights if needed:
-    if noiseArr is not None:
-        weightArr = 1.0 / np.power(noiseArr, 2.0)
-        weightArr = np.where(np.isnan(weightArr), 0.0, weightArr)
-        dFDF = Ifreq0Arr * np.sqrt(
-            np.sum(weightArr**2 * np.nan_to_num(noiseArr) ** 2)
-            / (np.sum(weightArr)) ** 2
+    if noise_arr is not None:
+        weight_arr = 1.0 / np.power(noise_arr, 2.0)
+        weight_arr = np.where(np.isnan(weight_arr), 0.0, weight_arr)
+        dFDF = Ifreq0_arr * np.sqrt(
+            np.sum(weight_arr**2 * np.nan_to_num(noise_arr) ** 2)
+            / (np.sum(weight_arr)) ** 2
         )
 
     else:
-        weightArr = np.ones(lamSqArr_m2.shape, dtype=np.float32)
+        weight_arr = np.ones(lam_sq_arr_m2.shape, dtype=np.float32)
         dFDF = None
 
     # Run fitting pixel-wise:
@@ -113,23 +113,23 @@ def pixelwise_peak_fitting(
         try:
             mDict = measure_FDF_parms(
                 FDF_pix,
-                phiArr,
+                phi_arr,
                 fwhmRMSF_pix,
                 dFDF=dFDF_pix,
-                lamSqArr_m2=lamSqArr_m2,
-                lam0Sq=lam0Sq,
+                lam_sq_arr_m2=lam_sq_arr_m2,
+                lam0_sq=lam0_sq,
                 snrDoBiasCorrect=5.0,
             )
             # Add keywords not included by the above function:
-            mDict["lam0Sq_m2"] = lam0Sq
+            mDict["lam0_sq_m2"] = lam0_sq
             mDict["freq0_Hz"] = freq0_Hz
             mDict["fwhmRMSF"] = fwhmRMSF_pix
-            mDict["Ifreq0"] = Ifreq0Arr[xarr[i], yarr[i]]
+            mDict["Ifreq0"] = Ifreq0_arr[xarr[i], yarr[i]]
             mDict["fracPol"] = mDict["ampPeakPIfit"] / mDict["Ifreq0"]
-            mDict["min_freq"] = float(np.min(freqArr_Hz))
-            mDict["max_freq"] = float(np.max(freqArr_Hz))
-            mDict["N_channels"] = lamSqArr_m2.size
-            mDict["median_channel_width"] = float(np.median(np.diff(freqArr_Hz)))
+            mDict["min_freq"] = float(np.min(freq_arr_Hz))
+            mDict["max_freq"] = float(np.max(freq_arr_Hz))
+            mDict["N_channels"] = lam_sq_arr_m2.size
+            mDict["median_channel_width"] = float(np.median(np.diff(freq_arr_Hz)))
             if dFDF_pix is not None:
                 mDict["dFDFth"] = dFDF_pix
             else:
@@ -212,8 +212,8 @@ def save_maps(map_dict, prefix_path, FDFheader):
         "Ifreq0": flux_unit,
         "polyCoeffs": "",
         "IfitStat": "",
-        "IfitChiSqRed": "",
-        "lam0Sq_m2": "m^2",
+        "IfitChi_sqRed": "",
+        "lam0_sq_m2": "m^2",
         "freq0_Hz": "Hz",
         "fwhmRMSF": "rad/m^2",
         "dQU": flux_unit,
@@ -296,12 +296,12 @@ def read_files(FDF_filename, freq_filename):
     # Remove degenerate axes to prevent problems with later steps.
     complex_cube = complex_cube.squeeze()
 
-    lam0Sq = head["LAMSQ0"]
+    lam0_sq = head["LAMSQ0"]
 
-    freqArr_Hz = np.loadtxt(freq_filename, dtype=float)
-    lambdaSqArr_m2 = np.power(C / freqArr_Hz, 2.0)
+    freq_arr_Hz = np.loadtxt(freq_filename, dtype=float)
+    lambda_sq_arr_m2 = np.power(C / freq_arr_Hz, 2.0)
 
-    phiArr_radm2 = fits_make_lin_axis(head, axis=FD_axis - 1)
+    phi_arr_radm2 = fits_make_lin_axis(head, axis=FD_axis - 1)
 
     HDUfwhm = pf.open(
         FDF_filename.replace("FDF_tot_dirty", "RMSF_FWHM")
@@ -315,7 +315,7 @@ def read_files(FDF_filename, freq_filename):
     )
     fwhmRMSF = HDUfwhm[0].data.squeeze()
 
-    return complex_cube, phiArr_radm2, fwhmRMSF, lambdaSqArr_m2, lam0Sq, head
+    return complex_cube, phi_arr_radm2, fwhmRMSF, lambda_sq_arr_m2, lam0_sq, head
 
 
 def main():
@@ -333,7 +333,7 @@ def main():
     """
 
     epilog_text = """
-    The script saves 2D maps of the parameters from the peak fitting and 
+    The script saves 2D maps of the parameters from the peak fitting and
     FDF characterization function. The user can select how many products are
     saved:
     no flag: a curated list of potentially interesting parameters is saved
@@ -450,7 +450,7 @@ def main():
             "dPolAngle0Fit_deg",
             "Ifreq0",
             "dFDFth",
-            "lam0Sq_m2",
+            "lam0_sq_m2",
             "freq0_Hz",
             "fwhmRMSF",
             "min_freq",
@@ -470,13 +470,13 @@ def main():
             "peakFDFimagFit",
             "peakFDFrealFit",
             "Ifreq0",
-            "lam0Sq_m2",
+            "lam0_sq_m2",
             "polAngle0Fit_deg",
             "dPolAngle0Fit_deg",
         ]
 
     # Read in files
-    FDF, phiArr_radm2, fwhmRMSF, lambdaSqArr_m2, lam0Sq, header = read_files(
+    FDF, phi_arr_radm2, fwhmRMSF, lambda_sq_arr_m2, lam0_sq, header = read_files(
         args.FDF_filename[0], args.freq_file[0]
     )
 
@@ -485,19 +485,19 @@ def main():
     else:
         dataI = None
     if args.noiseFile is not None:
-        rmsArr = readFreqFile(args.noiseFile, args.verbose)
+        rms_arr = readFreqFile(args.noiseFile, args.verbose)
     else:
-        rmsArr = None
+        rms_arr = None
 
     # Fit peaks
     map_dict = pixelwise_peak_fitting(
         FDF,
-        phiArr_radm2,
+        phi_arr_radm2,
         fwhmRMSF,
-        lambdaSqArr_m2,
-        lam0Sq,
+        lambda_sq_arr_m2,
+        lam0_sq,
         product_list,
-        noiseArr=rmsArr,
+        noise_arr=rms_arr,
         stokesIcube=dataI,
     )
 

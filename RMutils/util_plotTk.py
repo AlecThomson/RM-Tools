@@ -234,11 +234,11 @@ class CustomNavbar(NavigationToolbar2Tk):
 # -----------------------------------------------------------------------------#
 def plot_I_vs_nu_ax(
     ax,
-    freqArr_Hz,
-    IArr,
-    dIArr=None,
-    freqHirArr_Hz=None,
-    IModArr=None,
+    freq_arr_Hz,
+    I_arr,
+    dI_arr=None,
+    freqHir_arr_Hz=None,
+    IMod_arr=None,
     axisYright=False,
     axisXtop=False,
     units="",
@@ -254,14 +254,14 @@ def plot_I_vs_nu_ax(
         ax.xaxis.set_label_position("top")
 
     # Default to non-high-resolution inputs
-    if freqHirArr_Hz is None:
-        freqHirArr_Hz = freqArr_Hz
+    if freqHir_arr_Hz is None:
+        freqHir_arr_Hz = freq_arr_Hz
 
     # Plot I versus frequency
     ax.errorbar(
-        x=freqArr_Hz / 1e9,
-        y=IArr,
-        yerr=dIArr,
+        x=freq_arr_Hz / 1e9,
+        y=I_arr,
+        yerr=dI_arr,
         mfc="none",
         ms=2,
         fmt="D",
@@ -274,16 +274,16 @@ def plot_I_vs_nu_ax(
     )
 
     # Plot the model
-    if IModArr is not None:
-        ax.plot(freqHirArr_Hz / 1e9, IModArr, color="tab:red", lw=2.5, label="I Model")
+    if IMod_arr is not None:
+        ax.plot(freqHir_arr_Hz / 1e9, IMod_arr, color="tab:red", lw=2.5, label="I Model")
 
     # Scaling & formatting
     ax.yaxis.set_major_locator(MaxNLocator(4))
     ax.xaxis.set_major_locator(MaxNLocator(4))
-    xRange = (np.nanmax(freqArr_Hz) - np.nanmin(freqArr_Hz)) / 1e9
+    xRange = (np.nanmax(freq_arr_Hz) - np.nanmin(freq_arr_Hz)) / 1e9
     ax.set_xlim(
-        np.nanmin(freqArr_Hz) / 1e9 - xRange * 0.05,
-        np.nanmax(freqArr_Hz) / 1e9 + xRange * 0.05,
+        np.nanmin(freq_arr_Hz) / 1e9 - xRange * 0.05,
+        np.nanmax(freq_arr_Hz) / 1e9 + xRange * 0.05,
     )
     ax.set_xlabel("$\\nu$ (GHz)")
     ax.set_ylabel("Flux Density (" + units + ")")
@@ -297,14 +297,14 @@ def plot_I_vs_nu_ax(
 # -----------------------------------------------------------------------------#
 def plot_PQU_vs_nu_ax(
     ax,
-    freqArr_Hz,
-    QArr,
-    UArr,
-    dQArr=None,
-    dUArr=None,
-    freqHirArr_Hz=None,
-    QmodArr=None,
-    UmodArr=None,
+    freq_arr_Hz,
+    Q_arr,
+    U_arr,
+    dQ_arr=None,
+    dU_arr=None,
+    freqHir_arr_Hz=None,
+    Qmod_arr=None,
+    Umod_arr=None,
     axisYright=False,
     axisXtop=False,
 ):
@@ -319,21 +319,21 @@ def plot_PQU_vs_nu_ax(
         ax.xaxis.set_label_position("top")
 
     # Default to non-high-resolution inputs
-    if freqHirArr_Hz is None:
-        freqHirArr_Hz = freqArr_Hz
+    if freqHir_arr_Hz is None:
+        freqHir_arr_Hz = freq_arr_Hz
 
     # Calculate P and errors
-    PArr = np.sqrt(np.power(QArr, 2) + np.power(UArr, 2))
-    if dQArr is None or dUArr is None:
-        dPArr = None
+    P_arr = np.sqrt(np.power(Q_arr, 2) + np.power(U_arr, 2))
+    if dQ_arr is None or dU_arr is None:
+        dP_arr = None
     else:
-        dPArr = np.sqrt(np.power(dQArr, 2) + np.power(dUArr, 2))
+        dP_arr = np.sqrt(np.power(dQ_arr, 2) + np.power(dU_arr, 2))
 
     # Plot P, Q, U versus frequency
     ax.errorbar(
-        x=freqArr_Hz / 1e9,
-        y=QArr,
-        yerr=dQArr,
+        x=freq_arr_Hz / 1e9,
+        y=Q_arr,
+        yerr=dQ_arr,
         mec="tab:blue",
         mfc="none",
         ms=2,
@@ -344,9 +344,9 @@ def plot_PQU_vs_nu_ax(
         label="Stokes Q",
     )
     ax.errorbar(
-        x=freqArr_Hz / 1e9,
-        y=UArr,
-        yerr=dUArr,
+        x=freq_arr_Hz / 1e9,
+        y=U_arr,
+        yerr=dU_arr,
         mec="tab:red",
         mfc="none",
         ms=2,
@@ -357,9 +357,9 @@ def plot_PQU_vs_nu_ax(
         label="Stokes U",
     )
     ax.errorbar(
-        x=freqArr_Hz / 1e9,
-        y=PArr,
-        yerr=dPArr,
+        x=freq_arr_Hz / 1e9,
+        y=P_arr,
+        yerr=dP_arr,
         mec="k",
         mfc="none",
         ms=2,
@@ -371,21 +371,21 @@ def plot_PQU_vs_nu_ax(
     )
 
     # Plot the models
-    if QmodArr is not None:
-        ax.plot(freqHirArr_Hz / 1e9, QmodArr, color="tab:blue", lw=0.5, label="Model Q")
-    if UmodArr is not None:
-        ax.plot(freqHirArr_Hz / 1e9, UmodArr, color="tab:red", lw=0.5, label="Model U")
-    if QmodArr is not None and UmodArr is not None:
-        PmodArr = np.sqrt(QmodArr**2.0 + UmodArr**2.0)
-        ax.plot(freqHirArr_Hz / 1e9, PmodArr, color="k", lw=0.5, label="Model P")
+    if Qmod_arr is not None:
+        ax.plot(freqHir_arr_Hz / 1e9, Qmod_arr, color="tab:blue", lw=0.5, label="Model Q")
+    if Umod_arr is not None:
+        ax.plot(freqHir_arr_Hz / 1e9, Umod_arr, color="tab:red", lw=0.5, label="Model U")
+    if Qmod_arr is not None and Umod_arr is not None:
+        Pmod_arr = np.sqrt(Qmod_arr**2.0 + Umod_arr**2.0)
+        ax.plot(freqHir_arr_Hz / 1e9, Pmod_arr, color="k", lw=0.5, label="Model P")
 
     # Formatting
     ax.yaxis.set_major_locator(MaxNLocator(4))
     ax.xaxis.set_major_locator(MaxNLocator(4))
-    xRange = (np.nanmax(freqArr_Hz) - np.nanmin(freqArr_Hz)) / 1e9
+    xRange = (np.nanmax(freq_arr_Hz) - np.nanmin(freq_arr_Hz)) / 1e9
     ax.set_xlim(
-        np.nanmin(freqArr_Hz) / 1e9 - xRange * 0.05,
-        np.nanmax(freqArr_Hz) / 1e9 + xRange * 0.05,
+        np.nanmin(freq_arr_Hz) / 1e9 - xRange * 0.05,
+        np.nanmax(freq_arr_Hz) / 1e9 + xRange * 0.05,
     )
     ax.set_xlabel("$\\nu$ (GHz)")
     ax.set_ylabel("Flux Density")
@@ -398,7 +398,7 @@ def plot_PQU_vs_nu_ax(
 
 # -----------------------------------------------------------------------------#
 def plot_rmsIQU_vs_nu_ax(
-    ax, freqArr_Hz, rmsIArr, rmsQArr, rmsUArr, axisYright=False, axisXtop=False
+    ax, freq_arr_Hz, rmsI_arr, rmsQ_arr, rmsU_arr, axisYright=False, axisXtop=False
 ):
     """Plot the noise spectra in Stokes I, Q & U."""
 
@@ -411,22 +411,22 @@ def plot_rmsIQU_vs_nu_ax(
         ax.xaxis.set_label_position("top")
 
     # Plot the rms spectra in GHz and flux units
-    ax.plot(freqArr_Hz / 1e9, rmsIArr, marker="o", color="k", lw=0.5, label="rms I")
+    ax.plot(freq_arr_Hz / 1e9, rmsI_arr, marker="o", color="k", lw=0.5, label="rms I")
     ax.plot(
-        freqArr_Hz / 1e9, rmsQArr, marker="o", color="tab:blue", lw=0.5, label="rms Q"
+        freq_arr_Hz / 1e9, rmsQ_arr, marker="o", color="tab:blue", lw=0.5, label="rms Q"
     )
     ax.plot(
-        freqArr_Hz / 1e9, rmsUArr, marker="o", color="tab:red", lw=0.5, label="rms U"
+        freq_arr_Hz / 1e9, rmsU_arr, marker="o", color="tab:red", lw=0.5, label="rms U"
     )
     # ax.text(0.05, 0.94, 'I, Q & U RMS', transform=ax.transAxes)
 
     # Formatting
     ax.yaxis.set_major_locator(MaxNLocator(4))
     ax.xaxis.set_major_locator(MaxNLocator(4))
-    xRange = (np.nanmax(freqArr_Hz) - np.nanmin(freqArr_Hz)) / 1e9
+    xRange = (np.nanmax(freq_arr_Hz) - np.nanmin(freq_arr_Hz)) / 1e9
     ax.set_xlim(
-        np.nanmin(freqArr_Hz) / 1e9 - xRange * 0.05,
-        np.nanmax(freqArr_Hz) / 1e9 + xRange * 0.05,
+        np.nanmin(freq_arr_Hz) / 1e9 - xRange * 0.05,
+        np.nanmax(freq_arr_Hz) / 1e9 + xRange * 0.05,
     )
     ax.set_xlabel("$\\nu$ (GHz)")
     ax.set_ylabel("Flux Density")
@@ -439,16 +439,16 @@ def plot_rmsIQU_vs_nu_ax(
 # -----------------------------------------------------------------------------#
 def plot_pqu_vs_lamsq_ax(
     ax,
-    lamSqArr_m2,
-    qArr,
-    uArr,
-    pArr=None,
-    dqArr=None,
-    duArr=None,
-    dpArr=None,
-    lamSqHirArr_m2=None,
-    qModArr=None,
-    uModArr=None,
+    lam_sq_arr_m2,
+    q_arr,
+    u_arr,
+    p_arr=None,
+    dq_arr=None,
+    du_arr=None,
+    dp_arr=None,
+    lam_sqHir_arr_m2=None,
+    qMod_arr=None,
+    uMod_arr=None,
     model_dict=None,
     axisYright=False,
     axisXtop=False,
@@ -463,26 +463,26 @@ def plot_pqu_vs_lamsq_ax(
         ax.xaxis.set_label_position("top")
 
     # Default to non-high-resolution inputs
-    if lamSqHirArr_m2 is None:
-        lamSqHirArr_m2 = lamSqArr_m2
+    if lam_sqHir_arr_m2 is None:
+        lam_sqHir_arr_m2 = lam_sq_arr_m2
 
     # Calculate p and errors
-    if pArr is None:
-        pArr = np.sqrt(qArr**2.0 + uArr**2.0)
-        pArr = np.where(np.isfinite(pArr), pArr, np.nan)
-    if dpArr is None:
-        if dqArr is None or duArr is None:
-            dpArr = None
+    if p_arr is None:
+        p_arr = np.sqrt(q_arr**2.0 + u_arr**2.0)
+        p_arr = np.where(np.isfinite(p_arr), p_arr, np.nan)
+    if dp_arr is None:
+        if dq_arr is None or du_arr is None:
+            dp_arr = None
         else:
-            dpArr = np.sqrt(dqArr**2.0 + duArr**2.0)
-            dpArr = np.where(np.isfinite(dpArr), dpArr, np.nan)
+            dp_arr = np.sqrt(dq_arr**2.0 + du_arr**2.0)
+            dp_arr = np.where(np.isfinite(dp_arr), dp_arr, np.nan)
 
     # Plot p, q, u versus lambda^2
     #    """
     ax.errorbar(
-        x=lamSqArr_m2,
-        y=qArr,
-        yerr=dqArr,
+        x=lam_sq_arr_m2,
+        y=q_arr,
+        yerr=dq_arr,
         mec="tab:blue",
         mfc="none",
         ms=2,
@@ -494,9 +494,9 @@ def plot_pqu_vs_lamsq_ax(
         label="Stokes q",
     )
     ax.errorbar(
-        x=lamSqArr_m2,
-        y=uArr,
-        yerr=duArr,
+        x=lam_sq_arr_m2,
+        y=u_arr,
+        yerr=du_arr,
         mec="tab:red",
         mfc="none",
         ms=2,
@@ -508,9 +508,9 @@ def plot_pqu_vs_lamsq_ax(
         label="Stokes u",
     )
     ax.errorbar(
-        x=lamSqArr_m2,
-        y=pArr,
-        yerr=dpArr,
+        x=lam_sq_arr_m2,
+        y=p_arr,
+        yerr=dp_arr,
         mec="k",
         mfc="none",
         ms=2,
@@ -522,31 +522,31 @@ def plot_pqu_vs_lamsq_ax(
         label="Intensity p",
     )
     """
-    ax.errorbar(x=lamSqArr_m2, y=pArr, yerr=dpArr, mec='k', mfc='tab:red', ms=2,
+    ax.errorbar(x=lam_sq_arr_m2, y=p_arr, yerr=dp_arr, mec='k', mfc='tab:red', ms=2,
                 fmt='D', ecolor='k', elinewidth=1.0, capsize=2,
                 label='Intensity p')
 
-    ax.errorbar(x=lamSqArr_m2, y=qArr, yerr=dqArr, mec='tab:blue', mfc='tab:red', ms=2,
+    ax.errorbar(x=lam_sq_arr_m2, y=q_arr, yerr=dq_arr, mec='tab:blue', mfc='tab:red', ms=2,
                 fmt='D', ecolor='tab:blue', elinewidth=1.0, capsize=2,
                 label='Stokes q')
-    
-    ax.errorbar(x=lamSqArr_m2, y=uArr, yerr=duArr, mec='tab:red', mfc='tab:blue', ms=2,
+
+    ax.errorbar(x=lam_sq_arr_m2, y=u_arr, yerr=du_arr, mec='tab:red', mfc='tab:blue', ms=2,
                 fmt='D', ecolor='tab:red', elinewidth=1.0, capsize=2,
                 label='Stokes u')
     """
 
     # Plot the models
-    if qModArr is not None:
+    if qMod_arr is not None:
         ax.plot(
-            lamSqHirArr_m2, qModArr, color="tab:blue", alpha=1, lw=0.1, label="Model q"
+            lam_sqHir_arr_m2, qMod_arr, color="tab:blue", alpha=1, lw=0.1, label="Model q"
         )
-    if uModArr is not None:
+    if uMod_arr is not None:
         ax.plot(
-            lamSqHirArr_m2, uModArr, color="tab:red", alpha=1, lw=0.1, label="Model u"
+            lam_sqHir_arr_m2, uMod_arr, color="tab:red", alpha=1, lw=0.1, label="Model u"
         )
-    if qModArr is not None and uModArr is not None:
-        pModArr = np.sqrt(qModArr**2.0 + uModArr**2.0)
-        ax.plot(lamSqHirArr_m2, pModArr, color="k", alpha=1, lw=0.1, label="Model p")
+    if qMod_arr is not None and uMod_arr is not None:
+        pMod_arr = np.sqrt(qMod_arr**2.0 + uMod_arr**2.0)
+        ax.plot(lam_sqHir_arr_m2, pMod_arr, color="k", alpha=1, lw=0.1, label="Model p")
     if model_dict is not None:
         errDict = {}
         QUerrmodel = []
@@ -555,40 +555,40 @@ def plot_pqu_vs_lamsq_ax(
             idx = np.random.choice(np.arange(model_dict["posterior"].shape[0]))
             for j, name in enumerate(model_dict["parNames"]):
                 errDict[name] = model_dict["posterior"][name][idx]
-            QUerrmodel.append(model_dict["model"](errDict, lamSqHirArr_m2))
+            QUerrmodel.append(model_dict["model"](errDict, lam_sqHir_arr_m2))
         QUerrmodel = np.array(QUerrmodel)
         low, med, high = np.percentile(QUerrmodel, [16, 50, 84], axis=0)
 
         ax.plot(
-            lamSqHirArr_m2, np.real(med), "-", color="tab:blue", linewidth=0.1, alpha=1
+            lam_sqHir_arr_m2, np.real(med), "-", color="tab:blue", linewidth=0.1, alpha=1
         )
         ax.fill_between(
-            lamSqHirArr_m2, np.real(low), np.real(high), color="tab:blue", alpha=0.5
+            lam_sqHir_arr_m2, np.real(low), np.real(high), color="tab:blue", alpha=0.5
         )
         ax.plot(
-            lamSqHirArr_m2, np.imag(med), "-", color="tab:red", linewidth=0.1, alpha=1
+            lam_sqHir_arr_m2, np.imag(med), "-", color="tab:red", linewidth=0.1, alpha=1
         )
         ax.fill_between(
-            lamSqHirArr_m2, np.imag(low), np.imag(high), color="tab:red", alpha=0.5
+            lam_sqHir_arr_m2, np.imag(low), np.imag(high), color="tab:red", alpha=0.5
         )
-        if qModArr is not None and uModArr is not None:
-            ax.plot(lamSqHirArr_m2, np.abs(med), "-", color="k", linewidth=0.1, alpha=1)
+        if qMod_arr is not None and uMod_arr is not None:
+            ax.plot(lam_sqHir_arr_m2, np.abs(med), "-", color="k", linewidth=0.1, alpha=1)
             ax.fill_between(
-                lamSqHirArr_m2, np.abs(low), np.abs(high), color="k", alpha=0.5
+                lam_sqHir_arr_m2, np.abs(low), np.abs(high), color="k", alpha=0.5
             )
 
     # Formatting
     ax.yaxis.set_major_locator(MaxNLocator(4))
     ax.xaxis.set_major_locator(MaxNLocator(4))
-    xRange = np.nanmax(lamSqArr_m2) - np.nanmin(lamSqArr_m2)
+    xRange = np.nanmax(lam_sq_arr_m2) - np.nanmin(lam_sq_arr_m2)
     ax.set_xlim(
-        np.nanmin(lamSqArr_m2) - xRange * 0.05, np.nanmax(lamSqArr_m2) + xRange * 0.05
+        np.nanmin(lam_sq_arr_m2) - xRange * 0.05, np.nanmax(lam_sq_arr_m2) + xRange * 0.05
     )
-    yDataMax = max(np.nanmax(pArr), np.nanmax(qArr), np.nanmax(uArr))
-    yDataMin = min(np.nanmin(pArr), np.nanmin(qArr), np.nanmin(uArr))
+    yDataMax = max(np.nanmax(p_arr), np.nanmax(q_arr), np.nanmax(u_arr))
+    yDataMin = min(np.nanmin(p_arr), np.nanmin(q_arr), np.nanmin(u_arr))
     yRange = yDataMax - yDataMin
     medErrBar = np.max(
-        [float(nanmedian(dpArr)), float(nanmedian(dqArr)), float(nanmedian(duArr))]
+        [float(nanmedian(dp_arr)), float(nanmedian(dq_arr)), float(nanmedian(du_arr))]
     )
     ax.set_ylim(
         yDataMin - 2 * medErrBar - yRange * 0.05,
@@ -606,14 +606,14 @@ def plot_pqu_vs_lamsq_ax(
 # -----------------------------------------------------------------------------#
 def plot_psi_vs_lamsq_ax(
     ax,
-    lamSqArr_m2,
-    qArr,
-    uArr,
-    dqArr=None,
-    duArr=None,
-    lamSqHirArr_m2=None,
-    qModArr=None,
-    uModArr=None,
+    lam_sq_arr_m2,
+    q_arr,
+    u_arr,
+    dq_arr=None,
+    du_arr=None,
+    lam_sqHir_arr_m2=None,
+    qMod_arr=None,
+    uMod_arr=None,
     model_dict=None,
     axisYright=False,
     axisXtop=False,
@@ -628,26 +628,26 @@ def plot_psi_vs_lamsq_ax(
         ax.xaxis.set_label_position("top")
 
     # Default to non-high-resolution inputs
-    if lamSqHirArr_m2 is None:
-        lamSqHirArr_m2 = lamSqArr_m2
+    if lam_sqHir_arr_m2 is None:
+        lam_sqHir_arr_m2 = lam_sq_arr_m2
 
     # Calculate the angle and errors
-    pArr = np.sqrt(qArr**2.0 + uArr**2.0)
-    psiArr_deg = np.degrees(np.arctan2(uArr, qArr) / 2.0)
-    if dqArr is None or duArr is None:
-        dQUArr = None
-        dPsiArr_deg = None
+    p_arr = np.sqrt(q_arr**2.0 + u_arr**2.0)
+    psi_arr_deg = np.degrees(np.arctan2(u_arr, q_arr) / 2.0)
+    if dq_arr is None or du_arr is None:
+        dQU_arr = None
+        dPsi_arr_deg = None
     else:
-        dQUArr = np.sqrt(dqArr**2.0 + duArr**2.0)
-        dPsiArr_deg = np.degrees(
-            np.sqrt((qArr * duArr) ** 2.0 + (uArr * dqArr) ** 2.0) / (2.0 * pArr**2.0)
+        dQU_arr = np.sqrt(dq_arr**2.0 + du_arr**2.0)
+        dPsi_arr_deg = np.degrees(
+            np.sqrt((q_arr * du_arr) ** 2.0 + (u_arr * dq_arr) ** 2.0) / (2.0 * p_arr**2.0)
         )
 
     # Plot psi versus lambda^2
     ax.errorbar(
-        x=lamSqArr_m2,
-        y=psiArr_deg,
-        yerr=dPsiArr_deg,
+        x=lam_sq_arr_m2,
+        y=psi_arr_deg,
+        yerr=dPsi_arr_deg,
         mec="k",
         mfc="none",
         ms=2,
@@ -659,10 +659,10 @@ def plot_psi_vs_lamsq_ax(
     )
 
     # Plot the model
-    if qModArr is not None and uModArr is not None:
-        psiHirArr_deg = np.degrees(np.arctan2(uModArr, qModArr) / 2.0)
+    if qMod_arr is not None and uMod_arr is not None:
+        psiHir_arr_deg = np.degrees(np.arctan2(uMod_arr, qMod_arr) / 2.0)
         ax.plot(
-            lamSqHirArr_m2, psiHirArr_deg, color="tab:red", lw=0.1, label="Model $\psi$"
+            lam_sqHir_arr_m2, psiHir_arr_deg, color="tab:red", lw=0.1, label="Model $\psi$"
         )
     if model_dict is not None:
         errDict = {}
@@ -672,7 +672,7 @@ def plot_psi_vs_lamsq_ax(
             idx = np.random.choice(np.arange(model_dict["posterior"].shape[0]))
             for j, name in enumerate(model_dict["parNames"]):
                 errDict[name] = model_dict["posterior"][name][idx]
-            QUerrmodel = model_dict["model"](errDict, lamSqHirArr_m2)
+            QUerrmodel = model_dict["model"](errDict, lam_sqHir_arr_m2)
             Qerrmodel = np.real(QUerrmodel)
             Uerrmodel = np.imag(QUerrmodel)
             psi_errmodel.append(np.degrees(np.arctan2(Uerrmodel, Qerrmodel) / 2.0))
@@ -680,17 +680,17 @@ def plot_psi_vs_lamsq_ax(
         psi_errmodel = np.array(psi_errmodel)
         low, med, high = np.percentile(psi_errmodel, [16, 50, 84], axis=0)
 
-        ax.plot(lamSqHirArr_m2, med, "-", color="tab:red", linewidth=0.1, alpha=1)
+        ax.plot(lam_sqHir_arr_m2, med, "-", color="tab:red", linewidth=0.1, alpha=1)
         ax.fill_between(
-            lamSqHirArr_m2, low, high, color="tab:red", linewidth=0.1, alpha=0.5
+            lam_sqHir_arr_m2, low, high, color="tab:red", linewidth=0.1, alpha=0.5
         )
 
     # Formatting
     ax.yaxis.set_major_locator(MaxNLocator(4))
     ax.xaxis.set_major_locator(MaxNLocator(4))
-    xRange = np.nanmax(lamSqArr_m2) - np.nanmin(lamSqArr_m2)
+    xRange = np.nanmax(lam_sq_arr_m2) - np.nanmin(lam_sq_arr_m2)
     ax.set_xlim(
-        np.nanmin(lamSqArr_m2) - xRange * 0.05, np.nanmax(lamSqArr_m2) + xRange * 0.05
+        np.nanmin(lam_sq_arr_m2) - xRange * 0.05, np.nanmax(lam_sq_arr_m2) + xRange * 0.05
     )
     ax.set_ylim(-99.9, 99.9)
     ax.set_xlabel("$\\lambda^2$ (m$^2$)")
@@ -706,14 +706,14 @@ def plot_psi_vs_lamsq_ax(
 # -----------------------------------------------------------------------------#
 def plot_q_vs_u_ax(
     ax,
-    lamSqArr_m2,
-    qArr,
-    uArr,
-    dqArr=None,
-    duArr=None,
-    lamSqHirArr_m2=None,
-    qModArr=None,
-    uModArr=None,
+    lam_sq_arr_m2,
+    q_arr,
+    u_arr,
+    dq_arr=None,
+    du_arr=None,
+    lam_sqHir_arr_m2=None,
+    qMod_arr=None,
+    uMod_arr=None,
     model_dict=None,
     axisYright=False,
     axisXtop=False,
@@ -729,10 +729,10 @@ def plot_q_vs_u_ax(
 
     # Plot u versus q
     ax.errorbar(
-        x=qArr,
-        y=uArr,
-        xerr=dqArr,
-        yerr=duArr,
+        x=q_arr,
+        y=u_arr,
+        xerr=dq_arr,
+        yerr=du_arr,
         mec="grey",
         mfc="none",
         ms=1,
@@ -742,11 +742,11 @@ def plot_q_vs_u_ax(
         capsize=2,
         zorder=1,
     )
-    freqArr_Hz = C / np.sqrt(lamSqArr_m2)
+    freq_arr_Hz = C / np.sqrt(lam_sq_arr_m2)
     ax.scatter(
-        x=qArr,
-        y=uArr,
-        c=freqArr_Hz,
+        x=q_arr,
+        y=u_arr,
+        c=freq_arr_Hz,
         cmap="rainbow_r",
         s=30,
         marker="D",
@@ -756,8 +756,8 @@ def plot_q_vs_u_ax(
     )
 
     # Plot the model
-    if qModArr is not None and uModArr is not None:
-        ax.plot(qModArr, uModArr, color="k", lw=0.1, label="Model q & u", zorder=2)
+    if qMod_arr is not None and uMod_arr is not None:
+        ax.plot(qMod_arr, uMod_arr, color="k", lw=0.1, label="Model q & u", zorder=2)
     if model_dict is not None:
         errDict = {}
         # Sample the posterior randomly 100 times
@@ -765,7 +765,7 @@ def plot_q_vs_u_ax(
             idx = np.random.choice(np.arange(model_dict["posterior"].shape[0]))
             for j, name in enumerate(model_dict["parNames"]):
                 errDict[name] = model_dict["posterior"][name][idx]
-            QUerrmodel = model_dict["model"](errDict, lamSqHirArr_m2)
+            QUerrmodel = model_dict["model"](errDict, lam_sqHir_arr_m2)
             Qerrmodel = np.real(QUerrmodel)
             Uerrmodel = np.imag(QUerrmodel)
             ax.plot(Qerrmodel, Uerrmodel, color="k", lw=0.1, alpha=0.5, zorder=2)
@@ -773,10 +773,10 @@ def plot_q_vs_u_ax(
     # Formatting
     ax.yaxis.set_major_locator(MaxNLocator(4))
     ax.xaxis.set_major_locator(MaxNLocator(4))
-    xRange = np.nanmax(qArr) - np.nanmin(qArr)
-    ax.set_xlim(np.nanmin(qArr) - xRange * 0.05, np.nanmax(qArr) + xRange * 0.05)
-    yRange = np.nanmax(uArr) - np.nanmin(uArr)
-    ax.set_ylim(np.nanmin(uArr) - yRange * 0.05, np.nanmax(uArr) + yRange * 0.05)
+    xRange = np.nanmax(q_arr) - np.nanmin(q_arr)
+    ax.set_xlim(np.nanmin(q_arr) - xRange * 0.05, np.nanmax(q_arr) + xRange * 0.05)
+    yRange = np.nanmax(u_arr) - np.nanmin(u_arr)
+    ax.set_ylim(np.nanmin(u_arr) - yRange * 0.05, np.nanmax(u_arr) + yRange * 0.05)
     ax.set_xlabel("Stokes q")
     ax.set_ylabel("Stokes u")
     ax.axhline(0, linestyle="--", color="grey")
@@ -800,7 +800,7 @@ def unwrap_lines(dat, lims=[-90.0, 90.0], thresh=0.95):
 
 # -----------------------------------------------------------------------------#
 def plot_RMSF_ax(
-    ax, phiArr, RMSFArr, fwhmRMSF=None, axisYright=False, axisXtop=False, doTitle=False
+    ax, phi_arr, RMSF_arr, fwhmRMSF=None, axisYright=False, axisXtop=False, doTitle=False
 ):
 
     # Set the axis positions
@@ -812,20 +812,20 @@ def plot_RMSF_ax(
         ax.xaxis.set_label_position("top")
 
     # Plot the RMSF
-    ax.step(phiArr, RMSFArr.real, where="mid", color="tab:blue", lw=0.5, label="Real")
+    ax.step(phi_arr, RMSF_arr.real, where="mid", color="tab:blue", lw=0.5, label="Real")
     ax.step(
-        phiArr, RMSFArr.imag, where="mid", color="tab:red", lw=0.5, label="Imaginary"
+        phi_arr, RMSF_arr.imag, where="mid", color="tab:red", lw=0.5, label="Imaginary"
     )
-    ax.step(phiArr, np.abs(RMSFArr), where="mid", color="k", lw=1.0, label="PI")
+    ax.step(phi_arr, np.abs(RMSF_arr), where="mid", color="k", lw=1.0, label="PI")
     ax.axhline(0, color="grey")
     if doTitle:
         ax.text(0.05, 0.84, "RMSF", transform=ax.transAxes)
 
     # Plot the Gaussian fit
     if fwhmRMSF is not None:
-        yGauss = gauss([1.0, 0.0, fwhmRMSF])(phiArr)
+        yGauss = gauss([1.0, 0.0, fwhmRMSF])(phi_arr)
         ax.plot(
-            phiArr,
+            phi_arr,
             yGauss,
             color="g",
             marker="None",
@@ -840,8 +840,8 @@ def plot_RMSF_ax(
     # Scaling
     ax.yaxis.set_major_locator(MaxNLocator(4))
     ax.xaxis.set_major_locator(MaxNLocator(4))
-    xRange = np.nanmax(phiArr) - np.nanmin(phiArr)
-    ax.set_xlim(np.nanmin(phiArr) - xRange * 0.01, np.nanmax(phiArr) + xRange * 0.01)
+    xRange = np.nanmax(phi_arr) - np.nanmin(phi_arr)
+    ax.set_xlim(np.nanmin(phi_arr) - xRange * 0.01, np.nanmax(phi_arr) + xRange * 0.01)
     ax.set_ylabel("Normalised Units")
     ax.set_xlabel("$\phi$ rad m$^{-2}$")
     ax.axhline(0, color="grey")
@@ -870,8 +870,8 @@ def gauss(p):
 # -----------------------------------------------------------------------------#
 def plot_dirtyFDF_ax(
     ax,
-    phiArr,
-    FDFArr,
+    phi_arr,
+    FDF_arr,
     gaussParm=[],
     vLine=None,
     title="Dirty FDF",
@@ -890,27 +890,27 @@ def plot_dirtyFDF_ax(
         ax.xaxis.set_label_position("top")
 
     # Plot the FDF
-    FDFpiArr = np.sqrt(np.power(FDFArr.real, 2.0) + np.power(FDFArr.imag, 2.0))
-    ax.step(phiArr, FDFArr.real, where="mid", color="tab:blue", lw=0.5, label="Real")
+    FDFpi_arr = np.sqrt(np.power(FDF_arr.real, 2.0) + np.power(FDF_arr.imag, 2.0))
+    ax.step(phi_arr, FDF_arr.real, where="mid", color="tab:blue", lw=0.5, label="Real")
     ax.step(
-        phiArr, FDFArr.imag, where="mid", color="tab:red", lw=0.5, label="Imaginary"
+        phi_arr, FDF_arr.imag, where="mid", color="tab:red", lw=0.5, label="Imaginary"
     )
-    ax.step(phiArr, FDFpiArr, where="mid", color="k", lw=1.0, label="PI")
+    ax.step(phi_arr, FDFpi_arr, where="mid", color="k", lw=1.0, label="PI")
     if doTitle == True:
         ax.text(0.05, 0.84, "Dirty FDF", transform=ax.transAxes)
 
     # Plot the Gaussian peak
     if len(gaussParm) == 3:
         # [amp, mean, FWHM]
-        phiTrunkArr = np.where(
-            phiArr >= gaussParm[1] - gaussParm[2] / 3.0, phiArr, np.nan
+        phiTrunk_arr = np.where(
+            phi_arr >= gaussParm[1] - gaussParm[2] / 3.0, phi_arr, np.nan
         )
-        phiTrunkArr = np.where(
-            phiArr <= gaussParm[1] + gaussParm[2] / 3.0, phiTrunkArr, np.nan
+        phiTrunk_arr = np.where(
+            phi_arr <= gaussParm[1] + gaussParm[2] / 3.0, phiTrunk_arr, np.nan
         )
-        yGauss = gauss(gaussParm)(phiTrunkArr)
+        yGauss = gauss(gaussParm)(phiTrunk_arr)
         ax.plot(
-            phiArr,
+            phi_arr,
             yGauss,
             color="magenta",
             marker="None",
@@ -929,8 +929,8 @@ def plot_dirtyFDF_ax(
     # Scaling
     ax.yaxis.set_major_locator(MaxNLocator(4))
     ax.xaxis.set_major_locator(MaxNLocator(8))
-    xRange = np.nanmax(phiArr) - np.nanmin(phiArr)
-    ax.set_xlim(np.nanmin(phiArr) - xRange * 0.01, np.nanmax(phiArr) + xRange * 0.01)
+    xRange = np.nanmax(phi_arr) - np.nanmin(phi_arr)
+    ax.set_xlim(np.nanmin(phi_arr) - xRange * 0.01, np.nanmax(phi_arr) + xRange * 0.01)
     ax.set_ylabel("Flux Density (" + units + ")")
     ax.set_xlabel("$\phi$ (rad m$^{-2}$)")
     ax.axhline(0, color="grey")
@@ -943,10 +943,10 @@ def plot_dirtyFDF_ax(
 # -----------------------------------------------------------------------------#
 def plot_cleanFDF_ax(
     ax,
-    phiArr,
-    cleanFDFArr=None,
-    ccFDFArr=None,
-    dirtyFDFArr=None,
+    phi_arr,
+    cleanFDF_arr=None,
+    ccFDF_arr=None,
+    dirtyFDF_arr=None,
     gaussParm=[],
     title="Clean FDF",
     cutoff=None,
@@ -965,28 +965,28 @@ def plot_cleanFDF_ax(
         ax.xaxis.set_label_position("top")
 
     # Plot the dirty FDF in the background
-    if not dirtyFDFArr is None:
-        dirtyFDFpiArr = np.sqrt(
-            np.power(dirtyFDFArr.real, 2.0) + np.power(dirtyFDFArr.imag, 2.0)
+    if not dirtyFDF_arr is None:
+        dirtyFDFpi_arr = np.sqrt(
+            np.power(dirtyFDF_arr.real, 2.0) + np.power(dirtyFDF_arr.imag, 2.0)
         )
 
-        ax.step(phiArr, dirtyFDFpiArr, where="mid", color="grey", lw=0.5, label="Dirty")
+        ax.step(phi_arr, dirtyFDFpi_arr, where="mid", color="grey", lw=0.5, label="Dirty")
 
     # Plot the clean FDF
-    if not cleanFDFArr is None:
-        ax.step(phiArr, np.abs(cleanFDFArr), where="mid", color="k", lw=1.0, label="PI")
+    if not cleanFDF_arr is None:
+        ax.step(phi_arr, np.abs(cleanFDF_arr), where="mid", color="k", lw=1.0, label="PI")
         if showComplex:
             ax.step(
-                phiArr,
-                cleanFDFArr.real,
+                phi_arr,
+                cleanFDF_arr.real,
                 where="mid",
                 color="tab:blue",
                 lw=0.5,
                 label="Real",
             )
             ax.step(
-                phiArr,
-                cleanFDFArr.imag,
+                phi_arr,
+                cleanFDF_arr.imag,
                 where="mid",
                 color="tab:red",
                 lw=0.5,
@@ -995,21 +995,21 @@ def plot_cleanFDF_ax(
             # ax.text(0.05, 0.94, title, transform=ax.transAxes)
 
     # Plot the CC spectrum
-    if not ccFDFArr is None:
-        ax.step(phiArr, ccFDFArr, where="mid", color="g", lw=0.5, label="CC")
+    if not ccFDF_arr is None:
+        ax.step(phi_arr, ccFDF_arr, where="mid", color="g", lw=0.5, label="CC")
 
     # Plot the Gaussian peak
     if len(gaussParm) == 3:
         # [amp, mean, FWHM]
-        phiTrunkArr = np.where(
-            phiArr >= gaussParm[1] - gaussParm[2] / 3.0, phiArr, np.nan
+        phiTrunk_arr = np.where(
+            phi_arr >= gaussParm[1] - gaussParm[2] / 3.0, phi_arr, np.nan
         )
-        phiTrunkArr = np.where(
-            phiArr <= gaussParm[1] + gaussParm[2] / 3.0, phiTrunkArr, np.nan
+        phiTrunk_arr = np.where(
+            phi_arr <= gaussParm[1] + gaussParm[2] / 3.0, phiTrunk_arr, np.nan
         )
-        yGauss = gauss(gaussParm)(phiTrunkArr)
+        yGauss = gauss(gaussParm)(phiTrunk_arr)
         ax.plot(
-            phiArr,
+            phi_arr,
             yGauss,
             color="magenta",
             marker="None",
@@ -1028,8 +1028,8 @@ def plot_cleanFDF_ax(
     # Scaling
     ax.yaxis.set_major_locator(MaxNLocator(4))
     ax.xaxis.set_major_locator(MaxNLocator(4))
-    xRange = np.nanmax(phiArr) - np.nanmin(phiArr)
-    ax.set_xlim(np.nanmin(phiArr) - xRange * 0.01, np.nanmax(phiArr) + xRange * 0.01)
+    xRange = np.nanmax(phi_arr) - np.nanmin(phi_arr)
+    ax.set_xlim(np.nanmin(phi_arr) - xRange * 0.01, np.nanmax(phi_arr) + xRange * 0.01)
     ax.set_ylabel("Flux Density (" + units + ")")
     ax.set_xlabel("$\phi$ (rad m$^{-2}$)")
     ax.axhline(0, color="grey")
@@ -1115,9 +1115,9 @@ def plot_hist4_ax(
     # Print the binned values to the screen
     if verbose:
         print("\n#BIN, COUNTS ...")
-        binCentreArr = b[:-1] + np.diff(b) / 2.0
-        for i in range(len(binCentreArr)):
-            print(binCentreArr[i], end=" ")
+        binCentre_arr = b[:-1] + np.diff(b) / 2.0
+        for i in range(len(binCentre_arr)):
+            print(binCentre_arr[i], end=" ")
             for j in range(len(nLst)):
                 print(nLst[j][i], end=" ")
             print()
@@ -1396,17 +1396,17 @@ def plot_scatter4_ax(
 def plotSpecIPQU(dataMan, indx, io="fig"):
 
     # Get the data
-    freqArr_Hz, IArr, rmsIArr = dataMan.get_specI_byindx(indx)
-    dummy, QArr, rmsQArr = dataMan.get_specQ_byindx(indx)
-    dummy, UArr, rmsUArr = dataMan.get_specU_byindx(indx)
+    freq_arr_Hz, I_arr, rmsI_arr = dataMan.get_specI_byindx(indx)
+    dummy, Q_arr, rmsQ_arr = dataMan.get_specQ_byindx(indx)
+    dummy, U_arr, rmsU_arr = dataMan.get_specU_byindx(indx)
 
     # Get the models to overplot
-    freqHirArr_Hz, qModArr, uModArr = dataMan.get_thin_qumodel_byindx(
+    freqHir_arr_Hz, qMod_arr, uMod_arr = dataMan.get_thin_qumodel_byindx(
         indx, oversample=True
     )
-    freqHirArr_Hz, IModArr = dataMan.get_modI_byindx(indx, oversample=True)
-    QmodArr = qModArr * IModArr
-    UmodArr = uModArr * IModArr
+    freqHir_arr_Hz, IMod_arr = dataMan.get_modI_byindx(indx, oversample=True)
+    Qmod_arr = qMod_arr * IMod_arr
+    Umod_arr = uMod_arr * IMod_arr
 
     # Setup the figure
     fig = Figure()
@@ -1416,11 +1416,11 @@ def plotSpecIPQU(dataMan, indx, io="fig"):
     ax1 = fig.add_subplot(211)
     plot_I_vs_nu_ax(
         ax=ax1,
-        freqArr_Hz=freqArr_Hz,
-        IArr=IArr,
-        dIArr=rmsIArr,
-        freqHirArr_Hz=freqHirArr_Hz,
-        IModArr=IModArr,
+        freq_arr_Hz=freq_arr_Hz,
+        I_arr=I_arr,
+        dI_arr=rmsI_arr,
+        freqHir_arr_Hz=freqHir_arr_Hz,
+        IMod_arr=IMod_arr,
     )
     ax1.set_xlabel("")
     [label.set_visible(False) for label in ax1.get_xticklabels()]
@@ -1429,14 +1429,14 @@ def plotSpecIPQU(dataMan, indx, io="fig"):
     ax2 = fig.add_subplot(212, sharex=ax1)
     plot_PQU_vs_nu_ax(
         ax=ax2,
-        freqArr_Hz=freqArr_Hz,
-        QArr=QArr,
-        UArr=UArr,
-        dQArr=rmsQArr,
-        dUArr=rmsUArr,
-        freqHirArr_Hz=freqHirArr_Hz,
-        QmodArr=QmodArr,
-        UmodArr=UmodArr,
+        freq_arr_Hz=freq_arr_Hz,
+        Q_arr=Q_arr,
+        U_arr=U_arr,
+        dQ_arr=rmsQ_arr,
+        dU_arr=rmsU_arr,
+        freqHir_arr_Hz=freqHir_arr_Hz,
+        Qmod_arr=Qmod_arr,
+        Umod_arr=Umod_arr,
     )
 
     # Write to the pipe
@@ -1453,9 +1453,9 @@ def plotSpecIPQU(dataMan, indx, io="fig"):
 def plotSpecRMS(dataMan, indx, io="fig"):
 
     # Get the data
-    freqArr_Hz, IArr, rmsIArr = dataMan.get_specI_byindx(indx)
-    dummy, QArr, rmsQArr = dataMan.get_specQ_byindx(indx)
-    dummy, UArr, rmsUArr = dataMan.get_specU_byindx(indx)
+    freq_arr_Hz, I_arr, rmsI_arr = dataMan.get_specI_byindx(indx)
+    dummy, Q_arr, rmsQ_arr = dataMan.get_specQ_byindx(indx)
+    dummy, U_arr, rmsU_arr = dataMan.get_specU_byindx(indx)
 
     # Setup the figure
     fig = Figure()
@@ -1464,7 +1464,7 @@ def plotSpecRMS(dataMan, indx, io="fig"):
     # Plot Stokes I, Q & U
     ax1 = fig.add_subplot(111)
     plot_rmsIQU_vs_nu_ax(
-        ax=ax1, freqArr_Hz=freqArr_Hz, rmsIArr=rmsIArr, rmsQArr=rmsQArr, rmsUArr=rmsUArr
+        ax=ax1, freq_arr_Hz=freq_arr_Hz, rmsI_arr=rmsI_arr, rmsQ_arr=rmsQ_arr, rmsU_arr=rmsU_arr
     )
 
     # Write to the pipe
@@ -1481,23 +1481,23 @@ def plotSpecRMS(dataMan, indx, io="fig"):
 def plotPolang(dataMan, indx, io="fig"):
 
     # Get the data
-    freqArr_Hz, IArr, rmsIArr = dataMan.get_specI_byindx(indx)
-    dummy, modIArr = dataMan.get_modI_byindx(indx)
-    dummy, QArr, rmsQArr = dataMan.get_specQ_byindx(indx)
-    dummy, UArr, rmsUArr = dataMan.get_specU_byindx(indx)
+    freq_arr_Hz, I_arr, rmsI_arr = dataMan.get_specI_byindx(indx)
+    dummy, modI_arr = dataMan.get_modI_byindx(indx)
+    dummy, Q_arr, rmsQ_arr = dataMan.get_specQ_byindx(indx)
+    dummy, U_arr, rmsU_arr = dataMan.get_specU_byindx(indx)
 
     # Calculate fractional polarisation spectra
-    qArr = QArr / modIArr
-    uArr = UArr / modIArr
-    dqArr = qArr * np.sqrt((rmsQArr / QArr) ** 2.0 + (rmsIArr / IArr) ** 2.0)
-    duArr = uArr * np.sqrt((rmsUArr / UArr) ** 2.0 + (rmsIArr / IArr) ** 2.0)
-    lamSqArr_m2 = np.power(C / freqArr_Hz, 2.0)
+    q_arr = Q_arr / modI_arr
+    u_arr = U_arr / modI_arr
+    dq_arr = q_arr * np.sqrt((rmsQ_arr / Q_arr) ** 2.0 + (rmsI_arr / I_arr) ** 2.0)
+    du_arr = u_arr * np.sqrt((rmsU_arr / U_arr) ** 2.0 + (rmsI_arr / I_arr) ** 2.0)
+    lam_sq_arr_m2 = np.power(C / freq_arr_Hz, 2.0)
 
     # Get the models to overplot
-    freqHirArr_Hz, qModArr, uModArr = dataMan.get_thin_qumodel_byindx(
+    freqHir_arr_Hz, qMod_arr, uMod_arr = dataMan.get_thin_qumodel_byindx(
         indx, oversample=True
     )
-    lamSqHirArr_m2 = np.power(C / freqHirArr_Hz, 2.0)
+    lam_sqHir_arr_m2 = np.power(C / freqHir_arr_Hz, 2.0)
 
     # Setup the figure
     fig = Figure()
@@ -1507,14 +1507,14 @@ def plotPolang(dataMan, indx, io="fig"):
     ax1 = fig.add_subplot(111)
     plot_psi_vs_lamsq_ax(
         ax=ax1,
-        lamSqArr_m2=lamSqArr_m2,
-        qArr=qArr,
-        uArr=uArr,
-        dqArr=dqArr,
-        duArr=duArr,
-        lamSqHirArr_m2=lamSqHirArr_m2,
-        qModArr=qModArr,
-        uModArr=uModArr,
+        lam_sq_arr_m2=lam_sq_arr_m2,
+        q_arr=q_arr,
+        u_arr=u_arr,
+        dq_arr=dq_arr,
+        du_arr=du_arr,
+        lam_sqHir_arr_m2=lam_sqHir_arr_m2,
+        qMod_arr=qMod_arr,
+        uMod_arr=uMod_arr,
         axisYright=False,
     )
 
@@ -1532,23 +1532,23 @@ def plotPolang(dataMan, indx, io="fig"):
 def plotFracPol(dataMan, indx, io="fig"):
 
     # Get the data
-    freqArr_Hz, IArr, rmsIArr = dataMan.get_specI_byindx(indx)
-    dummy, modIArr = dataMan.get_modI_byindx(indx)
-    dummy, QArr, rmsQArr = dataMan.get_specQ_byindx(indx)
-    dummy, UArr, rmsUArr = dataMan.get_specU_byindx(indx)
+    freq_arr_Hz, I_arr, rmsI_arr = dataMan.get_specI_byindx(indx)
+    dummy, modI_arr = dataMan.get_modI_byindx(indx)
+    dummy, Q_arr, rmsQ_arr = dataMan.get_specQ_byindx(indx)
+    dummy, U_arr, rmsU_arr = dataMan.get_specU_byindx(indx)
 
     # Calculate fractional polarisation spectra
-    qArr = QArr / modIArr
-    uArr = UArr / modIArr
-    dqArr = qArr * np.sqrt((rmsQArr / QArr) ** 2.0 + (rmsIArr / IArr) ** 2.0)
-    duArr = uArr * np.sqrt((rmsUArr / UArr) ** 2.0 + (rmsIArr / IArr) ** 2.0)
-    lamSqArr_m2 = np.power(C / freqArr_Hz, 2.0)
+    q_arr = Q_arr / modI_arr
+    u_arr = U_arr / modI_arr
+    dq_arr = q_arr * np.sqrt((rmsQ_arr / Q_arr) ** 2.0 + (rmsI_arr / I_arr) ** 2.0)
+    du_arr = u_arr * np.sqrt((rmsU_arr / U_arr) ** 2.0 + (rmsI_arr / I_arr) ** 2.0)
+    lam_sq_arr_m2 = np.power(C / freq_arr_Hz, 2.0)
 
     # Get the models to overplot
-    freqHirArr_Hz, qModArr, uModArr = dataMan.get_thin_qumodel_byindx(
+    freqHir_arr_Hz, qMod_arr, uMod_arr = dataMan.get_thin_qumodel_byindx(
         indx, oversample=True
     )
-    lamSqHirArr_m2 = np.power(C / freqHirArr_Hz, 2.0)
+    lam_sqHir_arr_m2 = np.power(C / freqHir_arr_Hz, 2.0)
 
     # Setup the figure
     fig = Figure()
@@ -1558,14 +1558,14 @@ def plotFracPol(dataMan, indx, io="fig"):
     ax2 = fig.add_subplot(111)
     plot_pqu_vs_lamsq_ax(
         ax=ax2,
-        lamSqArr_m2=lamSqArr_m2,
-        qArr=qArr,
-        uArr=uArr,
-        dqArr=dqArr,
-        duArr=duArr,
-        lamSqHirArr_m2=lamSqHirArr_m2,
-        qModArr=qModArr,
-        uModArr=uModArr,
+        lam_sq_arr_m2=lam_sq_arr_m2,
+        q_arr=q_arr,
+        u_arr=u_arr,
+        dq_arr=dq_arr,
+        du_arr=du_arr,
+        lam_sqHir_arr_m2=lam_sqHir_arr_m2,
+        qMod_arr=qMod_arr,
+        uMod_arr=uMod_arr,
     )
 
     # Write to the pipe
@@ -1582,23 +1582,23 @@ def plotFracPol(dataMan, indx, io="fig"):
 def plotFracQvsU(dataMan, indx, io="fig"):
 
     # Get the data
-    freqArr_Hz, IArr, rmsIArr = dataMan.get_specI_byindx(indx)
-    dummy, modIArr = dataMan.get_modI_byindx(indx)
-    dummy, QArr, rmsQArr = dataMan.get_specQ_byindx(indx)
-    dummy, UArr, rmsUArr = dataMan.get_specU_byindx(indx)
+    freq_arr_Hz, I_arr, rmsI_arr = dataMan.get_specI_byindx(indx)
+    dummy, modI_arr = dataMan.get_modI_byindx(indx)
+    dummy, Q_arr, rmsQ_arr = dataMan.get_specQ_byindx(indx)
+    dummy, U_arr, rmsU_arr = dataMan.get_specU_byindx(indx)
 
     # Calculate fractional polarisation spectra
-    qArr = QArr / modIArr
-    uArr = UArr / modIArr
-    dqArr = qArr * np.sqrt((rmsQArr / QArr) ** 2.0 + (rmsIArr / IArr) ** 2.0)
-    duArr = uArr * np.sqrt((rmsUArr / UArr) ** 2.0 + (rmsIArr / IArr) ** 2.0)
-    lamSqArr_m2 = np.power(C / freqArr_Hz, 2.0)
+    q_arr = Q_arr / modI_arr
+    u_arr = U_arr / modI_arr
+    dq_arr = q_arr * np.sqrt((rmsQ_arr / Q_arr) ** 2.0 + (rmsI_arr / I_arr) ** 2.0)
+    du_arr = u_arr * np.sqrt((rmsU_arr / U_arr) ** 2.0 + (rmsI_arr / I_arr) ** 2.0)
+    lam_sq_arr_m2 = np.power(C / freq_arr_Hz, 2.0)
 
     # Get the models to overplot
-    freqHirArr_Hz, qModArr, uModArr = dataMan.get_thin_qumodel_byindx(
+    freqHir_arr_Hz, qMod_arr, uMod_arr = dataMan.get_thin_qumodel_byindx(
         indx, oversample=True
     )
-    lamSqHirArr_m2 = np.power(C / freqHirArr_Hz, 2.0)
+    lam_sqHir_arr_m2 = np.power(C / freqHir_arr_Hz, 2.0)
 
     # Setup the figure
     fig = Figure()
@@ -1608,14 +1608,14 @@ def plotFracQvsU(dataMan, indx, io="fig"):
     ax1 = fig.add_subplot(111)
     plot_q_vs_u_ax(
         ax=ax1,
-        lamSqArr_m2=lamSqArr_m2,
-        qArr=qArr,
-        uArr=uArr,
-        dqArr=dqArr,
-        duArr=duArr,
-        lamSqHirArr_m2=lamSqHirArr_m2,
-        qModArr=qModArr,
-        uModArr=uModArr,
+        lam_sq_arr_m2=lam_sq_arr_m2,
+        q_arr=q_arr,
+        u_arr=u_arr,
+        dq_arr=dq_arr,
+        du_arr=du_arr,
+        lam_sqHir_arr_m2=lam_sqHir_arr_m2,
+        qMod_arr=qMod_arr,
+        uMod_arr=uMod_arr,
         axisYright=False,
     )
 
@@ -1631,17 +1631,17 @@ def plotFracQvsU(dataMan, indx, io="fig"):
 
 # -----------------------------------------------------------------------------#
 def plot_Ipqu_spectra_fig(
-    freqArr_Hz,
-    IArr,
-    qArr,
-    uArr,
-    dIArr=None,
-    dqArr=None,
-    duArr=None,
-    freqHirArr_Hz=None,
-    IModArr=None,
-    qModArr=None,
-    uModArr=None,
+    freq_arr_Hz,
+    I_arr,
+    q_arr,
+    u_arr,
+    dI_arr=None,
+    dq_arr=None,
+    du_arr=None,
+    freqHir_arr_Hz=None,
+    IMod_arr=None,
+    qMod_arr=None,
+    uMod_arr=None,
     model_dict=None,
     fig=None,
     units="",
@@ -1653,20 +1653,20 @@ def plot_Ipqu_spectra_fig(
         fig = plt.figure(facecolor="w", figsize=(12.0, 8))
 
     # Default to non-high-resolution inputs
-    if freqHirArr_Hz is None:
-        freqHirArr_Hz = freqArr_Hz
-    lamSqArr_m2 = np.power(C / freqArr_Hz, 2.0)
-    lamSqHirArr_m2 = np.power(C / freqHirArr_Hz, 2.0)
+    if freqHir_arr_Hz is None:
+        freqHir_arr_Hz = freq_arr_Hz
+    lam_sq_arr_m2 = np.power(C / freq_arr_Hz, 2.0)
+    lam_sqHir_arr_m2 = np.power(C / freqHir_arr_Hz, 2.0)
 
     # Plot I versus nu axis
     ax1 = fig.add_subplot(221)
     plot_I_vs_nu_ax(
         ax=ax1,
-        freqArr_Hz=freqArr_Hz,
-        IArr=IArr,
-        dIArr=dIArr,
-        freqHirArr_Hz=freqHirArr_Hz,
-        IModArr=IModArr,
+        freq_arr_Hz=freq_arr_Hz,
+        I_arr=I_arr,
+        dI_arr=dI_arr,
+        freqHir_arr_Hz=freqHir_arr_Hz,
+        IMod_arr=IMod_arr,
         axisXtop=True,
         units=units,
     )
@@ -1675,14 +1675,14 @@ def plot_Ipqu_spectra_fig(
     ax2 = fig.add_subplot(223)
     plot_pqu_vs_lamsq_ax(
         ax=ax2,
-        lamSqArr_m2=lamSqArr_m2,
-        qArr=qArr,
-        uArr=uArr,
-        dqArr=dqArr,
-        duArr=duArr,
-        lamSqHirArr_m2=lamSqHirArr_m2,
-        qModArr=qModArr,
-        uModArr=uModArr,
+        lam_sq_arr_m2=lam_sq_arr_m2,
+        q_arr=q_arr,
+        u_arr=u_arr,
+        dq_arr=dq_arr,
+        du_arr=du_arr,
+        lam_sqHir_arr_m2=lam_sqHir_arr_m2,
+        qMod_arr=qMod_arr,
+        uMod_arr=uMod_arr,
         model_dict=model_dict,
     )
 
@@ -1690,14 +1690,14 @@ def plot_Ipqu_spectra_fig(
     ax3 = fig.add_subplot(222, sharex=ax2)
     plot_psi_vs_lamsq_ax(
         ax=ax3,
-        lamSqArr_m2=lamSqArr_m2,
-        qArr=qArr,
-        uArr=uArr,
-        dqArr=dqArr,
-        duArr=duArr,
-        lamSqHirArr_m2=lamSqHirArr_m2,
-        qModArr=qModArr,
-        uModArr=uModArr,
+        lam_sq_arr_m2=lam_sq_arr_m2,
+        q_arr=q_arr,
+        u_arr=u_arr,
+        dq_arr=dq_arr,
+        du_arr=du_arr,
+        lam_sqHir_arr_m2=lam_sqHir_arr_m2,
+        qMod_arr=qMod_arr,
+        uMod_arr=uMod_arr,
         model_dict=model_dict,
         axisYright=True,
         axisXtop=True,
@@ -1707,14 +1707,14 @@ def plot_Ipqu_spectra_fig(
     ax4 = fig.add_subplot(224)
     plot_q_vs_u_ax(
         ax=ax4,
-        lamSqArr_m2=lamSqArr_m2,
-        qArr=qArr,
-        uArr=uArr,
-        dqArr=dqArr,
-        duArr=duArr,
-        lamSqHirArr_m2=lamSqHirArr_m2,
-        qModArr=qModArr,
-        uModArr=uModArr,
+        lam_sq_arr_m2=lam_sq_arr_m2,
+        q_arr=q_arr,
+        u_arr=u_arr,
+        dq_arr=dq_arr,
+        du_arr=du_arr,
+        lam_sqHir_arr_m2=lam_sqHir_arr_m2,
+        qMod_arr=qMod_arr,
+        uMod_arr=uMod_arr,
         model_dict=model_dict,
         axisYright=True,
     )
@@ -1733,21 +1733,21 @@ def plot_Ipqu_spectra_fig(
 def plotPolsummary(dataMan, indx, io="fig"):
 
     # Get the data
-    freqArr_Hz, IArr, rmsIArr = dataMan.get_specI_byindx(indx)
-    dummy, modIArr = dataMan.get_modI_byindx(indx)
-    dummy, QArr, rmsQArr = dataMan.get_specQ_byindx(indx)
-    dummy, UArr, rmsUArr = dataMan.get_specU_byindx(indx)
+    freq_arr_Hz, I_arr, rmsI_arr = dataMan.get_specI_byindx(indx)
+    dummy, modI_arr = dataMan.get_modI_byindx(indx)
+    dummy, Q_arr, rmsQ_arr = dataMan.get_specQ_byindx(indx)
+    dummy, U_arr, rmsU_arr = dataMan.get_specU_byindx(indx)
 
     # Calculate fractional polarisation spectra
-    qArr = QArr / modIArr
-    uArr = UArr / modIArr
-    dqArr = qArr * np.sqrt((rmsQArr / QArr) ** 2.0 + (rmsIArr / IArr) ** 2.0)
-    duArr = uArr * np.sqrt((rmsUArr / UArr) ** 2.0 + (rmsIArr / IArr) ** 2.0)
-    lamSqArr_m2 = np.power(C / freqArr_Hz, 2.0)
+    q_arr = Q_arr / modI_arr
+    u_arr = U_arr / modI_arr
+    dq_arr = q_arr * np.sqrt((rmsQ_arr / Q_arr) ** 2.0 + (rmsI_arr / I_arr) ** 2.0)
+    du_arr = u_arr * np.sqrt((rmsU_arr / U_arr) ** 2.0 + (rmsI_arr / I_arr) ** 2.0)
+    lam_sq_arr_m2 = np.power(C / freq_arr_Hz, 2.0)
 
     # Get the models to overplot
-    dummy, modIHirArr = dataMan.get_modI_byindx(indx, oversample=True)
-    freqHirArr_Hz, qModArr, uModArr = dataMan.get_thin_qumodel_byindx(
+    dummy, modIHir_arr = dataMan.get_modI_byindx(indx, oversample=True)
+    freqHir_arr_Hz, qMod_arr, uMod_arr = dataMan.get_thin_qumodel_byindx(
         indx, oversample=True
     )
 
@@ -1757,17 +1757,17 @@ def plotPolsummary(dataMan, indx, io="fig"):
 
     # Call the function to create the 4-panel figure
     plot_Ipqu_spectra_fig(
-        freqArr_Hz=freqArr_Hz,
-        IArr=IArr,
-        qArr=qArr,
-        uArr=uArr,
-        dIArr=rmsIArr,
-        dqArr=dqArr,
-        duArr=duArr,
-        freqHirArr_Hz=freqHirArr_Hz,
-        IModArr=modIHirArr,
-        qModArr=qModArr,
-        uModArr=uModArr,
+        freq_arr_Hz=freq_arr_Hz,
+        I_arr=I_arr,
+        q_arr=q_arr,
+        u_arr=u_arr,
+        dI_arr=rmsI_arr,
+        dq_arr=dq_arr,
+        du_arr=du_arr,
+        freqHir_arr_Hz=freqHir_arr_Hz,
+        IMod_arr=modIHir_arr,
+        qMod_arr=qMod_arr,
+        uMod_arr=uMod_arr,
         fig=fig,
     )
 
@@ -1785,24 +1785,24 @@ def plotPolsummary(dataMan, indx, io="fig"):
 def plotPolresidual(dataMan, indx, io="fig"):
 
     # Get the data
-    freqArr_Hz, IArr, rmsIArr = dataMan.get_specI_byindx(indx)
-    dummy, modIArr = dataMan.get_modI_byindx(indx)
-    dummy, QArr, rmsQArr = dataMan.get_specQ_byindx(indx)
-    dummy, UArr, rmsUArr = dataMan.get_specU_byindx(indx)
-    dummy, qModArr, uModArr = dataMan.get_thin_qumodel_byindx(indx)
+    freq_arr_Hz, I_arr, rmsI_arr = dataMan.get_specI_byindx(indx)
+    dummy, modI_arr = dataMan.get_modI_byindx(indx)
+    dummy, Q_arr, rmsQ_arr = dataMan.get_specQ_byindx(indx)
+    dummy, U_arr, rmsU_arr = dataMan.get_specU_byindx(indx)
+    dummy, qMod_arr, uMod_arr = dataMan.get_thin_qumodel_byindx(indx)
 
     # Calculate fractional polarisation spectra
-    qArr = QArr / modIArr
-    uArr = UArr / modIArr
-    dqArr = qArr * np.sqrt((rmsQArr / QArr) ** 2.0 + (rmsIArr / IArr) ** 2.0)
-    duArr = uArr * np.sqrt((rmsUArr / UArr) ** 2.0 + (rmsIArr / IArr) ** 2.0)
-    lamSqArr_m2 = np.power(C / freqArr_Hz, 2.0)
+    q_arr = Q_arr / modI_arr
+    u_arr = U_arr / modI_arr
+    dq_arr = q_arr * np.sqrt((rmsQ_arr / Q_arr) ** 2.0 + (rmsI_arr / I_arr) ** 2.0)
+    du_arr = u_arr * np.sqrt((rmsU_arr / U_arr) ** 2.0 + (rmsI_arr / I_arr) ** 2.0)
+    lam_sq_arr_m2 = np.power(C / freq_arr_Hz, 2.0)
 
     # Form the residuals
-    qResidArr = qArr - qModArr
-    uResidArr = uArr - uModArr
-    pResidArr = np.sqrt(qResidArr**2.0 + uResidArr**2.0)
-    IResidArr = IArr - modIArr
+    qResid_arr = q_arr - qMod_arr
+    uResid_arr = u_arr - uMod_arr
+    pResid_arr = np.sqrt(qResid_arr**2.0 + uResid_arr**2.0)
+    IResid_arr = I_arr - modI_arr
 
     # Setup the figure
     fig = Figure()
@@ -1811,29 +1811,29 @@ def plotPolresidual(dataMan, indx, io="fig"):
     # Plot I versus nu,
     ax1 = fig.add_subplot(221)
     plot_I_vs_nu_ax(
-        ax=ax1, freqArr_Hz=freqArr_Hz, IArr=IResidArr, dIArr=rmsIArr, axisXtop=True
+        ax=ax1, freq_arr_Hz=freq_arr_Hz, I_arr=IResid_arr, dI_arr=rmsI_arr, axisXtop=True
     )
 
     # Plot p, q, u versus lambda^2
     ax2 = fig.add_subplot(223)
     plot_pqu_vs_lamsq_ax(
         ax=ax2,
-        lamSqArr_m2=lamSqArr_m2,
-        qArr=qResidArr,
-        uArr=uResidArr,
-        dqArr=dqArr,
-        duArr=duArr,
+        lam_sq_arr_m2=lam_sq_arr_m2,
+        q_arr=qResid_arr,
+        u_arr=uResid_arr,
+        dq_arr=dq_arr,
+        du_arr=du_arr,
     )
 
     # Plot psi versus lambda^2
     ax3 = fig.add_subplot(222)
     plot_psi_vs_lamsq_ax(
         ax=ax3,
-        lamSqArr_m2=lamSqArr_m2,
-        qArr=qResidArr,
-        uArr=uResidArr,
-        dqArr=dqArr,
-        duArr=duArr,
+        lam_sq_arr_m2=lam_sq_arr_m2,
+        q_arr=qResid_arr,
+        u_arr=uResid_arr,
+        dq_arr=dq_arr,
+        du_arr=du_arr,
         axisYright=True,
         axisXtop=True,
     )
@@ -1842,11 +1842,11 @@ def plotPolresidual(dataMan, indx, io="fig"):
     ax4 = fig.add_subplot(224)
     plot_q_vs_u_ax(
         ax=ax4,
-        lamSqArr_m2=lamSqArr_m2,
-        qArr=qResidArr,
-        uArr=uResidArr,
-        dqArr=dqArr,
-        duArr=duArr,
+        lam_sq_arr_m2=lam_sq_arr_m2,
+        q_arr=qResid_arr,
+        u_arr=uResid_arr,
+        dq_arr=dq_arr,
+        du_arr=du_arr,
         axisYright=True,
     )
 
@@ -1862,10 +1862,10 @@ def plotPolresidual(dataMan, indx, io="fig"):
 
 # -----------------------------------------------------------------------------#
 def plot_rmsf_fdf_fig(
-    phiArr,
+    phi_arr,
     FDF,
-    phi2Arr,
-    RMSFArr,
+    phi2_arr,
+    RMSF_arr,
     fwhmRMSF=None,
     gaussParm=[],
     vLine=None,
@@ -1880,7 +1880,7 @@ def plot_rmsf_fdf_fig(
     # Plot the RMSF
     ax1 = fig.add_subplot(211)
     plot_RMSF_ax(
-        ax=ax1, phiArr=phi2Arr, RMSFArr=RMSFArr, fwhmRMSF=fwhmRMSF, doTitle=True
+        ax=ax1, phi_arr=phi2_arr, RMSF_arr=RMSF_arr, fwhmRMSF=fwhmRMSF, doTitle=True
     )
     [label.set_visible(False) for label in ax1.get_xticklabels()]
     ax1.set_xlabel("")
@@ -1892,8 +1892,8 @@ def plot_rmsf_fdf_fig(
     ax2 = fig.add_subplot(212, sharex=ax1)
     plot_dirtyFDF_ax(
         ax=ax2,
-        phiArr=phiArr,
-        FDFArr=FDF,
+        phi_arr=phi_arr,
+        FDF_arr=FDF,
         gaussParm=gaussParm,
         vLine=vLine,
         doTitle=True,
@@ -1907,7 +1907,7 @@ def plot_rmsf_fdf_fig(
 def plotRMSF(dataMan, indx, io="fig"):
 
     # Get the data and Gaussian fit to RMSF
-    phiArr, RMSFArr = dataMan.get_RMSF_byindx(indx)
+    phi_arr, RMSF_arr = dataMan.get_RMSF_byindx(indx)
     pDict = dataMan.get_RMSF_params_byindx(indx)
 
     # Setup the figure
@@ -1916,7 +1916,7 @@ def plotRMSF(dataMan, indx, io="fig"):
 
     # Plot the RMSF
     ax1 = fig.add_subplot(111)
-    plot_RMSF_ax(ax=ax1, phiArr=phiArr, RMSFArr=RMSFArr, fwhmRMSF=pDict["fwhmRMSF"])
+    plot_RMSF_ax(ax=ax1, phi_arr=phi_arr, RMSF_arr=RMSF_arr, fwhmRMSF=pDict["fwhmRMSF"])
 
     # Write to the pipe
     if io == "string":
@@ -1932,7 +1932,7 @@ def plotRMSF(dataMan, indx, io="fig"):
 def plotDirtyFDF(dataMan, indx, io="fig"):
 
     # Get the data
-    phiArr, FDFArr = dataMan.get_dirtyFDF_byindx(indx)
+    phi_arr, FDF_arr = dataMan.get_dirtyFDF_byindx(indx)
 
     # Get the peak results
     pDict = dataMan.get_FDF_peak_params_byindx(indx)
@@ -1947,8 +1947,8 @@ def plotDirtyFDF(dataMan, indx, io="fig"):
     ax1 = fig.add_subplot(111)
     plot_dirtyFDF_ax(
         ax=ax1,
-        phiArr=phiArr,
-        FDFArr=FDFArr,
+        phi_arr=phi_arr,
+        FDF_arr=FDF_arr,
         gaussParm=gaussParm,
         title="Dirty Faraday Dispersion Function",
     )
@@ -1967,8 +1967,8 @@ def plotDirtyFDF(dataMan, indx, io="fig"):
 def plotCleanFDF(dataMan, indx, io="fig"):
 
     # Get the data
-    phiArr, dirtyFDFArr = dataMan.get_dirtyFDF_byindx(indx)
-    dummy, cleanFDFArr = dataMan.get_cleanFDF_byindx(indx)
+    phi_arr, dirtyFDF_arr = dataMan.get_dirtyFDF_byindx(indx)
+    dummy, cleanFDF_arr = dataMan.get_cleanFDF_byindx(indx)
     dummy, ccFDF = dataMan.get_ccFDF_byindx(indx)
 
     # Get the peak results
@@ -1984,10 +1984,10 @@ def plotCleanFDF(dataMan, indx, io="fig"):
     ax1 = fig.add_subplot(111)
     plot_cleanFDF_ax(
         ax=ax1,
-        phiArr=phiArr,
-        cleanFDFArr=cleanFDFArr,
-        ccFDFArr=ccFDF,
-        dirtyFDFArr=dirtyFDFArr,
+        phi_arr=phi_arr,
+        cleanFDF_arr=cleanFDF_arr,
+        ccFDF_arr=ccFDF,
+        dirtyFDF_arr=dirtyFDF_arr,
         gaussParm=gaussParm,
         title="Clean Faraday Dispersion Function",
         cutoff=pDict["cleanCutoff"],
@@ -2005,11 +2005,11 @@ def plotCleanFDF(dataMan, indx, io="fig"):
 
 # -----------------------------------------------------------------------------#
 def plot_cleanFDF_fig(
-    phiArr,
-    cleanFDFArr,
-    ccFDFArr=None,
-    dirtyFDFArr=None,
-    residFDFArr=None,
+    phi_arr,
+    cleanFDF_arr,
+    ccFDF_arr=None,
+    dirtyFDF_arr=None,
+    residFDF_arr=None,
     gaussParm=[],
     title="Clean FDF",
     cutoff=None,
@@ -2025,10 +2025,10 @@ def plot_cleanFDF_fig(
     ax1 = fig.add_subplot(211)
     plot_cleanFDF_ax(
         ax=ax1,
-        phiArr=phiArr,
-        cleanFDFArr=cleanFDFArr,
-        ccFDFArr=ccFDFArr,
-        dirtyFDFArr=dirtyFDFArr,
+        phi_arr=phi_arr,
+        cleanFDF_arr=cleanFDF_arr,
+        ccFDF_arr=ccFDF_arr,
+        dirtyFDF_arr=dirtyFDF_arr,
         gaussParm=gaussParm,
         title=title,
         cutoff=cutoff,
@@ -2039,10 +2039,10 @@ def plot_cleanFDF_fig(
     ax2 = fig.add_subplot(212)
     plot_cleanFDF_ax(
         ax=ax2,
-        phiArr=phiArr,
-        cleanFDFArr=cleanFDFArr,
-        ccFDFArr=ccFDFArr,
-        dirtyFDFArr=residFDFArr,
+        phi_arr=phi_arr,
+        cleanFDF_arr=cleanFDF_arr,
+        ccFDF_arr=ccFDF_arr,
+        dirtyFDF_arr=residFDF_arr,
         gaussParm=gaussParm,
         title=title,
         cutoff=cutoff,
@@ -2109,10 +2109,10 @@ def plotSctHstQuery(dataMan, plotParm, io="fig"):
     for i in range(len(plotParm.queryLst) - 1, -1, -1):
         sql = plotParm.queryLst[i]
         try:
-            resultArr = dataMan.query_database(sql)
-            colNames = resultArr.dtype.names
+            result_arr = dataMan.query_database(sql)
+            colNames = result_arr.dtype.names
             nCols = max(len(colNames), nCols)
-            popLst.append(resultArr)
+            popLst.append(result_arr)
         except Exception:
             popLst.append(None)
             print("\nWarn: failed to execute query:")
@@ -2280,17 +2280,17 @@ def label_format_exp(switchExp=3.0):
 
 # -----------------------------------------------------------------------------#
 def plot_complexity_fig(
-    xArr,
-    qArr,
-    dqArr,
-    sigmaAddqArr,
-    chiSqRedqArr,
-    probqArr,
-    uArr,
-    duArr,
-    sigmaAdduArr,
-    chiSqReduArr,
-    probuArr,
+    x_arr,
+    q_arr,
+    dq_arr,
+    sigmaAddq_arr,
+    chi_sqRedq_arr,
+    probq_arr,
+    u_arr,
+    du_arr,
+    sigmaAddu_arr,
+    chi_sqRedu_arr,
+    probu_arr,
     mDict,
     med=0.0,
     noise=1.0,
@@ -2308,9 +2308,9 @@ def plot_complexity_fig(
     ax1.xaxis.set_label_position("top")
     ax1.xaxis.set_major_locator(MaxNLocator(7))
     ax1.errorbar(
-        x=xArr,
-        y=qArr,
-        yerr=dqArr,
+        x=x_arr,
+        y=q_arr,
+        yerr=dq_arr,
         ms=3,
         color="tab:blue",
         fmt="o",
@@ -2318,7 +2318,7 @@ def plot_complexity_fig(
         capsize=0,
     )
     ax1.errorbar(
-        x=xArr, y=uArr, yerr=duArr, ms=3, color="tab:red", fmt="o", alpha=0.5, capsize=0
+        x=x_arr, y=u_arr, yerr=du_arr, ms=3, color="tab:red", fmt="o", alpha=0.5, capsize=0
     )
     ax1.axhline(med, color="grey", zorder=10)
     ax1.axhline(1.0, color="k", linestyle="--", zorder=10)
@@ -2334,10 +2334,10 @@ def plot_complexity_fig(
     ax2 = fig.add_subplot(232)
     ax2.tick_params(labelbottom="off")
     nBins = 15
-    yMin = np.nanmin([np.nanmin(qArr), np.nanmin(uArr)])
-    yMax = np.nanmax([np.nanmax(qArr), np.nanmax(uArr)])
+    yMin = np.nanmin([np.nanmin(q_arr), np.nanmin(u_arr)])
+    yMax = np.nanmax([np.nanmax(q_arr), np.nanmax(u_arr)])
     n, b, p = ax2.hist(
-        qArr,
+        q_arr,
         nBins,
         range=(yMin, yMax),
         density=1,
@@ -2347,7 +2347,7 @@ def plot_complexity_fig(
     )
     ax2.plot(xNorm, yNorm, color="k", linestyle="--", linewidth=1.5)
     n, b, p = ax2.hist(
-        uArr,
+        u_arr,
         nBins,
         range=(yMin, yMax),
         density=1,
@@ -2360,13 +2360,13 @@ def plot_complexity_fig(
     ax2.set_ylabel(r"Normalised Counts")
 
     # Plot the ECDF versus a normal CDF
-    nData = len(xArr)
-    ecdfArr = np.array(list(range(nData))) / float(nData)
-    qSrtArr = np.sort(qArr)
-    uSrtArr = np.sort(uArr)
+    nData = len(x_arr)
+    ecdf_arr = np.array(list(range(nData))) / float(nData)
+    qSrt_arr = np.sort(q_arr)
+    uSrt_arr = np.sort(u_arr)
     ax3 = fig.add_subplot(235, sharex=ax2)
-    ax3.step(qSrtArr, ecdfArr, where="mid", color="tab:blue")
-    ax3.step(uSrtArr, ecdfArr, where="mid", color="tab:red")
+    ax3.step(qSrt_arr, ecdf_arr, where="mid", color="tab:blue")
+    ax3.step(uSrt_arr, ecdf_arr, where="mid", color="tab:red")
     x, y = norm_cdf(mean=med, std=noise, N=1000)
     ax3.plot(x, y, color="k", linewidth=1.5, linestyle="--", zorder=1)
     ax3.set_ylim(0, 1.05)
@@ -2377,10 +2377,10 @@ def plot_complexity_fig(
     # Plot reduced chi-squared
     ax4 = fig.add_subplot(234)
     ax4.step(
-        x=sigmaAddqArr, y=chiSqRedqArr, color="tab:blue", linewidth=1.0, where="mid"
+        x=sigmaAddq_arr, y=chi_sqRedq_arr, color="tab:blue", linewidth=1.0, where="mid"
     )
     ax4.step(
-        x=sigmaAddqArr, y=chiSqReduArr, color="tab:red", linewidth=1.0, where="mid"
+        x=sigmaAddq_arr, y=chi_sqRedu_arr, color="tab:red", linewidth=1.0, where="mid"
     )
     ax4.axhline(1.0, color="k", linestyle="--")
     ax4.set_xlabel(r"$\sigma_{\rm add}$")
@@ -2390,16 +2390,16 @@ def plot_complexity_fig(
     ax5 = fig.add_subplot(233)
     ax5.tick_params(labelbottom="off")
     ax5.step(
-        x=sigmaAddqArr,
-        y=probqArr,
+        x=sigmaAddq_arr,
+        y=probq_arr,
         linewidth=1.0,
         where="mid",
         color="tab:blue",
         alpha=0.5,
     )
     ax5.step(
-        x=sigmaAdduArr,
-        y=probuArr,
+        x=sigmaAddu_arr,
+        y=probu_arr,
         linewidth=1.0,
         where="mid",
         color="tab:red",
@@ -2435,11 +2435,11 @@ def plot_complexity_fig(
     ax5.set_ylabel(r"P($\sigma_{\rm add}$|data)")
 
     # Plot the CPDF
-    CPDFq = np.cumsum(probqArr) / np.sum(probqArr)
-    CPDFu = np.cumsum(probuArr) / np.sum(probuArr)
+    CPDFq = np.cumsum(probq_arr) / np.sum(probq_arr)
+    CPDFu = np.cumsum(probu_arr) / np.sum(probu_arr)
     ax6 = fig.add_subplot(236, sharex=ax5)
-    ax6.step(x=sigmaAddqArr, y=CPDFq, linewidth=1.0, where="mid", color="tab:blue")
-    ax6.step(x=sigmaAdduArr, y=CPDFu, linewidth=1.0, where="mid", color="tab:red")
+    ax6.step(x=sigmaAddq_arr, y=CPDFq, linewidth=1.0, where="mid", color="tab:blue")
+    ax6.step(x=sigmaAddu_arr, y=CPDFu, linewidth=1.0, where="mid", color="tab:red")
     ax6.set_ylim(0, 1.05)
     ax6.axhline(0.5, color="grey", linestyle="-", linewidth=1.5)
     ax6.axvline(mDict["sigmaAddQ"], color="tab:blue", linestyle="-", linewidth=1.5)

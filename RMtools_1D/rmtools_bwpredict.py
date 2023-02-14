@@ -53,14 +53,14 @@ C = 2.997924538e8  # Speed of light [m/s]
 
 # -----------------------------------------------------------------------------#
 def bwdepol_compute_predictions(
-    freqArr_Hz, widths_Hz=None, phiMax_radm2=None, dPhi_radm2=None
+    freq_arr_Hz, widths_Hz=None, phiMax_radm2=None, dPhi_radm2=None
 ):
     """Computes theoretical sensitivity and noise curves for given
     channelization.
 
     Parameters
     ----------
-    freqArr_Hz:  array, float
+    freq_arr_Hz:  array, float
                  array of the centers of the frequency channels
 
     Kwargs
@@ -81,22 +81,22 @@ def bwdepol_compute_predictions(
 
     """
     # Calculate some wavelength parameters
-    lambdaSqArr_m2 = np.power(C / freqArr_Hz, 2.0)
-    # dFreq_Hz = np.nanmin(np.abs(np.diff(freqArr_Hz)))
-    lambdaSqRange_m2 = np.nanmax(lambdaSqArr_m2) - np.nanmin(lambdaSqArr_m2)
-    dLambdaSqMin_m2 = np.nanmin(np.abs(np.diff(lambdaSqArr_m2)))
-    dLambdaSqMax_m2 = np.nanmax(np.abs(np.diff(lambdaSqArr_m2)))
+    lambda_sq_arr_m2 = np.power(C / freq_arr_Hz, 2.0)
+    # dFreq_Hz = np.nanmin(np.abs(np.diff(freq_arr_Hz)))
+    lambda_sqRange_m2 = np.nanmax(lambda_sq_arr_m2) - np.nanmin(lambda_sq_arr_m2)
+    dLambda_sqMin_m2 = np.nanmin(np.abs(np.diff(lambda_sq_arr_m2)))
+    dLambda_sqMax_m2 = np.nanmax(np.abs(np.diff(lambda_sq_arr_m2)))
 
     # Set the Faraday depth range
-    fwhmRMSF_radm2 = 2.0 * m.sqrt(3.0) / lambdaSqRange_m2
+    fwhmRMSF_radm2 = 2.0 * m.sqrt(3.0) / lambda_sqRange_m2
     if dPhi_radm2 is None:
         dPhi_radm2 = fwhmRMSF_radm2
     if phiMax_radm2 is None:
-        phiMax_radm2 = 2 * m.sqrt(3.0) / dLambdaSqMin_m2
+        phiMax_radm2 = 2 * m.sqrt(3.0) / dLambda_sqMin_m2
 
     # Faraday depth sampling.
-    phiArr_radm2 = np.arange(0, phiMax_radm2 + 1e-6, dPhi_radm2)
-    phiArr_radm2 = phiArr_radm2.astype("float64")
+    phi_arr_radm2 = np.arange(0, phiMax_radm2 + 1e-6, dPhi_radm2)
+    phi_arr_radm2 = phi_arr_radm2.astype("float64")
 
     print(
         "Computing out to a Faraday depth of {:g} rad/m^2 in steps of {:g} rad/m^2".format(
@@ -105,16 +105,16 @@ def bwdepol_compute_predictions(
     )
 
     # Uniform weights only for prediction purposes
-    weightArr = np.ones(freqArr_Hz.shape, dtype="float64")
+    weight_arr = np.ones(freq_arr_Hz.shape, dtype="float64")
 
     # Get channel widths if not given by user.
-    K = 1.0 / np.sum(weightArr)
+    K = 1.0 / np.sum(weight_arr)
     if widths_Hz is None:
-        widths_Hz = estimate_channel_bandwidth(freqArr_Hz)
+        widths_Hz = estimate_channel_bandwidth(freq_arr_Hz)
 
-    adjoint_varbs = [widths_Hz, freqArr_Hz, phiArr_radm2, K, weightArr]
-    adjoint_info = adjoint_theory(adjoint_varbs, weightArr, show_progress=False)
-    phiArr_radm2, adjoint_sens, adjoint_noise = adjoint_info
+    adjoint_varbs = [widths_Hz, freq_arr_Hz, phi_arr_radm2, K, weight_arr]
+    adjoint_info = adjoint_theory(adjoint_varbs, weight_arr, show_progress=False)
+    phi_arr_radm2, adjoint_sens, adjoint_noise = adjoint_info
 
     adjoint_info[2] = adjoint_noise / np.max(adjoint_noise)  # Renormalize to unity.
 
@@ -177,10 +177,10 @@ def main():
     try:
         data = np.loadtxt(args.dataFile[0], unpack=True, dtype="float64")
         if data.ndim == 1:  # If single column file, data is only channel freqs
-            freqArr_Hz = data
+            freq_arr_Hz = data
             widths_Hz = None
         else:  # file has multiple columns
-            freqArr_Hz = data[0]  # assume the first column is channel freqs
+            freq_arr_Hz = data[0]  # assume the first column is channel freqs
             widths_Hz = data[1]  # Assume widths are 2nd column if present.
     except:
         print(
@@ -189,7 +189,7 @@ def main():
         exit
 
     adjoint_info = bwdepol_compute_predictions(
-        freqArr_Hz=freqArr_Hz,
+        freq_arr_Hz=freq_arr_Hz,
         widths_Hz=widths_Hz,
         phiMax_radm2=args.phiMax_radm2,
         dPhi_radm2=args.dPhi_radm2,

@@ -144,13 +144,13 @@ def main():
     I_filename = args.fitsI[0]
 
     datacube, headI = open_datacube(fitsI=I_filename, verbose=args.verbose)
-    freqArr_Hz = get_freq_array(I_filename)
+    freq_arr_Hz = get_freq_array(I_filename)
 
     # Run polynomial fitting on the spectra
     make_model_I(
         datacube=datacube,
         header=headI,
-        freqArr_Hz=freqArr_Hz,
+        freq_arr_Hz=freq_arr_Hz,
         polyOrd=args.polyOrd,
         cutoff=args.cutoff,
         prefixOut=args.prefixOut,
@@ -199,15 +199,15 @@ def get_frequencies(datacube, headI, freqFile):
 
     # Read the frequency vector
     print("Reading frequency vector from '%s'." % freqFile)
-    freqArr_Hz = np.loadtxt(freqFile, dtype=dtFloat)
-    if nChan != len(freqArr_Hz):
+    freq_arr_Hz = np.loadtxt(freqFile, dtype=dtFloat)
+    if nChan != len(freq_arr_Hz):
         print("Err: frequency vector and frequency axis of cube unequal length.")
         sys.exit()
 
-    return freqArr_Hz
+    return freq_arr_Hz
 
 
-def cube_noise(datacube, header, freqArr_Hz, cutoff=-1, threshold=3):
+def cube_noise(datacube, header, freq_arr_Hz, cutoff=-1, threshold=3):
 
     """
     Estimate channel noise of a cube data. Returns rms values and a mask 2D data.
@@ -223,15 +223,15 @@ def cube_noise(datacube, header, freqArr_Hz, cutoff=-1, threshold=3):
     dtFloat = "float" + str(nBits)
     nChan = datacube.shape[0]
 
-    if nChan != len(freqArr_Hz):
+    if nChan != len(freq_arr_Hz):
         print("Err: frequency vector and frequency axis of cube unequal length.")
         sys.exit()
 
     # Measure the RMS spectrum using 2 passes of MAD on each plane
     # Determine which pixels have emission above the cutoff
     print("Measuring the RMS noise and creating an emission mask")
-    rmsArr = np.zeros_like(freqArr_Hz)
-    medSky = np.zeros_like(freqArr_Hz)
+    rms_arr = np.zeros_like(freq_arr_Hz)
+    medSky = np.zeros_like(freq_arr_Hz)
     mskSrc = np.zeros((header["NAXIS2"], header["NAXIS1"]), dtype=dtFloat)
 
     start = time.time()
@@ -250,20 +250,20 @@ def cube_noise(datacube, header, freqArr_Hz, cutoff=-1, threshold=3):
 
         idxSky = np.where(dataPlane < medTmp + rmsTmp * threshold)
         medSky[i] = np.nanmedian(dataPlane[idxSky])
-        rmsArr[i] = MAD(dataPlane[idxSky])
+        rms_arr[i] = MAD(dataPlane[idxSky])
 
         # When building final emission mask treat +ve cutoffs as absolute
         # values and negative cutoffs as sigma values
         if cutoff > 0:
             idxSrc = np.where(dataPlane > cutoff)
         else:
-            idxSrc = np.where(dataPlane > medSky[i] - 1 * rmsArr[i] * cutoff)
+            idxSrc = np.where(dataPlane > medSky[i] - 1 * rms_arr[i] * cutoff)
 
         mskSrc[idxSrc] += 1
 
     end = time.time()
     print(" For loop masking takes %.3fs" % (end - start))
-    return rmsArr, mskSrc
+    return rms_arr, mskSrc
 
 
 def channel_noise(chan, datacube, header, cutoff, threshold, nBits):
@@ -306,10 +306,10 @@ def savefits_mask(data, header, outDir, prefixOut):
     headMask["DATAMIN"] = 0
     del headMask["BUNIT"]
 
-    mskArr = np.where(data > 0, 1.0, np.nan)
+    msk_arr = np.where(data > 0, 1.0, np.nan)
     MaskfitsFile = outDir + "/" + prefixOut + "Mask.fits"
     print("> %s" % MaskfitsFile)
-    pf.writeto(MaskfitsFile, mskArr, headMask, output_verify="fix", overwrite=True)
+    pf.writeto(MaskfitsFile, msk_arr, headMask, output_verify="fix", overwrite=True)
 
 
 def savefits_Coeffs(data, dataerr, header, polyOrd, outDir, prefixOut):
@@ -353,7 +353,7 @@ def savefits_model_I(data, header, outDir, prefixOut):
 
 
 def fit_spectra_I(
-    xy, datacube, freqArr_Hz, rms_Arr, polyOrd, fit_function, nDetectPix, verbose=True
+    xy, datacube, freq_arr_Hz, rms__arr, polyOrd, fit_function, nDetectPix, verbose=True
 ):
 
     i, x, y = xy
@@ -361,18 +361,18 @@ def fit_spectra_I(
     Ispectrum = datacube[:, x, y]
 
     pixFitDict = fit_StokesI_model(
-        freqArr_Hz, Ispectrum, rms_Arr, polyOrd=polyOrd, fit_function=fit_function
+        freq_arr_Hz, Ispectrum, rms__arr, polyOrd=polyOrd, fit_function=fit_function
     )
 
-    pixImodel = calculate_StokesI_model(pixFitDict, freqArr_Hz)
+    pixImodel = calculate_StokesI_model(pixFitDict, freq_arr_Hz)
 
     outs = dict()
 
     outs["I"] = pixImodel
     outs["coeffs"] = pixFitDict["p"]
     outs["coeffs_err"] = pixFitDict["perror"]
-    outs["chiSq"] = pixFitDict["chiSq"]
-    outs["chiSqRed"] = pixFitDict["chiSqRed"]
+    outs["chi_sq"] = pixFitDict["chi_sq"]
+    outs["chi_sqRed"] = pixFitDict["chi_sqRed"]
     outs["nIter"] = pixFitDict["nIter"]
     outs["AIC"] = pixFitDict["AIC"]
 
@@ -385,7 +385,7 @@ def fit_spectra_I(
 def make_model_I(
     datacube,
     header,
-    freqArr_Hz,
+    freq_arr_Hz,
     polyOrd=2,
     cutoff=-1,
     nBits=32,
@@ -404,7 +404,7 @@ def make_model_I(
 
     datacube:  Stokes I data cube.
     header: header of the data cube.
-    freqArr_Hz: frequency values of the cube in Hz.
+    freq_arr_Hz: frequency values of the cube in Hz.
     polyOrd: the order of the polynomial to fit. 0-5 supported, 2 is default.
     fit_function: fit log or linear.
 
@@ -415,15 +415,15 @@ def make_model_I(
     nChan = datacube.shape[0]
     dtFloat = "float" + str(nBits)
 
-    rms_Arr, mskSrc = cube_noise(
-        datacube, header, freqArr_Hz, cutoff=cutoff, threshold=threshold
+    rms__arr, mskSrc = cube_noise(
+        datacube, header, freq_arr_Hz, cutoff=cutoff, threshold=threshold
     )
 
-    mskArr = np.where(mskSrc > 0, 1.0, np.nan)
+    msk_arr = np.where(mskSrc > 0, 1.0, np.nan)
 
     if not apply_mask:
         mskSrc = np.ones((header["naxis2"], header["naxis1"]), dtype=dtFloat)
-        mskArr = np.where(mskSrc > 0, 1.0, np.nan)
+        msk_arr = np.where(mskSrc > 0, 1.0, np.nan)
 
     srcCoords = np.rot90(np.where(mskSrc > 0))
 
@@ -440,8 +440,8 @@ def make_model_I(
     modelIcube[:] = np.nan
     results = []
 
-    coeffs = np.array([mskArr] * 6)
-    coeffs_error = np.array([mskArr] * 6)
+    coeffs = np.array([msk_arr] * 6)
+    coeffs_error = np.array([msk_arr] * 6)
     datacube = np.squeeze(datacube)
 
     # Inform user job magnitude
@@ -459,8 +459,8 @@ def make_model_I(
             partial(
                 fit_spectra_I,
                 datacube=datacube,
-                freqArr_Hz=freqArr_Hz,
-                rms_Arr=rms_Arr,
+                freq_arr_Hz=freq_arr_Hz,
+                rms__arr=rms__arr,
                 polyOrd=polyOrd,
                 fit_function=fit_function,
                 nDetectPix=nDetectPix,

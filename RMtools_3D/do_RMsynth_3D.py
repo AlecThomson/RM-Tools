@@ -53,11 +53,11 @@ C = 2.997924538e8  # Speed of light [m/s]
 
 # -----------------------------------------------------------------------------#
 def run_rmsynth(
-    dataQ: np.ndarray,
-    dataU: np.ndarray,
-    freqArr_Hz: np.ndarray,
+    data_Q: np.ndarray,
+    data_U: np.ndarray,
+    freq_arr_Hz: np.ndarray,
     dataI: Union[np.ndarray, None] = None,
-    rmsArr: Union[np.ndarray, None] = None,
+    rms_arr: Union[np.ndarray, None] = None,
     phiMax_radm2: Union[float, None] = None,
     dPhi_radm2: Union[float, None] = None,
     nSamples: float = 10.0,
@@ -69,11 +69,11 @@ def run_rmsynth(
     """Run RM-synthesis on 2/3D data.
 
     Args:
-        dataQ (np.ndarray): Stokes Q intensity cube.
-        dataU (np.ndarray): Stokes U intensity cube.
-        freqArr_Hz (np.ndarray): Frequency of each channel in Hz.
+        data_Q (np.ndarray): Stokes Q intensity cube.
+        data_U (np.ndarray): Stokes U intensity cube.
+        freq_arr_Hz (np.ndarray): Frequency of each channel in Hz.
         dataI (Union[np.ndarray, None], optional): Model cube of Stokes I spectra (see do_fitIcube). Defaults to None.
-        rmsArr (Union[np.ndarray, None], optional): Cube of RMS spectra.. Defaults to None.
+        rms_arr (Union[np.ndarray, None], optional): Cube of RMS spectra.. Defaults to None.
         phiMax_radm2 (Union[float, None], optional): Maximum absolute Faraday depth (rad/m^2). Defaults to None.
         dPhi_radm2 (Union[float, None], optional): Faraday depth channel size (rad/m^2). Defaults to None.
         nSamples (float, optional): Number of samples across the RMSF. Defaults to 10.0.
@@ -87,22 +87,22 @@ def run_rmsynth(
     Returns:
         list: FDF and RMSF information
             if not_rmsf:
-                dataArr = [FDFcube, phiArr_radm2, lam0Sq_m2, lambdaSqArr_m2]
+                data_arr = [FDFcube, phi_arr_radm2, lam0_sq_m2, lambda_sq_arr_m2]
 
             else:
-                dataArr = [FDFcube, phiArr_radm2, RMSFcube, phi2Arr_radm2, fwhmRMSFCube,fitStatArr, lam0Sq_m2, lambdaSqArr_m2]
+                data_arr = [FDFcube, phi_arr_radm2, RMSFcube, phi2_arr_radm2, fwhmRMSFCube,fitStat_arr, lam0_sq_m2, lambda_sq_arr_m2]
     """
     # Sanity check on header dimensions
 
-    if not str(dataQ.shape) == str(dataU.shape):
-        raise ValueError(f"unequal dimensions: Q = {dataQ.shape} U = {dataU.shape}")
+    if not str(data_Q.shape) == str(data_U.shape):
+        raise ValueError(f"unequal dimensions: Q = {data_Q.shape} U = {data_U.shape}")
 
     # Check dimensions of Stokes I cube, if present
     if not dataI is None:
-        if not str(dataI.shape) == str(dataQ.shape):
+        if not str(dataI.shape) == str(data_Q.shape):
             log(
                 "Err: unequal dimensions: Q = "
-                + str(dataQ.shape)
+                + str(data_Q.shape)
                 + ", I = "
                 + str(dataI.shape)
                 + "."
@@ -113,19 +113,19 @@ def run_rmsynth(
     dtFloat = f"float{nBits}"
     dtComplex = f"complex{2 * nBits}"
 
-    lambdaSqArr_m2 = np.power(C / freqArr_Hz, 2.0)
+    lambda_sq_arr_m2 = np.power(C / freq_arr_Hz, 2.0)
 
-    dFreq_Hz = np.nanmin(np.abs(np.diff(freqArr_Hz)))
-    lambdaSqRange_m2 = np.nanmax(lambdaSqArr_m2) - np.nanmin(lambdaSqArr_m2)
-    dLambdaSqMin_m2 = np.nanmin(np.abs(np.diff(lambdaSqArr_m2)))
-    dLambdaSqMax_m2 = np.nanmax(np.abs(np.diff(lambdaSqArr_m2)))
+    dFreq_Hz = np.nanmin(np.abs(np.diff(freq_arr_Hz)))
+    lambda_sqRange_m2 = np.nanmax(lambda_sq_arr_m2) - np.nanmin(lambda_sq_arr_m2)
+    dLambda_sqMin_m2 = np.nanmin(np.abs(np.diff(lambda_sq_arr_m2)))
+    dLambda_sqMax_m2 = np.nanmax(np.abs(np.diff(lambda_sq_arr_m2)))
 
     # Set the Faraday depth range
-    fwhmRMSF_radm2 = 2.0 * m.sqrt(3.0) / lambdaSqRange_m2
+    fwhmRMSF_radm2 = 2.0 * m.sqrt(3.0) / lambda_sqRange_m2
     if dPhi_radm2 is None:
         dPhi_radm2 = fwhmRMSF_radm2 / nSamples  # Type: float
     if phiMax_radm2 is None:
-        phiMax_radm2 = m.sqrt(3.0) / dLambdaSqMax_m2
+        phiMax_radm2 = m.sqrt(3.0) / dLambda_sqMax_m2
         phiMax_radm2 = max(
             phiMax_radm2, fwhmRMSF_radm2 * 10.0
         )  # Force the minimum phiMax to 10 FWHM
@@ -134,20 +134,20 @@ def run_rmsynth(
     nChanRM = int(round(abs((phiMax_radm2 - 0.0) / dPhi_radm2))) * 2 + 1
     startPhi_radm2 = -(nChanRM - 1.0) * dPhi_radm2 / 2.0
     stopPhi_radm2 = +(nChanRM - 1.0) * dPhi_radm2 / 2.0
-    phiArr_radm2 = np.linspace(startPhi_radm2, stopPhi_radm2, int(nChanRM))
-    phiArr_radm2 = phiArr_radm2.astype(dtFloat)
+    phi_arr_radm2 = np.linspace(startPhi_radm2, stopPhi_radm2, int(nChanRM))
+    phi_arr_radm2 = phi_arr_radm2.astype(dtFloat)
     if verbose:
         log(
-            "PhiArr = %.2f to %.2f by %.2f (%d chans)."
-            % (phiArr_radm2[0], phiArr_radm2[-1], float(dPhi_radm2), nChanRM)
+            "Phi_arr = %.2f to %.2f by %.2f (%d chans)."
+            % (phi_arr_radm2[0], phi_arr_radm2[-1], float(dPhi_radm2), nChanRM)
         )
 
     # Calculate the weighting as 1/sigma^2 or all 1s (uniform)
-    if weightType == "variance" and rmsArr is not None:
-        weightArr = 1.0 / np.power(rmsArr, 2.0)
+    if weightType == "variance" and rms_arr is not None:
+        weight_arr = 1.0 / np.power(rms_arr, 2.0)
     else:
         weightType = "uniform"
-        weightArr = np.ones(freqArr_Hz.shape, dtype=dtFloat)
+        weight_arr = np.ones(freq_arr_Hz.shape, dtype=dtFloat)
     if verbose:
         log("Weight type is '%s'." % weightType)
 
@@ -156,30 +156,30 @@ def run_rmsynth(
     # Read the Stokes I model and divide into the Q & U data
     if dataI is not None:
         with np.errstate(divide="ignore", invalid="ignore"):
-            qArr = np.true_divide(dataQ, dataI)
-            uArr = np.true_divide(dataU, dataI)
+            q_arr = np.true_divide(data_Q, dataI)
+            u_arr = np.true_divide(data_U, dataI)
     else:
-        qArr = dataQ
-        uArr = dataU
+        q_arr = data_Q
+        u_arr = data_U
 
     # Perform RM-synthesis on the cube
-    FDFcube, lam0Sq_m2 = do_rmsynth_planes(
-        dataQ=qArr,
-        dataU=uArr,
-        lambdaSqArr_m2=lambdaSqArr_m2,
-        phiArr_radm2=phiArr_radm2,
-        weightArr=weightArr,
+    FDFcube, lam0_sq_m2 = do_rmsynth_planes(
+        data_Q=q_arr,
+        data_U=u_arr,
+        lambda_sq_arr_m2=lambda_sq_arr_m2,
+        phi_arr_radm2=phi_arr_radm2,
+        weight_arr=weight_arr,
         nBits=32,
         verbose=verbose,
     )
     # Calculate the Rotation Measure Spread Function cube
     if not_rmsf is not True:
-        RMSFcube, phi2Arr_radm2, fwhmRMSFCube, fitStatArr = get_rmsf_planes(
-            lambdaSqArr_m2=lambdaSqArr_m2,
-            phiArr_radm2=phiArr_radm2,
-            weightArr=weightArr,
-            mskArr=~np.isfinite(dataQ),
-            lam0Sq_m2=lam0Sq_m2,
+        RMSFcube, phi2_arr_radm2, fwhmRMSFCube, fitStat_arr = get_rmsf_planes(
+            lambda_sq_arr_m2=lambda_sq_arr_m2,
+            phi_arr_radm2=phi_arr_radm2,
+            weight_arr=weight_arr,
+            msk_arr=~np.isfinite(data_Q),
+            lam0_sq_m2=lam0_sq_m2,
             double=True,
             fitRMSF=fitRMSF,
             fitRMSFreal=False,
@@ -191,45 +191,45 @@ def run_rmsynth(
     cputime = endTime - startTime
     logger.info(f"> RM-synthesis completed in {cputime:0.2f} seconds.")
 
-    # Determine the Stokes I value at lam0Sq_m2 from the Stokes I model
+    # Determine the Stokes I value at lam0_sq_m2 from the Stokes I model
     # Note: the Stokes I model MUST be continuous throughout the cube,
     # i.e., no NaNs as the amplitude at freq0_Hz is interpolated from the
     # nearest two planes.
     with np.errstate(divide="ignore", invalid="ignore"):
-        freq0_Hz = np.true_divide(C, m.sqrt(lam0Sq_m2))
+        freq0_Hz = np.true_divide(C, m.sqrt(lam0_sq_m2))
 
     if dataI is not None:
-        idx = np.abs(freqArr_Hz - freq0_Hz).argmin()
-        if freqArr_Hz[idx] < freq0_Hz:
-            Ifreq0Arr = interp_images(dataI[idx, :, :], dataI[idx + 1, :, :], f=0.5)
-        elif freqArr_Hz[idx] > freq0_Hz:
-            Ifreq0Arr = interp_images(dataI[idx - 1, :, :], dataI[idx, :, :], f=0.5)
+        idx = np.abs(freq_arr_Hz - freq0_Hz).argmin()
+        if freq_arr_Hz[idx] < freq0_Hz:
+            Ifreq0_arr = interp_images(dataI[idx, :, :], dataI[idx + 1, :, :], f=0.5)
+        elif freq_arr_Hz[idx] > freq0_Hz:
+            Ifreq0_arr = interp_images(dataI[idx - 1, :, :], dataI[idx, :, :], f=0.5)
         else:
-            Ifreq0Arr = dataI[idx, :, :]
+            Ifreq0_arr = dataI[idx, :, :]
 
         # Multiply the dirty FDF by Ifreq0 to recover the PI
-        FDFcube *= Ifreq0Arr
+        FDFcube *= Ifreq0_arr
 
     if not_rmsf:
-        dataArr = [FDFcube, phiArr_radm2, lam0Sq_m2, lambdaSqArr_m2]
+        data_arr = [FDFcube, phi_arr_radm2, lam0_sq_m2, lambda_sq_arr_m2]
 
     else:
-        dataArr = [
+        data_arr = [
             FDFcube,
-            phiArr_radm2,
+            phi_arr_radm2,
             RMSFcube,
-            phi2Arr_radm2,
+            phi2_arr_radm2,
             fwhmRMSFCube,
-            fitStatArr,
-            lam0Sq_m2,
-            lambdaSqArr_m2,
+            fitStat_arr,
+            lam0_sq_m2,
+            lambda_sq_arr_m2,
         ]
 
-    return dataArr
+    return data_arr
 
 
 def writefits(
-    dataArr: list,
+    data_arr: list,
     headtemplate: pf.Header,
     prefixOut: str = "",
     outDir: Path = Path("."),
@@ -254,11 +254,11 @@ def writefits(
             FDF_tot_dirty.fits: Polarizd Intensity (sqrt(Q^2+U^2))
 
     Args:
-      dataArr (list): FDF and RMSF information
+      data_arr (list): FDF and RMSF information
         if not_rmsf:
-            dataArr = [FDFcube, phiArr_radm2, lam0Sq_m2, lambdaSqArr_m2]
+            data_arr = [FDFcube, phi_arr_radm2, lam0_sq_m2, lambda_sq_arr_m2]
         else:
-            dataArr = [FDFcube, phiArr_radm2, RMSFcube, phi2Arr_radm2, fwhmRMSFCube,fitStatArr, lam0Sq_m2, lambdaSqArr_m2]
+            data_arr = [FDFcube, phi_arr_radm2, RMSFcube, phi2_arr_radm2, fwhmRMSFCube,fitStat_arr, lam0_sq_m2, lambda_sq_arr_m2]
 
         headtemplate: FITS header template
 
@@ -273,19 +273,19 @@ def writefits(
 
     """
     if not_rmsf:
-        FDFcube, phiArr_radm2, lam0Sq_m2, lambdaSqArr_m2 = dataArr
+        FDFcube, phi_arr_radm2, lam0_sq_m2, lambda_sq_arr_m2 = data_arr
 
     else:
         (
             FDFcube,
-            phiArr_radm2,
+            phi_arr_radm2,
             RMSFcube,
-            phi2Arr_radm2,
+            phi2_arr_radm2,
             fwhmRMSFCube,
-            fitStatArr,
-            lam0Sq_m2,
-            lambdaSqArr_m2,
-        ) = dataArr
+            fitStat_arr,
+            lam0_sq_m2,
+            lambda_sq_arr_m2,
+        ) = data_arr
 
     # Default data types
     dtFloat = "float" + str(nBits)
@@ -308,21 +308,21 @@ def writefits(
             pass  # The try statement is needed for if the FITS header does not
             # have CTYPE keywords.
 
-    header["NAXIS" + str(freq_axis)] = phiArr_radm2.size
+    header["NAXIS" + str(freq_axis)] = phi_arr_radm2.size
     header["CTYPE" + str(freq_axis)] = ("FDEP", "Faraday depth (linear)")
     header["CDELT" + str(freq_axis)] = (
-        np.diff(phiArr_radm2)[0],
+        np.diff(phi_arr_radm2)[0],
         "[rad/m^2] Coordinate increment at reference point",
     )
-    header["CRPIX" + str(freq_axis)] = phiArr_radm2.size // 2 + 1
+    header["CRPIX" + str(freq_axis)] = phi_arr_radm2.size // 2 + 1
     header["CRVAL" + str(freq_axis)] = (
-        phiArr_radm2[phiArr_radm2.size // 2],
+        phi_arr_radm2[phi_arr_radm2.size // 2],
         "[rad/m^2] Coordinate value at reference point",
     )
     header["CUNIT" + str(freq_axis)] = "rad/m^2"
-    if not np.isfinite(lam0Sq_m2):
-        lam0Sq_m2 = 0.0
-    header["LAMSQ0"] = (lam0Sq_m2, "Lambda^2_0, in m^2")
+    if not np.isfinite(lam0_sq_m2):
+        lam0_sq_m2 = 0.0
+    header["LAMSQ0"] = (lam0_sq_m2, "Lambda^2_0, in m^2")
     if "DATAMAX" in header:
         del header["DATAMAX"]
     if "DATAMIN" in header:
@@ -355,18 +355,15 @@ def writefits(
         hdu1 = pf.PrimaryHDU(FDFcube.imag.astype(dtFloat), header)
         hdu2 = pf.PrimaryHDU(np.abs(FDFcube).astype(dtFloat), header)
         fitsFileOut = outDir + "/" + prefixOut + "FDF_real_dirty.fits"
-        if verbose:
-            log("> %s" % fitsFileOut)
+        logger.info("> %s" % fitsFileOut)
         hdu0.writeto(fitsFileOut, output_verify="fix", overwrite=True)
 
         fitsFileOut = outDir + "/" + prefixOut + "FDF_im_dirty.fits"
-        if verbose:
-            log("> %s" % fitsFileOut)
+        logger.info("> %s" % fitsFileOut)
         hdu1.writeto(fitsFileOut, output_verify="fix", overwrite=True)
 
         fitsFileOut = outDir + "/" + prefixOut + "FDF_tot_dirty.fits"
-        if verbose:
-            log("> %s" % fitsFileOut)
+        logger.info("> %s" % fitsFileOut)
         hdu2.writeto(fitsFileOut, output_verify="fix", overwrite=True)
 
     else:
@@ -375,8 +372,7 @@ def writefits(
         hdu1 = pf.ImageHDU(FDFcube.imag.astype(dtFloat), header)
         hdu2 = pf.ImageHDU(np.abs(FDFcube).astype(dtFloat), header)
         fitsFileOut = outDir + "/" + prefixOut + "FDF_dirty.fits"
-        if verbose:
-            log("> %s" % fitsFileOut)
+        logger.info("> %s" % fitsFileOut)
         hduLst = pf.HDUList([hdu0, hdu1, hdu2])
         hduLst.writeto(fitsFileOut, output_verify="fix", overwrite=True)
         hduLst.close()
@@ -385,9 +381,9 @@ def writefits(
 
     # Save the RMSF
     if not_rmsf is not True:
-        header["NAXIS" + str(freq_axis)] = phi2Arr_radm2.size
+        header["NAXIS" + str(freq_axis)] = phi2_arr_radm2.size
         header["CRVAL" + str(freq_axis)] = (
-            phi2Arr_radm2[0],
+            phi2_arr_radm2[0],
             "[rad/m^2] Coordinate value at reference point",
         )
         header["DATAMAX"] = np.max(fwhmRMSFCube) + 1
@@ -398,7 +394,7 @@ def writefits(
         # don't try to remove the FD axis, but just make it degenerate.
         # Also requires np.expand_dims to set the correct NAXIS.
         rmheader["NAXIS" + str(freq_axis)] = 1
-        rmheader["CRVAL" + str(freq_axis)] = phiArr_radm2[0]
+        rmheader["CRVAL" + str(freq_axis)] = phi_arr_radm2[0]
 
         if write_seperate_FDF:
             hdu0 = pf.PrimaryHDU(RMSFcube.real.astype(dtFloat), header)
@@ -409,23 +405,19 @@ def writefits(
             )
 
             fitsFileOut = outDir + "/" + prefixOut + "RMSF_real.fits"
-            if verbose:
-                log("> %s" % fitsFileOut)
+            logger.info("> %s" % fitsFileOut)
             hdu0.writeto(fitsFileOut, output_verify="fix", overwrite=True)
 
             fitsFileOut = outDir + "/" + prefixOut + "RMSF_im.fits"
-            if verbose:
-                log("> %s" % fitsFileOut)
+            logger.info("> %s" % fitsFileOut)
             hdu1.writeto(fitsFileOut, output_verify="fix", overwrite=True)
 
             fitsFileOut = outDir + "/" + prefixOut + "RMSF_tot.fits"
-            if verbose:
-                log("> %s" % fitsFileOut)
+            logger.info("> %s" % fitsFileOut)
             hdu2.writeto(fitsFileOut, output_verify="fix", overwrite=True)
 
             fitsFileOut = outDir + "/" + prefixOut + "RMSF_FWHM.fits"
-            if verbose:
-                log("> %s" % fitsFileOut)
+            logger.info("> %s" % fitsFileOut)
             hdu3.writeto(fitsFileOut, output_verify="fix", overwrite=True)
 
         else:
@@ -435,8 +427,7 @@ def writefits(
             hdu2 = pf.ImageHDU(np.abs(RMSFcube).astype(dtFloat), header)
             hdu3 = pf.ImageHDU(fwhmRMSFCube.astype(dtFloat), rmheader)
             hduLst = pf.HDUList([hdu0, hdu1, hdu2, hdu3])
-            if verbose:
-                log("> %s" % fitsFileOut)
+            logger.info("> %s" % fitsFileOut)
             hduLst.writeto(fitsFileOut, output_verify="fix", overwrite=True)
             hduLst.close()
 
@@ -445,7 +436,7 @@ def writefits(
     # Also requires np.expand_dims to set the correct NAXIS.
     header["NAXIS" + str(freq_axis)] = 1
     header["CRVAL" + str(freq_axis)] = (
-        phiArr_radm2[0],
+        phi_arr_radm2[0],
         "[rad/m^2] Coordinate value at reference point",
     )
     if "DATAMAX" in header:
@@ -455,7 +446,7 @@ def writefits(
 
     # Generate peak maps:
 
-    maxPI, peakRM = create_peak_maps(FDFcube, phiArr_radm2, Ndim - freq_axis)
+    maxPI, peakRM = create_peak_maps(FDFcube, phi_arr_radm2, Ndim - freq_axis)
     # Save a maximum polarised intensity map
     fitsFileOut = outDir + "/" + prefixOut + "FDF_maxPI.fits"
     if verbose:
@@ -485,7 +476,7 @@ def writefits(
 #    # Save an RM moment-1 map
 #    fitsFileOut = outDir + "/" + prefixOut + "FDF_mom1.fits"
 #    header["BUNIT"] = "rad/m^2"
-#    mom1FDFmap = (np.nansum(np.moveaxis(np.abs(FDFcube),FDFcube.ndim-freq_axis,FDFcube.ndim-1) * phiArr_radm2, FDFcube.ndim-1)
+#    mom1FDFmap = (np.nansum(np.moveaxis(np.abs(FDFcube),FDFcube.ndim-freq_axis,FDFcube.ndim-1) * phi_arr_radm2, FDFcube.ndim-1)
 #                  /np.nansum(np.abs(FDFcube), FDFcube.ndim-freq_axis))
 #    mom1FDFmap = mom1FDFmap.astype(dtFloat)
 #    logger.info("> %s" % fitsFileOut)
@@ -493,14 +484,14 @@ def writefits(
 #               output_verify="fix")
 
 
-def create_peak_maps(FDFcube, phiArr_radm2, phi_axis=0):
+def create_peak_maps(FDFcube, phi_arr_radm2, phi_axis=0):
     """Finds the location and amplitude of the highest peak in the FDF (pixelwise)
     and returns maps of those parameters. Does not fit the peak, only finds
     the location in terms of the quantized Faraday depth slices of the cube.
     Used to produce the maxPI and peakRM maps.
     Inputs:
         FDFcube: output cube from run_rmsynth
-        phiArr_radm2: array of Faraday depth values, from run_rmsynth
+        phi_arr_radm2: array of Faraday depth values, from run_rmsynth
         phi_axis (int): number of the axis for Faraday depth (in python order,
                          not FITS order). Defaults to zero (first axis).
     Returns:
@@ -512,7 +503,7 @@ def create_peak_maps(FDFcube, phiArr_radm2, phi_axis=0):
 
     maxPI = np.max(np.abs(FDFcube), axis=phi_axis)
     peakRM_indices = np.argmax(np.abs(FDFcube), axis=phi_axis)
-    peakRM = phiArr_radm2[peakRM_indices]
+    peakRM = phi_arr_radm2[peakRM_indices]
 
     return maxPI, peakRM
 
@@ -587,8 +578,8 @@ def readFitsCube(file, verbose, log=print):
 
 def readFreqFile(file, verbose, log=print):
     # Read the frequency vector and wavelength sampling
-    freqArr_Hz = np.loadtxt(file, dtype=float)
-    return freqArr_Hz
+    freq_arr_Hz = np.loadtxt(file, dtype=float)
+    return freq_arr_Hz
 
 
 # -----------------------------------------------------------------------------#
@@ -730,19 +721,19 @@ def main():
     else:
         dataI = None
     if args.noiseFile is not None:
-        rmsArr = readFreqFile(args.noiseFile, verbose)
+        rms_arr = readFreqFile(args.noiseFile, verbose)
     else:
-        rmsArr = None
+        rms_arr = None
 
-    header, dataQ = readFitsCube(args.fitsQ[0], verbose)
+    header, data_Q = readFitsCube(args.fitsQ[0], verbose)
 
     # Run RM-synthesis on the cubes
-    dataArr = run_rmsynth(
-        dataQ=dataQ,
-        dataU=readFitsCube(args.fitsU[0], verbose)[1],
-        freqArr_Hz=readFreqFile(args.freqFile[0], verbose),
+    data_arr = run_rmsynth(
+        data_Q=data_Q,
+        data_U=readFitsCube(args.fitsU[0], verbose)[1],
+        freq_arr_Hz=readFreqFile(args.freqFile[0], verbose),
         dataI=dataI,
-        rmsArr=rmsArr,
+        rms_arr=rms_arr,
         phiMax_radm2=args.phiMax_radm2,
         dPhi_radm2=args.dPhi_radm2,
         nSamples=args.nSamples,
@@ -755,7 +746,7 @@ def main():
 
     # Write to files
     writefits(
-        dataArr,
+        data_arr,
         headtemplate=header,
         fitRMSF=False,
         prefixOut=args.prefixOut,

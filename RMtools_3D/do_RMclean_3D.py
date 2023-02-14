@@ -90,8 +90,8 @@ def run_rmclean(
 
     Returns:
         cleanFDF (ndarray): Cube of RMCLEANed FDFs.
-        ccArr (ndarray): Cube of RMCLEAN components (i.e. the model).
-        iterCountArr (ndarray): Cube of number of RMCLEAN iterations.
+        cc_arr (ndarray): Cube of RMCLEAN components (i.e. the model).
+        iterCount_arr (ndarray): Cube of number of RMCLEAN iterations.
         residFDF (ndarray): Cube of residual RMCLEANed FDFs.
         head (fits.header): Header of FDF FITS file for template.
 
@@ -104,11 +104,11 @@ def run_rmclean(
     # Read the FDF
     dirtyFDF, head, FD_axis = read_FDF_cubes(fitsFDF)
 
-    phiArr_radm2 = fits_make_lin_axis(head, axis=FD_axis - 1, dtype=dtFloat)
+    phi_arr_radm2 = fits_make_lin_axis(head, axis=FD_axis - 1, dtype=dtFloat)
 
     # Read the RMSF
 
-    RMSFArr, headRMSF, FD_axis = read_FDF_cubes(fitsRMSF)
+    RMSF_arr, headRMSF, FD_axis = read_FDF_cubes(fitsRMSF)
     HDULst = pf.open(
         fitsRMSF.replace("_real", "_FWHM")
         .replace("_im", "_FWHM")
@@ -116,19 +116,19 @@ def run_rmclean(
         "readonly",
         memmap=True,
     )
-    fwhmRMSFArr = np.squeeze(HDULst[0].data)
+    fwhmRMSF_arr = np.squeeze(HDULst[0].data)
     HDULst.close()
-    phi2Arr_radm2 = fits_make_lin_axis(headRMSF, axis=FD_axis - 1, dtype=dtFloat)
+    phi2_arr_radm2 = fits_make_lin_axis(headRMSF, axis=FD_axis - 1, dtype=dtFloat)
 
     startTime = time.time()
 
     # Do the clean
-    cleanFDF, ccArr, iterCountArr, residFDF = do_rmclean_hogbom(
+    cleanFDF, cc_arr, iterCount_arr, residFDF = do_rmclean_hogbom(
         dirtyFDF=dirtyFDF,
-        phiArr_radm2=phiArr_radm2,
-        RMSFArr=RMSFArr,
-        phi2Arr_radm2=phi2Arr_radm2,
-        fwhmRMSFArr=fwhmRMSFArr,
+        phi_arr_radm2=phi_arr_radm2,
+        RMSF_arr=RMSF_arr,
+        phi2_arr_radm2=phi2_arr_radm2,
+        fwhmRMSF_arr=fwhmRMSF_arr,
         cutoff=cutoff,
         maxIter=maxIter,
         gain=gain,
@@ -152,7 +152,7 @@ def run_rmclean(
     # The difference is the number of dimensions that need to be added:
     if old_Ndim - new_Ndim != 0:  # add missing (degenerate) dimensions back in
         cleanFDF = np.expand_dims(cleanFDF, axis=tuple(range(old_Ndim - new_Ndim)))
-        ccArr = np.expand_dims(ccArr, axis=tuple(range(old_Ndim - new_Ndim)))
+        cc_arr = np.expand_dims(cc_arr, axis=tuple(range(old_Ndim - new_Ndim)))
         residFDF = np.expand_dims(residFDF, axis=tuple(range(old_Ndim - new_Ndim)))
     # New dimensions are added to the beginning of the axis ordering
     # (revserse of FITS ordering)
@@ -160,16 +160,16 @@ def run_rmclean(
     # Move the FDF axis to it's original spot. Hopefully this means that all
     # axes are in their original place after all of that.
     cleanFDF = np.moveaxis(cleanFDF, old_Ndim - new_Ndim, old_Ndim - FD_axis)
-    ccArr = np.moveaxis(ccArr, old_Ndim - new_Ndim, old_Ndim - FD_axis)
+    cc_arr = np.moveaxis(cc_arr, old_Ndim - new_Ndim, old_Ndim - FD_axis)
     residFDF = np.moveaxis(residFDF, old_Ndim - new_Ndim, old_Ndim - FD_axis)
 
-    return cleanFDF, ccArr, iterCountArr, residFDF, head
+    return cleanFDF, cc_arr, iterCount_arr, residFDF, head
 
 
 def writefits(
     cleanFDF,
-    ccArr,
-    iterCountArr,
+    cc_arr,
+    iterCount_arr,
     residFDF,
     headtemp,
     nBits=32,
@@ -200,8 +200,8 @@ def writefits(
                 CLEAN_nIter.fits: RMCLEAN iterations.
     Args:
         cleanFDF (ndarray): Cube of RMCLEANed FDFs.
-        ccArr (ndarray): Cube of RMCLEAN components (i.e. the model).
-        iterCountArr (ndarray): Cube of number of RMCLEAN iterations.
+        cc_arr (ndarray): Cube of RMCLEAN components (i.e. the model).
+        iterCount_arr (ndarray): Cube of number of RMCLEAN iterations.
         residFDF (ndarray): Cube of residual RMCLEANed FDFs.
 
     Kwargs:
@@ -220,8 +220,7 @@ def writefits(
     # Save the clean FDF
     if not write_separate_FDF:
         fitsFileOut = outDir + "/" + prefixOut + "FDF_clean.fits"
-        if verbose:
-            log("> %s" % fitsFileOut)
+        logger.info("> %s" % fitsFileOut)
         hdu0 = pf.PrimaryHDU(cleanFDF.real.astype(dtFloat), headtemp)
         hdu1 = pf.ImageHDU(cleanFDF.imag.astype(dtFloat), headtemp)
         hdu2 = pf.ImageHDU(np.abs(cleanFDF).astype(dtFloat), headtemp)
@@ -232,46 +231,39 @@ def writefits(
         hdu0 = pf.PrimaryHDU(cleanFDF.real.astype(dtFloat), headtemp)
         fitsFileOut = outDir + "/" + prefixOut + "FDF_clean_real.fits"
         hdu0.writeto(fitsFileOut, output_verify="fix", overwrite=True)
-        if verbose:
-            log("> %s" % fitsFileOut)
+        logger.info("> %s" % fitsFileOut)
         hdu1 = pf.PrimaryHDU(cleanFDF.imag.astype(dtFloat), headtemp)
         fitsFileOut = outDir + "/" + prefixOut + "FDF_clean_im.fits"
         hdu1.writeto(fitsFileOut, output_verify="fix", overwrite=True)
-        if verbose:
-            log("> %s" % fitsFileOut)
+        logger.info("> %s" % fitsFileOut)
         hdu2 = pf.PrimaryHDU(np.abs(cleanFDF).astype(dtFloat), headtemp)
         fitsFileOut = outDir + "/" + prefixOut + "FDF_clean_tot.fits"
         hdu2.writeto(fitsFileOut, output_verify="fix", overwrite=True)
-        if verbose:
-            log("> %s" % fitsFileOut)
+        logger.info("> %s" % fitsFileOut)
 
     if not write_separate_FDF:
         # Save the complex clean components as another file.
         fitsFileOut = outDir + "/" + prefixOut + "FDF_CC.fits"
-        if verbose:
-            log("> %s" % fitsFileOut)
-        hdu0 = pf.PrimaryHDU(ccArr.real.astype(dtFloat), headtemp)
-        hdu1 = pf.ImageHDU(ccArr.imag.astype(dtFloat), headtemp)
-        hdu2 = pf.ImageHDU(np.abs(ccArr).astype(dtFloat), headtemp)
+        logger.info("> %s" % fitsFileOut)
+        hdu0 = pf.PrimaryHDU(cc_arr.real.astype(dtFloat), headtemp)
+        hdu1 = pf.ImageHDU(cc_arr.imag.astype(dtFloat), headtemp)
+        hdu2 = pf.ImageHDU(np.abs(cc_arr).astype(dtFloat), headtemp)
         hduLst = pf.HDUList([hdu0, hdu1, hdu2])
         hduLst.writeto(fitsFileOut, output_verify="fix", overwrite=True)
         hduLst.close()
     else:
-        hdu0 = pf.PrimaryHDU(ccArr.real.astype(dtFloat), headtemp)
+        hdu0 = pf.PrimaryHDU(cc_arr.real.astype(dtFloat), headtemp)
         fitsFileOut = outDir + "/" + prefixOut + "FDF_CC_real.fits"
         hdu0.writeto(fitsFileOut, output_verify="fix", overwrite=True)
-        if verbose:
-            log("> %s" % fitsFileOut)
-        hdu1 = pf.PrimaryHDU(ccArr.imag.astype(dtFloat), headtemp)
+        logger.info("> %s" % fitsFileOut)
+        hdu1 = pf.PrimaryHDU(cc_arr.imag.astype(dtFloat), headtemp)
         fitsFileOut = outDir + "/" + prefixOut + "FDF_CC_im.fits"
         hdu1.writeto(fitsFileOut, output_verify="fix", overwrite=True)
-        if verbose:
-            log("> %s" % fitsFileOut)
-        hdu2 = pf.PrimaryHDU(np.abs(ccArr).astype(dtFloat), headtemp)
+        logger.info("> %s" % fitsFileOut)
+        hdu2 = pf.PrimaryHDU(np.abs(cc_arr).astype(dtFloat), headtemp)
         fitsFileOut = outDir + "/" + prefixOut + "FDF_CC_tot.fits"
         hdu2.writeto(fitsFileOut, output_verify="fix", overwrite=True)
-        if verbose:
-            log("> %s" % fitsFileOut)
+        logger.info("> %s" % fitsFileOut)
 
     # Because there can be problems with different axes having different FITS keywords,
     # don't try to remove the FD axis, but just make it degenerate.
@@ -288,8 +280,8 @@ def writefits(
     headtemp["BUNIT"] = "Iterations"
     hdu0 = pf.PrimaryHDU(
         np.expand_dims(
-            iterCountArr.astype(dtFloat),
-            axis=tuple(range(headtemp["NAXIS"] - iterCountArr.ndim)),
+            iterCount_arr.astype(dtFloat),
+            axis=tuple(range(headtemp["NAXIS"] - iterCount_arr.ndim)),
         ),
         headtemp,
     )
@@ -515,7 +507,7 @@ def main():
     dataDir, dummy = os.path.split(args.fitsFDF[0])
 
     # Run RM-CLEAN on the cubes
-    cleanFDF, ccArr, iterCountArr, residFDF, headtemp = run_rmclean(
+    cleanFDF, cc_arr, iterCount_arr, residFDF, headtemp = run_rmclean(
         fitsFDF=args.fitsFDF[0],
         fitsRMSF=args.fitsRMSF[0],
         cutoff=args.cutoff,
@@ -529,8 +521,8 @@ def main():
     # Write results to disk
     writefits(
         cleanFDF,
-        ccArr,
-        iterCountArr,
+        cc_arr,
+        iterCount_arr,
         residFDF,
         headtemp,
         prefixOut=args.prefixOut,

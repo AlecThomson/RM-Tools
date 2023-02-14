@@ -449,8 +449,8 @@ def create_simple_fits_hdu(
         yCoordStr = "DEC-SIN"
 
     # Create the data array and insert into a new HDU
-    dataArr = np.zeros(shape, dtype="f4")
-    hdu = pf.PrimaryHDU(data=dataArr)
+    data_arr = np.zeros(shape, dtype="f4")
+    hdu = pf.PrimaryHDU(data=data_arr)
     head = hdu.header
 
     # Populate the header cards assuming small field of view

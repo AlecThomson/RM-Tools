@@ -289,12 +289,12 @@ def run_qufit(
     # Parse the data array
     # freq_Hz, I, Q, U, dI, dQ, dU
     try:
-        (freqArr_Hz, IArr, QArr, UArr, dIArr, dQArr, dUArr) = data
+        (freq_arr_Hz, I_arr, Q_arr, U_arr, dI_arr, dQ_arr, dU_arr) = data
         print("\nFormat [freq_Hz, I, Q, U, dI, dQ, dU]")
     except Exception:
         # freq_Hz, Q, U, dQ, dU
         try:
-            (freqArr_Hz, QArr, UArr, dQArr, dUArr) = data
+            (freq_arr_Hz, Q_arr, U_arr, dQ_arr, dU_arr) = data
             print("\nFormat [freq_Hz, Q, U,  dQ, dU]")
             noStokesI = True
         except Exception:
@@ -306,42 +306,42 @@ def run_qufit(
     # If no Stokes I present, create a dummy spectrum = unity
     if noStokesI:
         print("Note: no Stokes I data - assuming fractional polarisation.")
-        IArr = np.ones_like(QArr)
-        dIArr = np.zeros_like(QArr)
+        I_arr = np.ones_like(Q_arr)
+        dI_arr = np.zeros_like(Q_arr)
 
     # Convert to GHz for convenience
-    lamSqArr_m2 = np.power(C / freqArr_Hz, 2.0)
+    lam_sq_arr_m2 = np.power(C / freq_arr_Hz, 2.0)
 
     # Fit the Stokes I spectrum and create the fractional spectra
-    dataArr = create_frac_spectra(
-        freqArr=freqArr_Hz,
-        IArr=IArr,
-        QArr=QArr,
-        UArr=UArr,
-        dIArr=dIArr,
-        dQArr=dQArr,
-        dUArr=dUArr,
+    data_arr = create_frac_spectra(
+        freq_arr=freq_arr_Hz,
+        I_arr=I_arr,
+        Q_arr=Q_arr,
+        U_arr=U_arr,
+        dI_arr=dI_arr,
+        dQ_arr=dQ_arr,
+        dU_arr=dU_arr,
         polyOrd=polyOrd,
         verbose=True,
         fit_function=fit_function,
     )
-    (IModArr, qArr, uArr, dqArr, duArr, IfitDict) = dataArr
+    (IMod_arr, q_arr, u_arr, dq_arr, du_arr, IfitDict) = data_arr
 
     # Plot the data and the Stokes I model fit
     print("Plotting the input data and spectral index fit.")
-    freqHirArr_Hz = np.linspace(freqArr_Hz[0], freqArr_Hz[-1], 10000)
-    IModHirArr = calculate_StokesI_model(IfitDict, freqHirArr_Hz)
+    freqHir_arr_Hz = np.linspace(freq_arr_Hz[0], freq_arr_Hz[-1], 10000)
+    IModHir_arr = calculate_StokesI_model(IfitDict, freqHir_arr_Hz)
     specFig = plt.figure(facecolor="w", figsize=(10, 6))
     plot_Ipqu_spectra_fig(
-        freqArr_Hz=freqArr_Hz,
-        IArr=IArr,
-        qArr=qArr,
-        uArr=uArr,
-        dIArr=dIArr,
-        dqArr=dqArr,
-        duArr=duArr,
-        freqHirArr_Hz=freqHirArr_Hz,
-        IModArr=IModHirArr,
+        freq_arr_Hz=freq_arr_Hz,
+        I_arr=I_arr,
+        q_arr=q_arr,
+        u_arr=u_arr,
+        dI_arr=dI_arr,
+        dq_arr=dq_arr,
+        du_arr=du_arr,
+        freqHir_arr_Hz=freqHir_arr_Hz,
+        IMod_arr=IModHir_arr,
         fig=specFig,
     )
 
@@ -388,7 +388,7 @@ def run_qufit(
     priors = mod.priors
 
     # Set the likelihood function given the data
-    lnlike = lnlike_call(parNames, lamSqArr_m2, qArr, dqArr, uArr, duArr, modelNum)
+    lnlike = lnlike_call(parNames, lam_sq_arr_m2, q_arr, dq_arr, u_arr, du_arr, modelNum)
     # Let's time the sampler
     startTime = time.time()
 
@@ -426,10 +426,10 @@ def run_qufit(
         )
 
     # Calculate goodness-of-fit parameters
-    nData = 2.0 * len(lamSqArr_m2)
+    nData = 2.0 * len(lam_sq_arr_m2)
     dof = nData - nFree - 1
-    chiSq = chisq_model(parNames, p, lamSqArr_m2, qArr, dqArr, uArr, duArr, model)
-    chiSqRed = chiSq / dof
+    chi_sq = chisq_model(parNames, p, lam_sq_arr_m2, q_arr, dq_arr, u_arr, du_arr, model)
+    chi_sqRed = chi_sq / dof
     AIC = 2.0 * nFree - 2.0 * lnLike
     AICc = 2.0 * nFree * (nFree + 1) / (nData - nFree - 1) - 2.0 * lnLike
     BIC = nFree * np.log(nData) - 2.0 * lnLike
@@ -441,8 +441,8 @@ def run_qufit(
     print("#-PROCESSORS  = %d" % ncores)
     print("RUN-TIME      = %.2f" % (endTime - startTime))
     print("DOF           = %d" % dof)
-    print("CHISQ:        = %.3g" % chiSq)
-    print("CHISQ RED     = %.3g" % chiSqRed)
+    print("CHISQ:        = %.3g" % chi_sq)
+    print("CHISQ RED     = %.3g" % chi_sqRed)
     print("AIC:          = %.3g" % AIC)
     print("AICc          = %.3g" % AICc)
     print("BIC           = %.3g" % BIC)
@@ -469,8 +469,8 @@ def run_qufit(
         "priorTypes": toscalar(priorTypes),
         "wraps": toscalar(wraps),
         "dof": toscalar(dof),
-        "chiSq": toscalar(chiSq),
-        "chiSqRed": toscalar(chiSqRed),
+        "chi_sq": toscalar(chi_sq),
+        "chi_sqRed": toscalar(chi_sqRed),
         "AIC": toscalar(AIC),
         "AICc": toscalar(AICc),
         "BIC": toscalar(BIC),
@@ -481,8 +481,8 @@ def run_qufit(
         "Imodel_errs": ",".join(
             [str(x.astype(np.float32)) for x in IfitDict["perror"]]
         ),
-        "IfitChiSq": toscalar(IfitDict["chiSq"]),
-        "IfitChiSqRed": toscalar(IfitDict["chiSqRed"]),
+        "IfitChi_sq": toscalar(IfitDict["chi_sq"]),
+        "IfitChi_sqRed": toscalar(IfitDict["chi_sqRed"]),
         "IfitPolyOrd": toscalar(IfitDict["polyOrd"]),
         "Ifitfreq0": toscalar(IfitDict["reference_frequency_Hz"]),
     }
@@ -518,11 +518,11 @@ def run_qufit(
     # Save the posterior chains to ASCII file
 
     # Plot the data and best-fitting model
-    lamSqHirArr_m2 = np.linspace(lamSqArr_m2[0], lamSqArr_m2[-1], 10000)
-    freqHirArr_Hz = C / np.sqrt(lamSqHirArr_m2)
-    IModArr = calculate_StokesI_model(IfitDict, freqHirArr_Hz)
+    lam_sqHir_arr_m2 = np.linspace(lam_sq_arr_m2[0], lam_sq_arr_m2[-1], 10000)
+    freqHir_arr_Hz = C / np.sqrt(lam_sqHir_arr_m2)
+    IMod_arr = calculate_StokesI_model(IfitDict, freqHir_arr_Hz)
     pDict = {k: v for k, v in zip(parNames, p)}
-    quModArr = model(pDict, lamSqHirArr_m2)
+    quMod_arr = model(pDict, lam_sqHir_arr_m2)
     model_dict = {
         "model": model,
         "parNames": parNames,
@@ -530,17 +530,17 @@ def run_qufit(
     }
     specFig.clf()
     plot_Ipqu_spectra_fig(
-        freqArr_Hz=freqArr_Hz,
-        IArr=IArr,
-        qArr=qArr,
-        uArr=uArr,
-        dIArr=dIArr,
-        dqArr=dqArr,
-        duArr=duArr,
-        freqHirArr_Hz=freqHirArr_Hz,
-        IModArr=IModArr,
-        qModArr=quModArr.real,
-        uModArr=quModArr.imag,
+        freq_arr_Hz=freq_arr_Hz,
+        I_arr=I_arr,
+        q_arr=q_arr,
+        u_arr=u_arr,
+        dI_arr=dI_arr,
+        dq_arr=dq_arr,
+        du_arr=du_arr,
+        freqHir_arr_Hz=freqHir_arr_Hz,
+        IMod_arr=IMod_arr,
+        qMod_arr=quMod_arr.real,
+        uMod_arr=quMod_arr.imag,
         model_dict=model_dict,
         fig=specFig,
     )
@@ -566,14 +566,14 @@ def run_qufit(
 class lnlike_call(bilby.Likelihood):
     """Returns a function to evaluate the log-likelihood"""
 
-    def __init__(self, parNames, lamSqArr_m2, qArr, dqArr, uArr, duArr, modelNum):
+    def __init__(self, parNames, lam_sq_arr_m2, q_arr, dq_arr, u_arr, du_arr, modelNum):
 
         self.parNames = parNames
-        self.lamSqArr_m2 = lamSqArr_m2
-        self.qArr = qArr
-        self.dqArr = dqArr
-        self.uArr = uArr
-        self.duArr = duArr
+        self.lam_sq_arr_m2 = lam_sq_arr_m2
+        self.q_arr = q_arr
+        self.dq_arr = dq_arr
+        self.u_arr = u_arr
+        self.du_arr = du_arr
         self.modelNum = modelNum
         pDict = {k: None for k in parNames}
         super().__init__(parameters=pDict)
@@ -582,31 +582,31 @@ class lnlike_call(bilby.Likelihood):
         # Evaluate the model and calculate the joint ln(like)
         # Silva 2006
         model = load_model(self.modelNum).model
-        quMod = model(self.parameters, self.lamSqArr_m2)
-        dquArr = np.sqrt(np.power(self.dqArr, 2) + np.power(self.duArr, 2))
-        chiSqQ = np.nansum(np.power((self.qArr - quMod.real) / self.dqArr, 2))
-        chiSqU = np.nansum(np.power((self.uArr - quMod.imag) / self.dqArr, 2))
-        nData = len(dquArr)
+        quMod = model(self.parameters, self.lam_sq_arr_m2)
+        dqu_arr = np.sqrt(np.power(self.dq_arr, 2) + np.power(self.du_arr, 2))
+        chi_sqQ = np.nansum(np.power((self.q_arr - quMod.real) / self.dq_arr, 2))
+        chi_sqU = np.nansum(np.power((self.u_arr - quMod.imag) / self.dq_arr, 2))
+        nData = len(dqu_arr)
         logLike = (
             -nData * np.log(2.0 * np.pi)
-            - 2.0 * np.nansum(np.log(dquArr))
-            - chiSqQ / 2.0
-            - chiSqU / 2.0
+            - 2.0 * np.nansum(np.log(dqu_arr))
+            - chi_sqQ / 2.0
+            - chi_sqU / 2.0
         )
 
         return logLike
 
 
 # -----------------------------------------------------------------------------#
-def chisq_model(parNames, p, lamSqArr_m2, qArr, dqArr, uArr, duArr, model):
+def chisq_model(parNames, p, lam_sq_arr_m2, q_arr, dq_arr, u_arr, du_arr, model):
     """Calculate the chi^2 for the current model, given the data."""
 
     # Evaluate the model and calculate chisq
     pDict = {k: v for k, v in zip(parNames, p)}
-    quMod = model(pDict, lamSqArr_m2)
+    quMod = model(pDict, lam_sq_arr_m2)
     chisq = np.nansum(
-        np.power((qArr - quMod.real) / dqArr, 2)
-        + np.power((uArr - quMod.imag) / duArr, 2)
+        np.power((q_arr - quMod.real) / dq_arr, 2)
+        + np.power((u_arr - quMod.imag) / du_arr, 2)
     )
 
     return chisq

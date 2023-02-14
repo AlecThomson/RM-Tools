@@ -150,25 +150,19 @@ def run_rmsynth(
 
     # freq_Hz, I, Q, U, dI, dQ, dU
     try:
-        if verbose:
-            log("> Trying [freq_Hz, I, Q, U, dI, dQ, dU]", end=" ")
-        (freqArr_Hz, IArr, QArr, UArr, dIArr, dQArr, dUArr) = data
-        if verbose:
-            log("... success.")
+        logger.info("> Trying [freq_Hz, I, Q, U, dI, dQ, dU]", end=" ")
+        (freq_arr_Hz, I_arr, Q_arr, U_arr, dI_arr, dQ_arr, dU_arr) = data
+        logger.info("... success.")
     except Exception:
-        if verbose:
-            log("...failed.")
+        logger.info("...failed.")
         # freq_Hz, q, u, dq, du
         try:
-            if verbose:
-                log("> Trying [freq_Hz, q, u,  dq, du]", end=" ")
-            (freqArr_Hz, QArr, UArr, dQArr, dUArr) = data
-            if verbose:
-                log("... success.")
+            logger.info("> Trying [freq_Hz, q, u,  dq, du]", end=" ")
+            (freq_arr_Hz, Q_arr, U_arr, dQ_arr, dU_arr) = data
+            logger.info("... success.")
             noStokesI = True
         except Exception:
-            if verbose:
-                log("...failed.")
+            logger.info("...failed.")
             if debug:
                 log(traceback.format_exc())
             sys.exit()
@@ -177,24 +171,23 @@ def run_rmsynth(
 
     # If no Stokes I present, create a dummy spectrum = unity
     if noStokesI:
-        if verbose:
-            log("Warn: no Stokes I data in use.")
-        IArr = np.ones_like(QArr)
-        dIArr = np.zeros_like(QArr)
+        logger.info("Warn: no Stokes I data in use.")
+        I_arr = np.ones_like(Q_arr)
+        dI_arr = np.zeros_like(Q_arr)
 
     # Convert to GHz for convenience
-    freqArr_GHz = freqArr_Hz / 1e9
-    dQUArr = (dQArr + dUArr) / 2.0
+    freq_arr_GHz = freq_arr_Hz / 1e9
+    dQU_arr = (dQ_arr + dU_arr) / 2.0
 
     # Fit the Stokes I spectrum and create the fractional spectra
-    IModArr, qArr, uArr, dqArr, duArr, fitDict = create_frac_spectra(
-        freqArr=freqArr_Hz,
-        IArr=IArr,
-        QArr=QArr,
-        UArr=UArr,
-        dIArr=dIArr,
-        dQArr=dQArr,
-        dUArr=dUArr,
+    IMod_arr, q_arr, u_arr, dq_arr, du_arr, fitDict = create_frac_spectra(
+        freq_arr=freq_arr_Hz,
+        I_arr=I_arr,
+        Q_arr=Q_arr,
+        U_arr=U_arr,
+        dI_arr=dI_arr,
+        dQ_arr=dQ_arr,
+        dU_arr=dU_arr,
         polyOrd=polyOrd,
         verbose=True,
         debug=debug,
@@ -202,30 +195,30 @@ def run_rmsynth(
         modStokesI=modStokesI,
     )
 
-    dquArr = (dqArr + duArr) / 2.0
-    dquArr = np.where(np.isfinite(dquArr), dquArr, np.nan)
+    dqu_arr = (dq_arr + du_arr) / 2.0
+    dqu_arr = np.where(np.isfinite(dqu_arr), dqu_arr, np.nan)
 
     # Plot the data and the Stokes I model fit
     if verbose:
         log("Plotting the input data and spectral index fit.")
-    freqHirArr_Hz = np.linspace(freqArr_Hz[0], freqArr_Hz[-1], 10000)
+    freqHir_arr_Hz = np.linspace(freq_arr_Hz[0], freq_arr_Hz[-1], 10000)
     if modStokesI is None:
-        IModHirArr = calculate_StokesI_model(fitDict, freqHirArr_Hz)
+        IModHir_arr = calculate_StokesI_model(fitDict, freqHir_arr_Hz)
     elif modStokesI is not None:
-        modStokesI_interp = interp1d(freqArr_Hz, modStokesI)
-        IModHirArr = modStokesI_interp(freqHirArr_Hz)
+        modStokesI_interp = interp1d(freq_arr_Hz, modStokesI)
+        IModHir_arr = modStokesI_interp(freqHir_arr_Hz)
     if showPlots or saveFigures:
         specFig = plt.figure(facecolor="w", figsize=(12.0, 8))
         plot_Ipqu_spectra_fig(
-            freqArr_Hz=freqArr_Hz,
-            IArr=IArr,
-            qArr=qArr,
-            uArr=uArr,
-            dIArr=dIArr,
-            dqArr=dqArr,
-            duArr=duArr,
-            freqHirArr_Hz=freqHirArr_Hz,
-            IModArr=IModHirArr,
+            freq_arr_Hz=freq_arr_Hz,
+            I_arr=I_arr,
+            q_arr=q_arr,
+            u_arr=u_arr,
+            dI_arr=dI_arr,
+            dq_arr=dq_arr,
+            du_arr=du_arr,
+            freqHir_arr_Hz=freqHir_arr_Hz,
+            IMod_arr=IModHir_arr,
             fig=specFig,
             units=units,
         )
@@ -249,14 +242,14 @@ def run_rmsynth(
         rmsFig = plt.figure(facecolor="w", figsize=(12.0, 8))
         ax = rmsFig.add_subplot(111)
         ax.plot(
-            freqArr_Hz / 1e9, dQUArr, marker="o", color="k", lw=0.5, label="rms <QU>"
+            freq_arr_Hz / 1e9, dQU_arr, marker="o", color="k", lw=0.5, label="rms <QU>"
         )
-        ax.plot(freqArr_Hz / 1e9, dQArr, marker="o", color="b", lw=0.5, label="rms Q")
-        ax.plot(freqArr_Hz / 1e9, dUArr, marker="o", color="r", lw=0.5, label="rms U")
-        xRange = (np.nanmax(freqArr_Hz) - np.nanmin(freqArr_Hz)) / 1e9
+        ax.plot(freq_arr_Hz / 1e9, dQ_arr, marker="o", color="b", lw=0.5, label="rms Q")
+        ax.plot(freq_arr_Hz / 1e9, dU_arr, marker="o", color="r", lw=0.5, label="rms U")
+        xRange = (np.nanmax(freq_arr_Hz) - np.nanmin(freq_arr_Hz)) / 1e9
         ax.set_xlim(
-            np.min(freqArr_Hz) / 1e9 - xRange * 0.05,
-            np.max(freqArr_Hz) / 1e9 + xRange * 0.05,
+            np.min(freq_arr_Hz) / 1e9 - xRange * 0.05,
+            np.max(freq_arr_Hz) / 1e9 + xRange * 0.05,
         )
         ax.set_xlabel("$\\nu$ (GHz)")
         ax.set_ylabel("RMS " + units)
@@ -266,18 +259,18 @@ def run_rmsynth(
     # -------------------------------------------------------------------------#
 
     # Calculate some wavelength parameters
-    lambdaSqArr_m2 = np.power(C / freqArr_Hz, 2.0)
-    dFreq_Hz = np.nanmin(np.abs(np.diff(freqArr_Hz)))
-    lambdaSqRange_m2 = np.nanmax(lambdaSqArr_m2) - np.nanmin(lambdaSqArr_m2)
-    dLambdaSqMin_m2 = np.nanmin(np.abs(np.diff(lambdaSqArr_m2)))
-    dLambdaSqMax_m2 = np.nanmax(np.abs(np.diff(lambdaSqArr_m2)))
+    lambda_sq_arr_m2 = np.power(C / freq_arr_Hz, 2.0)
+    dFreq_Hz = np.nanmin(np.abs(np.diff(freq_arr_Hz)))
+    lambda_sqRange_m2 = np.nanmax(lambda_sq_arr_m2) - np.nanmin(lambda_sq_arr_m2)
+    dLambda_sqMin_m2 = np.nanmin(np.abs(np.diff(lambda_sq_arr_m2)))
+    dLambda_sqMax_m2 = np.nanmax(np.abs(np.diff(lambda_sq_arr_m2)))
 
     # Set the Faraday depth range
-    fwhmRMSF_radm2 = 2.0 * m.sqrt(3.0) / lambdaSqRange_m2
+    fwhmRMSF_radm2 = 2.0 * m.sqrt(3.0) / lambda_sqRange_m2
     if dPhi_radm2 is None:
         dPhi_radm2 = fwhmRMSF_radm2 / nSamples
     if phiMax_radm2 is None:
-        phiMax_radm2 = m.sqrt(3.0) / dLambdaSqMax_m2
+        phiMax_radm2 = m.sqrt(3.0) / dLambda_sqMax_m2
         phiMax_radm2 = max(
             phiMax_radm2, fwhmRMSF_radm2 * 10.0
         )  # Force the minimum phiMax to 10 FWHM
@@ -286,44 +279,44 @@ def run_rmsynth(
     nChanRM = int(round(abs((phiMax_radm2 - 0.0) / dPhi_radm2)) * 2.0 + 1.0)
     startPhi_radm2 = -(nChanRM - 1.0) * dPhi_radm2 / 2.0
     stopPhi_radm2 = +(nChanRM - 1.0) * dPhi_radm2 / 2.0
-    phiArr_radm2 = np.linspace(startPhi_radm2, stopPhi_radm2, nChanRM)
-    phiArr_radm2 = phiArr_radm2.astype(dtFloat)
+    phi_arr_radm2 = np.linspace(startPhi_radm2, stopPhi_radm2, nChanRM)
+    phi_arr_radm2 = phi_arr_radm2.astype(dtFloat)
     if verbose:
         log(
-            "PhiArr = %.2f to %.2f by %.2f (%d chans)."
-            % (phiArr_radm2[0], phiArr_radm2[-1], float(dPhi_radm2), nChanRM)
+            "Phi_arr = %.2f to %.2f by %.2f (%d chans)."
+            % (phi_arr_radm2[0], phi_arr_radm2[-1], float(dPhi_radm2), nChanRM)
         )
 
     # Calculate the weighting as 1/sigma^2 or all 1s (uniform)
     if weightType == "variance":
-        weightArr = 1.0 / np.power(dquArr, 2.0)
+        weight_arr = 1.0 / np.power(dqu_arr, 2.0)
     else:
         weightType = "uniform"
-        weightArr = np.ones(freqArr_Hz.shape, dtype=dtFloat)
+        weight_arr = np.ones(freq_arr_Hz.shape, dtype=dtFloat)
     if verbose:
         log("Weight type is '%s'." % weightType)
 
     startTime = time.time()
 
     # Perform RM-synthesis on the spectrum
-    dirtyFDF, lam0Sq_m2 = do_rmsynth_planes(
-        dataQ=qArr,
-        dataU=uArr,
-        lambdaSqArr_m2=lambdaSqArr_m2,
-        phiArr_radm2=phiArr_radm2,
-        weightArr=weightArr,
+    dirtyFDF, lam0_sq_m2 = do_rmsynth_planes(
+        data_Q=q_arr,
+        data_U=u_arr,
+        lambda_sq_arr_m2=lambda_sq_arr_m2,
+        phi_arr_radm2=phi_arr_radm2,
+        weight_arr=weight_arr,
         nBits=nBits,
         verbose=verbose,
         log=log,
     )
 
     # Calculate the Rotation Measure Spread Function
-    RMSFArr, phi2Arr_radm2, fwhmRMSFArr, fitStatArr = get_rmsf_planes(
-        lambdaSqArr_m2=lambdaSqArr_m2,
-        phiArr_radm2=phiArr_radm2,
-        weightArr=weightArr,
-        mskArr=~np.isfinite(qArr),
-        lam0Sq_m2=lam0Sq_m2,
+    RMSF_arr, phi2_arr_radm2, fwhmRMSF_arr, fitStat_arr = get_rmsf_planes(
+        lambda_sq_arr_m2=lambda_sq_arr_m2,
+        phi_arr_radm2=phi_arr_radm2,
+        weight_arr=weight_arr,
+        msk_arr=~np.isfinite(q_arr),
+        lam0_sq_m2=lam0_sq_m2,
         double=True,
         fitRMSF=fitRMSF,
         fitRMSFreal=False,
@@ -331,12 +324,12 @@ def run_rmsynth(
         verbose=verbose,
         log=log,
     )
-    fwhmRMSF = float(fwhmRMSFArr)
+    fwhmRMSF = float(fwhmRMSF_arr)
 
     # ALTERNATE RM-SYNTHESIS CODE --------------------------------------------#
 
-    # dirtyFDF, [phi2Arr_radm2, RMSFArr], lam0Sq_m2, fwhmRMSF = \
-    #          do_rmsynth(qArr, uArr, lambdaSqArr_m2, phiArr_radm2, weightArr)
+    # dirtyFDF, [phi2_arr_radm2, RMSF_arr], lam0_sq_m2, fwhmRMSF = \
+    #          do_rmsynth(q_arr, u_arr, lambda_sq_arr_m2, phi_arr_radm2, weight_arr)
 
     # -------------------------------------------------------------------------#
 
@@ -345,13 +338,13 @@ def run_rmsynth(
     if verbose:
         log("> RM-synthesis completed in %.2f seconds." % cputime)
 
-    # Determine the Stokes I value at lam0Sq_m2 from the Stokes I model
+    # Determine the Stokes I value at lam0_sq_m2 from the Stokes I model
     # Multiply the dirty FDF by Ifreq0 to recover the PI
-    freq0_Hz = C / m.sqrt(lam0Sq_m2)
+    freq0_Hz = C / m.sqrt(lam0_sq_m2)
     if modStokesI is None:
         Ifreq0 = calculate_StokesI_model(fitDict, freq0_Hz)
     elif modStokesI is not None:
-        modStokesI_interp = interp1d(freqArr_Hz, modStokesI)
+        modStokesI_interp = interp1d(freq_arr_Hz, modStokesI)
         Ifreq0 = modStokesI_interp(freq0_Hz)
     dirtyFDF *= Ifreq0  # FDF is in fracpol units initially, convert back to flux
 
@@ -360,21 +353,21 @@ def run_rmsynth(
     #     fitDict=renormalize_StokesI_model(fitDict,freq0_Hz)
 
     # Calculate the theoretical noise in the FDF !!Old formula only works for wariance weights!
-    weightArr = np.where(np.isnan(weightArr), 0.0, weightArr)
+    weight_arr = np.where(np.isnan(weight_arr), 0.0, weight_arr)
     dFDFth = Ifreq0 * np.sqrt(
-        np.nansum(weightArr**2 * np.nan_to_num(dquArr) ** 2)
-        / (np.sum(weightArr)) ** 2
+        np.nansum(weight_arr**2 * np.nan_to_num(dqu_arr) ** 2)
+        / (np.sum(weight_arr)) ** 2
     )
 
     # Measure the parameters of the dirty FDF
     # Use the theoretical noise to calculate uncertainties
     mDict = measure_FDF_parms(
         FDF=dirtyFDF,
-        phiArr=phiArr_radm2,
+        phi_arr=phi_arr_radm2,
         fwhmRMSF=fwhmRMSF,
         dFDF=dFDFth,
-        lamSqArr_m2=lambdaSqArr_m2,
-        lam0Sq=lam0Sq_m2,
+        lam_sq_arr_m2=lambda_sq_arr_m2,
+        lam0_sq=lam0_sq_m2,
     )
     mDict["Ifreq0"] = toscalar(Ifreq0)
     mDict["polyCoeffs"] = ",".join([str(x.astype(np.float32)) for x in fitDict["p"]])
@@ -384,12 +377,12 @@ def run_rmsynth(
     mDict["poly_reffreq"] = fitDict["reference_frequency_Hz"]
     mDict["polyOrd"] = fitDict["polyOrd"]
     mDict["IfitStat"] = fitDict["fitStatus"]
-    mDict["IfitChiSqRed"] = fitDict["chiSqRed"]
+    mDict["IfitChi_sqRed"] = fitDict["chi_sqRed"]
     mDict["fit_function"] = fit_function
-    mDict["lam0Sq_m2"] = toscalar(lam0Sq_m2)
+    mDict["lam0_sq_m2"] = toscalar(lam0_sq_m2)
     mDict["freq0_Hz"] = toscalar(freq0_Hz)
     mDict["fwhmRMSF"] = toscalar(fwhmRMSF)
-    mDict["dQU"] = toscalar(nanmedian(dQUArr))
+    mDict["dQU"] = toscalar(nanmedian(dQU_arr))
     mDict["dFDFth"] = toscalar(dFDFth)
     mDict["units"] = units
 
@@ -399,21 +392,21 @@ def run_rmsynth(
         log("Caution: Stokes I model has low signal-to-noise.")
 
     # Add information on nature of channels:
-    good_channels = np.where(np.logical_and(weightArr != 0, np.isfinite(qArr)))[0]
-    mDict["min_freq"] = float(np.min(freqArr_Hz[good_channels]))
-    mDict["max_freq"] = float(np.max(freqArr_Hz[good_channels]))
+    good_channels = np.where(np.logical_and(weight_arr != 0, np.isfinite(q_arr)))[0]
+    mDict["min_freq"] = float(np.min(freq_arr_Hz[good_channels]))
+    mDict["max_freq"] = float(np.max(freq_arr_Hz[good_channels]))
     mDict["N_channels"] = good_channels.size
-    mDict["median_channel_width"] = float(np.median(np.diff(freqArr_Hz)))
+    mDict["median_channel_width"] = float(np.median(np.diff(freq_arr_Hz)))
 
     # Measure the complexity of the q and u spectra
     # Use 'ampPeakPIfitEff' for bias correct PI
     mDict["fracPol"] = toscalar(mDict["ampPeakPIfitEff"] / (Ifreq0))
     mD, pD = measure_qu_complexity(
-        freqArr_Hz=freqArr_Hz,
-        qArr=qArr,
-        uArr=uArr,
-        dqArr=dqArr,
-        duArr=duArr,
+        freq_arr_Hz=freq_arr_Hz,
+        q_arr=q_arr,
+        u_arr=u_arr,
+        dq_arr=dq_arr,
+        du_arr=du_arr,
         fracPol=mDict["fracPol"],
         psi0_deg=mDict["polAngle0Fit_deg"],
         RM_radm2=mDict["phiPeakPIfit_rm2"],
@@ -423,17 +416,17 @@ def run_rmsynth(
     # Debugging plots for spectral complexity measure
     if debug:
         tmpFig = plot_complexity_fig(
-            xArr=pD["xArrQ"],
-            qArr=pD["yArrQ"],
-            dqArr=pD["dyArrQ"],
-            sigmaAddqArr=pD["sigmaAddArrQ"],
-            chiSqRedqArr=pD["chiSqRedArrQ"],
-            probqArr=pD["probArrQ"],
-            uArr=pD["yArrU"],
-            duArr=pD["dyArrU"],
-            sigmaAdduArr=pD["sigmaAddArrU"],
-            chiSqReduArr=pD["chiSqRedArrU"],
-            probuArr=pD["probArrU"],
+            x_arr=pD["x_arrQ"],
+            q_arr=pD["y_arrQ"],
+            dq_arr=pD["dy_arrQ"],
+            sigmaAddq_arr=pD["sigmaAdd_arrQ"],
+            chi_sqRedq_arr=pD["chi_sqRed_arrQ"],
+            probq_arr=pD["prob_arrQ"],
+            u_arr=pD["y_arrU"],
+            du_arr=pD["dy_arrU"],
+            sigmaAddu_arr=pD["sigmaAdd_arrU"],
+            chi_sqRedu_arr=pD["chi_sqRed_arrU"],
+            probu_arr=pD["prob_arrU"],
             mDict=mDict,
         )
         if saveFigures:
@@ -448,11 +441,11 @@ def run_rmsynth(
 
     # add array dictionary
     aDict = dict()
-    aDict["phiArr_radm2"] = phiArr_radm2
-    aDict["phi2Arr_radm2"] = phi2Arr_radm2
-    aDict["RMSFArr"] = RMSFArr
-    aDict["freqArr_Hz"] = freqArr_Hz
-    aDict["weightArr"] = weightArr
+    aDict["phi_arr_radm2"] = phi_arr_radm2
+    aDict["phi2_arr_radm2"] = phi2_arr_radm2
+    aDict["RMSF_arr"] = RMSF_arr
+    aDict["freq_arr_Hz"] = freq_arr_Hz
+    aDict["weight_arr"] = weight_arr
     aDict["dirtyFDF"] = dirtyFDF
 
     if verbose:
@@ -501,10 +494,10 @@ def run_rmsynth(
     if showPlots or saveFigures:
         fdfFig = plt.figure(facecolor="w", figsize=(12.0, 8))
         plot_rmsf_fdf_fig(
-            phiArr=phiArr_radm2,
+            phi_arr=phi_arr_radm2,
             FDF=dirtyFDF,
-            phi2Arr=phi2Arr_radm2,
-            RMSFArr=RMSFArr,
+            phi2_arr=phi2_arr_radm2,
+            RMSF_arr=RMSF_arr,
             fwhmRMSF=fwhmRMSF,
             vLine=mDict["phiPeakPIfit_rm2"],
             fig=fdfFig,
@@ -566,12 +559,12 @@ def readFile(dataFile, nBits, verbose=True, debug=False):
     try:
         if verbose:
             print("> Trying [freq_Hz, I, Q, U, dI, dQ, dU]", end=" ")
-        (freqArr_Hz, IArr, QArr, UArr, dIArr, dQArr, dUArr) = np.loadtxt(
+        (freq_arr_Hz, I_arr, Q_arr, U_arr, dI_arr, dQ_arr, dU_arr) = np.loadtxt(
             dataFile, unpack=True, dtype=dtFloat
         )
         if verbose:
             print("... success.")
-        data = [freqArr_Hz, IArr, QArr, UArr, dIArr, dQArr, dUArr]
+        data = [freq_arr_Hz, I_arr, Q_arr, U_arr, dI_arr, dQ_arr, dU_arr]
     except Exception:
         if verbose:
             print("...failed.")
@@ -579,12 +572,12 @@ def readFile(dataFile, nBits, verbose=True, debug=False):
         try:
             if verbose:
                 print("> Trying [freq_Hz, q, u,  dq, du]", end=" ")
-            (freqArr_Hz, QArr, UArr, dQArr, dUArr) = np.loadtxt(
+            (freq_arr_Hz, Q_arr, U_arr, dQ_arr, dU_arr) = np.loadtxt(
                 dataFile, unpack=True, dtype=dtFloat
             )
             if verbose:
                 print("... success.")
-            data = [freqArr_Hz, QArr, UArr, dQArr, dUArr]
+            data = [freq_arr_Hz, Q_arr, U_arr, dQ_arr, dU_arr]
 
             noStokesI = True
         except Exception:
@@ -609,7 +602,7 @@ def saveOutput(outdict, arrdict, prefixOut, verbose):
         outFile,
         list(
             zip(
-                arrdict["phiArr_radm2"],
+                arrdict["phi_arr_radm2"],
                 arrdict["dirtyFDF"].real,
                 arrdict["dirtyFDF"].imag,
             )
@@ -623,9 +616,9 @@ def saveOutput(outdict, arrdict, prefixOut, verbose):
         outFile,
         list(
             zip(
-                arrdict["phi2Arr_radm2"],
-                arrdict["RMSFArr"].real,
-                arrdict["RMSFArr"].imag,
+                arrdict["phi2_arr_radm2"],
+                arrdict["RMSF_arr"].real,
+                arrdict["RMSF_arr"].imag,
             )
         ),
     )
@@ -633,7 +626,7 @@ def saveOutput(outdict, arrdict, prefixOut, verbose):
     outFile = prefixOut + "_weight.dat"
     if verbose:
         print("> %s" % outFile)
-    np.savetxt(outFile, list(zip(arrdict["freqArr_Hz"], arrdict["weightArr"])))
+    np.savetxt(outFile, list(zip(arrdict["freq_arr_Hz"], arrdict["weight_arr"])))
 
     # Save the measurements to a "key=value" text file
     outFile = prefixOut + "_RMsynth.dat"
@@ -676,7 +669,7 @@ def main():
     # Help string to be shown using the -h option
     descStr = """
     Run RM-synthesis on Stokes I, Q and U spectra (1D) stored in an ASCII
-    file. The Stokes I spectrum is first fit with a polynomial or power law 
+    file. The Stokes I spectrum is first fit with a polynomial or power law
     and the resulting model used to create fractional q = Q/I and u = U/I spectra.
 
     The ASCII file should the following columns, in a space separated format:

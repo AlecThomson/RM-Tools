@@ -67,6 +67,7 @@ import math as m
 import sys
 from typing import Tuple, Union
 
+import astropy.constants as const
 import numpy as np
 from scipy import stats
 from tqdm import tqdm
@@ -82,8 +83,19 @@ from RMutils.util_misc import (
 )
 from RMutils.logger import logger
 
-# Constants
-C = 2.99792458e8
+
+def n_bit_to_dtype(n_bits: int) -> Tuple[str, str]:
+    """Convert the number of bits to a numpy data type.
+
+    Args:
+        n_bits (int): Number of bits.
+
+    Returns:
+        Tuple[str,str]: Numpy data types.
+    """
+    dt_float = "float" + str(n_bits)
+    dt_complex = "complex" + str(2 * n_bits)
+    return dt_float, dt_complex
 
 
 # -----------------------------------------------------------------------------#
@@ -106,14 +118,17 @@ def do_rmsynth_planes(
     but possible in single-dish cubes). Input data must be in standard python
     [z,y,x] order, where z is the frequency axis in ascending order.
 
-    data_Q           ... 1, 2 or 3D Stokes Q data array
-    data_U           ... 1, 2 or 3D Stokes U data array
-    lambda_sq_arr_m2  ... vector of wavelength^2 values (assending freq order)
-    phi_arr_radm2    ... vector of trial Faraday depth values
-    weight_arr       ... vector of weights, default [None] is Uniform (all 1s)
-    n_bits           ... precision of data arrays [32]
-    log             ... function to be used to output messages [print]
+    Args:
+        data_Q (np.ndarray): 1, 2 or 3D Stokes Q data array.
+        data_U (np.ndarray): 1, 2 or 3D Stokes U data array.
+        lambda_sq_arr_m2 (np.ndarray): vector of wavelength^2 values (assending freq order.
+        phi_arr_radm2 (np.ndarray): vector of trial Faraday depth values
+        weight_arr (Union[np.ndarray, None], optional): vector of weights. Defaults to None - Uniform (all 1s).
+        lam0_sq_m2 (Union[float, None], optional): Reference wavelength^2. Defaults to None.
+        n_bits (int, optional): precision of data arrays. Defaults to 32.
 
+    Returns:
+        Union[ Tuple[np.ndarray, float], Tuple[None, None], ]: _description_
     """
 
     # Default data types
@@ -132,8 +147,8 @@ def do_rmsynth_planes(
     if not data_Q.shape == data_U.shape:
         logger.error("Stokes Q and U data arrays must be the same shape.")
         return None, None
-    nDims = len(data_Q.shape)
-    if not nDims <= 3:
+    n_dims = len(data_Q.shape)
+    if not n_dims <= 3:
         logger.error("data dimensions must be <= 3.")
         return None, None
     if not data_Q.shape[0] == lambda_sq_arr_m2.shape[0]:
@@ -142,31 +157,31 @@ def do_rmsynth_planes(
         return None, None
 
     # Reshape the data arrays to 3 dimensions
-    if nDims == 1:
+    if n_dims == 1:
         data_Q = np.reshape(data_Q, (data_Q.shape[0], 1, 1))
         data_U = np.reshape(data_U, (data_U.shape[0], 1, 1))
-    elif nDims == 2:
+    elif n_dims == 2:
         data_Q = np.reshape(data_Q, (data_Q.shape[0], data_Q.shape[1], 1))
         data_U = np.reshape(data_U, (data_U.shape[0], data_U.shape[1], 1))
 
     # Create a complex polarised cube, B&dB Eqns. (8) and (14)
-    # Array has dimensions [nFreq, nY, nX]
-    pCube = (data_Q + 1j * data_U) * weight_arr[:, np.newaxis, np.newaxis]
+    # _array has dimensions [nFreq, n_y, n_x]
+    p_cube = (data_Q + 1j * data_U) * weight_arr[:, np.newaxis, np.newaxis]
 
     # Check for NaNs (flagged data) in the cube & set to zero
-    mskCube = np.isnan(pCube)
-    pCube = np.nan_to_num(pCube)
+    mskCube = np.isnan(p_cube)
+    p_cube = np.nan_to_num(p_cube)
 
     # If full planes are flagged then set corresponding weights to zero
-    mskPlanes = np.sum(np.sum(~mskCube, axis=1), axis=1)
-    mskPlanes = np.where(mskPlanes == 0, 0, 1)
-    weight_arr *= mskPlanes
+    msk_planes = np.sum(np.sum(~mskCube, axis=1), axis=1)
+    msk_planes = np.where(msk_planes == 0, 0, 1)
+    weight_arr *= msk_planes
 
     # Initialise the complex Faraday Dispersion Function cube
-    nX = data_Q.shape[-1]
-    nY = data_Q.shape[-2]
+    n_x = data_Q.shape[-1]
+    n_y = data_Q.shape[-2]
     n_phi = phi_arr_radm2.shape[0]
-    FDFcube = np.zeros((n_phi, nY, nX), dtype=dt_complex)
+    FDFcube = np.zeros((n_phi, n_y, n_x), dtype=dt_complex)
 
     # lam0_sq_m2 is the weighted mean of lambda^2 distribution (B&dB Eqn. 32)
     # Calculate a global lam0_sq_m2 value, ignoring isolated flagged voxels
@@ -180,15 +195,15 @@ def do_rmsynth_planes(
     # flagged voxels data in the datacube and can be position dependent
     weightCube = np.invert(mskCube) * weight_arr[:, np.newaxis, np.newaxis]
     with np.errstate(divide="ignore", invalid="ignore"):
-        KArr = np.true_divide(1.0, np.sum(weightCube, axis=0))
-        KArr[KArr == np.inf] = 0
-        KArr = np.nan_to_num(KArr)
+        K_arr = np.true_divide(1.0, np.sum(weightCube, axis=0))
+        K_arr[K_arr == np.inf] = 0
+        K_arr = np.nan_to_num(K_arr)
 
     # Do the RM-synthesis on each plane
     a = lambda_sq_arr_m2 - lam0_sq_m2
     for i, phi_plane in tqdm(enumerate(phi_arr_radm2), total=n_phi, desc="RM-synthesis by channel"):
         arg = np.exp(-2.0j * phi_plane * a)[:, np.newaxis, np.newaxis]
-        FDFcube[i, :, :] = KArr * np.sum(pCube * arg, axis=0)
+        FDFcube[i, :, :] = K_arr * np.sum(p_cube * arg, axis=0)
 
     # Remove redundant dimensions in the FDF array
     FDFcube = np.squeeze(FDFcube)
@@ -201,7 +216,7 @@ def get_rmsf_planes(
     lambda_sq_arr_m2: np.ndarray,
     phi_arr_radm2: np.ndarray,
     weight_arr: Union[np.ndarray, None]=None,
-    mskArr: Union[np.ndarray, None]=None,
+    msk_arr: Union[np.ndarray, None]=None,
     lam0_sq_m2: Union[float, None]=None,
     double: bool=True,
     fitRMSF: bool=False,
@@ -221,7 +236,7 @@ def get_rmsf_planes(
     lambda_sq_arr_m2  ... vector of wavelength^2 values (assending freq order)
     phi_arr_radm2    ... vector of trial Faraday depth values
     weight_arr       ... vector of weights, default [None] is no weighting
-    maskArr         ... cube of mask values used to shape return cube [None]
+    mask_arr         ... cube of mask values used to shape return cube [None]
     lam0_sq_m2       ... force a reference lambda^2 value (def=calculate) [None]
     double          ... pad the Faraday depth to double-size [True]
     fitRMSF         ... fit the main lobe of the RMSF with a Gaussian [False]
@@ -233,17 +248,16 @@ def get_rmsf_planes(
     """
 
     # Default data types
-    dt_float = "float" + str(n_bits)
-    dt_complex = "complex" + str(2 * n_bits)
+    dt_float, dt_complex = n_bit_to_dtype(n_bits)
 
     # For cleaning the RMSF should extend by 1/2 on each side in phi-space
     if double:
         n_phi = phi_arr_radm2.shape[0]
         n_ext = np.ceil(n_phi / 2.0)
-        resampIndxArr = np.arange(2.0 * n_ext + n_phi) - n_ext
-        phi2Arr = extrap(resampIndxArr, np.arange(n_phi, dtype="int"), phi_arr_radm2)
+        resampIndx_arr = np.arange(2.0 * n_ext + n_phi) - n_ext
+        phi2_arr = extrap(resampIndx_arr, np.arange(n_phi, dtype="int"), phi_arr_radm2)
     else:
-        phi2Arr = phi_arr_radm2
+        phi2_arr = phi_arr_radm2
 
     # Set the weight array
     if weight_arr is None:
@@ -251,46 +265,44 @@ def get_rmsf_planes(
     weight_arr = np.where(np.isnan(weight_arr), 0.0, weight_arr)
 
     # Set the mask array (default to 1D, no masked channels)
-    if mskArr is None:
-        mskArr = np.zeros_like(lambda_sq_arr_m2, dtype="bool")
-        nDims = 1
+    if msk_arr is None:
+        msk_arr = np.zeros_like(lambda_sq_arr_m2, dtype="bool")
+        n_dims = 1
     else:
-        mskArr = mskArr.astype("bool")
-        nDims = len(mskArr.shape)
+        msk_arr = msk_arr.astype("bool")
+        n_dims = len(msk_arr.shape)
 
     # Sanity checks on array sizes
     if not weight_arr.shape == lambda_sq_arr_m2.shape:
         logger.error("wavelength^2 and weight arrays must be the same shape.")
         return None, None, None, None
-    if not nDims <= 3:
+    if not n_dims <= 3:
         logger.error("mask dimensions must be <= 3.")
         return None, None, None, None
-    if not mskArr.shape[0] == lambda_sq_arr_m2.shape[0]:
-        logger.error("mask depth does not match lambda^2 vector (%d vs %d).", end=" ")
-        (mskArr.shape[0], lambda_sq_arr_m2.shape[-1])
-        log("     Check that the mask is in [z, y, x] order.")
+    if not msk_arr.shape[0] == lambda_sq_arr_m2.shape[0]:
+        logger.error(f"mask depth does not match lambda^2 vector ({msk_arr.shape[0]} vs {lambda_sq_arr_m2.shape[-1]}).")
         return None, None, None, None
 
     # Reshape the mask array to 3 dimensions
-    if nDims == 1:
-        mskArr = np.reshape(mskArr, (mskArr.shape[0], 1, 1))
-    elif nDims == 2:
-        mskArr = np.reshape(mskArr, (mskArr.shape[0], mskArr.shape[1], 1))
+    if n_dims == 1:
+        msk_arr = np.reshape(msk_arr, (msk_arr.shape[0], 1, 1))
+    elif n_dims == 2:
+        msk_arr = np.reshape(msk_arr, (msk_arr.shape[0], msk_arr.shape[1], 1))
 
     # Create a unit cube for use in RMSF calculation (negative of mask)
     # CVE: unit cube removed: it wasn't accurate for non-uniform weights, and was no longer used
 
     # Initialise the complex RM Spread Function cube
-    nX = mskArr.shape[-1]
-    nY = mskArr.shape[-2]
-    nPix = nX * nY
-    n_phi = phi2Arr.shape[0]
-    RMSFcube = np.ones((n_phi, nY, nX), dtype=dt_complex)
+    n_x = msk_arr.shape[-1]
+    n_y = msk_arr.shape[-2]
+    nPix = n_x * n_y
+    n_phi = phi2_arr.shape[0]
+    RMSFcube = np.ones((n_phi, n_y, n_x), dtype=dt_complex)
 
     # If full planes are flagged then set corresponding weights to zero
-    xySum = np.sum(np.sum(mskArr, axis=1), axis=1)
-    mskPlanes = np.where(xySum == nPix, 0, 1)
-    weight_arr *= mskPlanes
+    xySum = np.sum(np.sum(msk_arr, axis=1), axis=1)
+    msk_planes = np.where(xySum == nPix, 0, 1)
+    weight_arr *= msk_planes
 
     # Check for isolated clumps of flags (# flags in a plane not 0 or nPix)
     flagTotals = np.unique(xySum).tolist()
@@ -306,7 +318,7 @@ def get_rmsf_planes(
     if len(flagTotals) > 0:
         do1Dcalc = False
 
-    # lam0Sq is the weighted mean of LambdaSq distribution (B&dB Eqn. 32)
+    # lam0_sq is the weighted mean of Lambda_sq distribution (B&dB Eqn. 32)
     # Calculate a single lam0_sq_m2 value, ignoring isolated flagged voxels
     K = 1.0 / np.nansum(weight_arr)
     lam0_sq_m2 = K * np.nansum(weight_arr * lambda_sq_arr_m2)
@@ -316,23 +328,21 @@ def get_rmsf_planes(
 
     # Do a simple 1D calculation and replicate along X & Y axes
     if do1Dcalc:
-        if verbose:
-            log("Calculating 1D RMSF and replicating along X & Y axes.")
+        logger.info("Calculating 1D RMSF and replicating along X & Y axes.")
 
         # Calculate the RMSF
-        a = (-2.0 * 1j * phi2Arr).astype(dt_complex)
+        a = (-2.0 * 1j * phi2_arr).astype(dt_complex)
         b = lambda_sq_arr_m2 - lam0_sq_m2
-        RMSFArr = K * np.sum(weight_arr * np.exp(np.outer(a, b)), 1)
+        RMSF_arr = K * np.sum(weight_arr * np.exp(np.outer(a, b)), 1)
 
         # Fit the RMSF main lobe
         fitStatus = -1
         if fitRMSF:
-            if verbose:
-                log("Fitting Gaussian to the main lobe.")
+            logger.info("Fitting Gaussian to the main lobe.")
             if fitRMSFreal:
-                mp = fit_rmsf(phi2Arr, RMSFArr.real)
+                mp = fit_rmsf(phi2_arr, RMSF_arr.real)
             else:
-                mp = fit_rmsf(phi2Arr, np.abs(RMSFArr))
+                mp = fit_rmsf(phi2_arr, np.abs(RMSF_arr))
             if mp is None or mp.status < 1:
                 pass
                 logger.error("failed to fit the RMSF.")
@@ -342,22 +352,21 @@ def get_rmsf_planes(
                 fitStatus = mp.status
 
         # Replicate along X and Y axes
-        RMSFcube = np.tile(RMSFArr[:, np.newaxis, np.newaxis], (1, nY, nX))
-        fwhmRMSFArr = np.ones((nY, nX), dtype=dt_float) * fwhmRMSF
-        statArr = np.ones((nY, nX), dtype="int") * fitStatus
+        RMSFcube = np.tile(RMSF_arr[:, np.newaxis, np.newaxis], (1, n_y, n_x))
+        fwhmRMSF_arr = np.ones((n_y, n_x), dtype=dt_float) * fwhmRMSF
+        stat_arr = np.ones((n_y, n_x), dtype="int") * fitStatus
 
     # Calculate the RMSF at each pixel
     else:
-        if verbose:
-            log("Calculating RMSF by channel.")
+        logger.info("Calculating RMSF by channel.")
 
         # The K value used to scale each RMSF must take into account
         # isolated flagged voxels data in the datacube
-        weightCube = np.invert(mskArr) * weight_arr[:, np.newaxis, np.newaxis]
+        weightCube = np.invert(msk_arr) * weight_arr[:, np.newaxis, np.newaxis]
         with np.errstate(divide="ignore", invalid="ignore"):
-            KArr = np.true_divide(1.0, np.sum(weightCube, axis=0))
-            KArr[KArr == np.inf] = 0
-            KArr = np.nan_to_num(KArr)
+            K_arr = np.true_divide(1.0, np.sum(weightCube, axis=0))
+            K_arr[K_arr == np.inf] = 0
+            K_arr = np.nan_to_num(K_arr)
 
         # Calculate the RMSF for each plane
         if verbose:
@@ -366,52 +375,48 @@ def get_rmsf_planes(
         for i in range(n_phi):
             if verbose:
                 progress(40, ((i + 1) * 100.0 / n_phi))
-            arg = np.exp(-2.0j * phi2Arr[i] * a)[:, np.newaxis, np.newaxis]
-            RMSFcube[i, :, :] = KArr * np.sum(weightCube * arg, axis=0)
+            arg = np.exp(-2.0j * phi2_arr[i] * a)[:, np.newaxis, np.newaxis]
+            RMSFcube[i, :, :] = K_arr * np.sum(weightCube * arg, axis=0)
 
         # Default to the analytical RMSF
-        fwhmRMSFArr = np.ones((nY, nX), dtype=dt_float) * fwhmRMSF
-        statArr = np.ones((nY, nX), dtype="int") * (-1)
+        fwhmRMSF_arr = np.ones((n_y, n_x), dtype=dt_float) * fwhmRMSF
+        stat_arr = np.ones((n_y, n_x), dtype="int") * (-1)
 
         # Fit the RMSF main lobe
         if fitRMSF:
-            if verbose:
-                log("Fitting main lobe in each RMSF spectrum.")
-                log("> This may take some time!")
-                progress(40, 0)
+            logger.info("Fitting main lobe in each RMSF spectrum.")
+            logger.info("> This may take some time!")
             k = 0
-            for i in range(nX):
-                for j in range(nY):
+            for i in range(n_x):
+                for j in range(n_y):
                     k += 1
-                    if verbose:
-                        progress(40, ((i + 1) * 100.0 / n_phi))
                     if fitRMSFreal:
-                        mp = fit_rmsf(phi2Arr, RMSFcube[:, j, i].real)
+                        mp = fit_rmsf(phi2_arr, RMSFcube[:, j, i].real)
                     else:
-                        mp = fit_rmsf(phi2Arr, np.abs(RMSFcube[:, j, i]))
+                        mp = fit_rmsf(phi2_arr, np.abs(RMSFcube[:, j, i]))
                     if not (mp is None or mp.status < 1):
-                        fwhmRMSFArr[j, i] = mp.params[2]
-                        statArr[j, i] = mp.status
+                        fwhmRMSF_arr[j, i] = mp.params[2]
+                        stat_arr[j, i] = mp.status
 
     # Remove redundant dimensions
     RMSFcube = np.squeeze(RMSFcube)
-    fwhmRMSFArr = np.squeeze(fwhmRMSFArr)
-    statArr = np.squeeze(statArr)
+    fwhmRMSF_arr = np.squeeze(fwhmRMSF_arr)
+    stat_arr = np.squeeze(stat_arr)
 
-    return RMSFcube, phi2Arr, fwhmRMSFArr, statArr
+    return RMSFcube, phi2_arr, fwhmRMSF_arr, stat_arr
 
 
 # -----------------------------------------------------------------------------#
 def do_rmclean_hogbom(
     dirtyFDF,
     phi_arr_radm2,
-    RMSFArr,
-    phi2Arr_radm2,
-    fwhmRMSFArr,
+    RMSF_arr,
+    phi2_arr_radm2,
+    fwhmRMSF_arr,
     cutoff,
     maxIter=1000,
     gain=0.1,
-    mskArr=None,
+    msk_arr=None,
     n_bits=32,
     verbose=False,
     doPlots=False,
@@ -425,13 +430,13 @@ def do_rmclean_hogbom(
 
     dirtyFDF       ... 1, 2 or 3D complex FDF array
     phi_arr_radm2   ... 1D Faraday depth array corresponding to the FDF
-    RMSFArr        ... 1, 2 or 3D complex RMSF array
-    phi2Arr_radm2  ... double size 1D Faraday depth array of the RMSF
-    fwhmRMSFArr    ... scalar, 1D or 2D array of RMSF main lobe widths
+    RMSF_arr        ... 1, 2 or 3D complex RMSF array
+    phi2_arr_radm2  ... double size 1D Faraday depth array of the RMSF
+    fwhmRMSF_arr    ... scalar, 1D or 2D array of RMSF main lobe widths
     cutoff         ... clean cutoff (+ve = absolute values, -ve = sigma) [-1]
     maxIter        ... maximun number of CLEAN loop interations [1000]
     gain           ... CLEAN loop gain [0.1]
-    mskArr         ... scalar, 1D or 2D pixel mask array [None]
+    msk_arr         ... scalar, 1D or 2D pixel mask array [None]
     n_bits          ... precision of data arrays [32]
     verbose        ... print feedback during calculation [False]
     doPlots        ... plot the final CLEAN FDF [False]
@@ -449,51 +454,51 @@ def do_rmclean_hogbom(
     # Sanity checks on array sizes
     n_phi = phi_arr_radm2.shape[0]
     if n_phi != dirtyFDF.shape[0]:
-        logger.error("'phi2Arr_radm2' and 'dirtyFDF' are not the same length.")
+        logger.error("'phi2_arr_radm2' and 'dirtyFDF' are not the same length.")
         return None, None, None
-    n_phi2 = phi2Arr_radm2.shape[0]
-    if not n_phi2 == RMSFArr.shape[0]:
-        logger.error("missmatch in 'phi2Arr_radm2' and 'RMSFArr' length.")
+    n_phi2 = phi2_arr_radm2.shape[0]
+    if not n_phi2 == RMSF_arr.shape[0]:
+        logger.error("missmatch in 'phi2_arr_radm2' and 'RMSF_arr' length.")
         return None, None, None
     if not (n_phi2 >= 2 * n_phi):
         logger.error("the Faraday depth of the RMSF must be twice the FDF.")
         return None, None, None
-    nDims = len(dirtyFDF.shape)
-    if not nDims <= 3:
+    n_dims = len(dirtyFDF.shape)
+    if not n_dims <= 3:
         logger.error("FDF array dimensions must be <= 3.")
         return None, None, None
-    if not nDims == len(RMSFArr.shape):
+    if not n_dims == len(RMSF_arr.shape):
         logger.error("the input RMSF and FDF must have the same number of axes.")
         return None, None, None
-    if not RMSFArr.shape[1:] == dirtyFDF.shape[1:]:
+    if not RMSF_arr.shape[1:] == dirtyFDF.shape[1:]:
         logger.error("the xy dimesions of the RMSF and FDF must match.")
         return None, None, None
-    if mskArr is not None:
-        if not mskArr.shape == dirtyFDF.shape[1:]:
+    if msk_arr is not None:
+        if not msk_arr.shape == dirtyFDF.shape[1:]:
             logger.error("pixel mask must match xy dimesnisons of FDF cube.")
             log(
                 "     FDF[z,y,z] = {:}, Mask[y,x] = {:}.".format(
-                    dirtyFDF.shape, mskArr.shape
+                    dirtyFDF.shape, msk_arr.shape
                 ),
                 end=" ",
             )
 
             return None, None, None
     else:
-        mskArr = np.ones(dirtyFDF.shape[1:], dtype="bool")
+        msk_arr = np.ones(dirtyFDF.shape[1:], dtype="bool")
 
     # Reshape the FDF & RMSF array to 3 dimensions and mask array to 2
-    if nDims == 1:
+    if n_dims == 1:
         dirtyFDF = np.reshape(dirtyFDF, (dirtyFDF.shape[0], 1, 1))
-        RMSFArr = np.reshape(RMSFArr, (RMSFArr.shape[0], 1, 1))
-        mskArr = np.reshape(mskArr, (1, 1))
-        fwhmRMSFArr = np.reshape(fwhmRMSFArr, (1, 1))
-    elif nDims == 2:
+        RMSF_arr = np.reshape(RMSF_arr, (RMSF_arr.shape[0], 1, 1))
+        msk_arr = np.reshape(msk_arr, (1, 1))
+        fwhmRMSF_arr = np.reshape(fwhmRMSF_arr, (1, 1))
+    elif n_dims == 2:
         dirtyFDF = np.reshape(dirtyFDF, list(dirtyFDF.shape[:2]) + [1])
-        RMSFArr = np.reshape(RMSFArr, list(RMSFArr.shape[:2]) + [1])
-        mskArr = np.reshape(mskArr, (dirtyFDF.shape[1], 1))
-        fwhmRMSFArr = np.reshape(fwhmRMSFArr, (dirtyFDF.shape[1], 1))
-    iterCountArr = np.zeros_like(mskArr, dtype="int")
+        RMSF_arr = np.reshape(RMSF_arr, list(RMSF_arr.shape[:2]) + [1])
+        msk_arr = np.reshape(msk_arr, (dirtyFDF.shape[1], 1))
+        fwhmRMSF_arr = np.reshape(fwhmRMSF_arr, (dirtyFDF.shape[1], 1))
+    iterCount_arr = np.zeros_like(msk_arr, dtype="int")
 
     # Determine which pixels have components above the cutoff
     absFDF = np.abs(np.nan_to_num(dirtyFDF))
@@ -510,17 +515,17 @@ def do_rmclean_hogbom(
     # Residual is initially copies of dirty FDF, so that pixels that are not
     #  processed get correct values (but will be overridden when processed)
     residFDF = dirtyFDF.copy()
-    ccArr = np.zeros(dirtyFDF.shape, dtype=dt_complex)
+    cc_arr = np.zeros(dirtyFDF.shape, dtype=dt_complex)
     cleanFDF = np.zeros_like(dirtyFDF)
 
     # Loop through the pixels containing a polarised signal
     inputs = [[yi, xi, dirtyFDF] for yi, xi in xyCoords]
     rmc = RMcleaner(
-        RMSFArr,
-        phi2Arr_radm2,
+        RMSF_arr,
+        phi2_arr_radm2,
         phi_arr_radm2,
-        fwhmRMSFArr,
-        iterCountArr,
+        fwhmRMSF_arr,
+        iterCount_arr,
         maxIter,
         gain,
         cutoff,
@@ -540,8 +545,7 @@ def do_rmclean_hogbom(
                 progress(40, ((i) * 100.0 / nCleanPix))
                 i += 1
     else:
-        if verbose:
-            log(
+        logger.info(
                 "(Progress bar is not supported for parallel mode. Please wait for the code to finish."
             )
         if chunksize is not None:
@@ -550,13 +554,13 @@ def do_rmclean_hogbom(
             output = list(pool.map(rmc.cleanloop, inputs))
         pool.close()
     # Put data back in correct shape
-    #    ccArr = np.reshape(np.rot90(np.stack([model for _, _, model in output]), k=-1),dirtyFDF.shape)
+    #    cc_arr = np.reshape(np.rot90(np.stack([model for _, _, model in output]), k=-1),dirtyFDF.shape)
     #    cleanFDF = np.reshape(np.rot90(np.stack([clean for clean, _, _ in output]), k=-1),dirtyFDF.shape)
     #    residFDF = np.reshape(np.rot90(np.stack([resid for _, resid, _ in output]), k=-1),dirtyFDF.shape)
     for i in range(len(inputs)):
         yi = inputs[i][0]
         xi = inputs[i][1]
-        ccArr[:, yi, xi] = output[i][2]
+        cc_arr[:, yi, xi] = output[i][2]
         cleanFDF[:, yi, xi] = output[i][0]
         residFDF[:, yi, xi] = output[i][1]
 
@@ -566,11 +570,11 @@ def do_rmclean_hogbom(
 
     # Remove redundant dimensions
     cleanFDF = np.squeeze(cleanFDF)
-    ccArr = np.squeeze(ccArr)
-    iterCountArr = np.squeeze(iterCountArr)
+    cc_arr = np.squeeze(cc_arr)
+    iterCount_arr = np.squeeze(iterCount_arr)
     residFDF = np.squeeze(residFDF)
 
-    return cleanFDF, ccArr, iterCountArr, residFDF
+    return cleanFDF, cc_arr, iterCount_arr, residFDF
 
 
 # -----------------------------------------------------------------------------#
@@ -583,11 +587,11 @@ class RMcleaner:
 
     def __init__(
         self,
-        RMSFArr,
-        phi2Arr_radm2,
+        RMSF_arr,
+        phi2_arr_radm2,
         phi_arr_radm2,
-        fwhmRMSFArr,
-        iterCountArr,
+        fwhmRMSF_arr,
+        iterCount_arr,
         maxIter=1000,
         gain=0.1,
         cutoff=0,
@@ -595,11 +599,11 @@ class RMcleaner:
         verbose=False,
         window=0,
     ):
-        self.RMSFArr = RMSFArr
-        self.phi2Arr_radm2 = phi2Arr_radm2
+        self.RMSF_arr = RMSF_arr
+        self.phi2_arr_radm2 = phi2_arr_radm2
         self.phi_arr_radm2 = phi_arr_radm2
-        self.fwhmRMSFArr = fwhmRMSFArr
-        self.iterCountArr = iterCountArr
+        self.fwhmRMSF_arr = fwhmRMSF_arr
+        self.iterCount_arr = iterCount_arr
         self.maxIter = maxIter
         self.gain = gain
         self.cutoff = cutoff
@@ -614,17 +618,17 @@ class RMcleaner:
         dirtyFDF = dirtyFDF[:, yi, xi]
         # Initialise arrays to hold the residual FDF, clean components, clean FDF
         residFDF = dirtyFDF.copy()
-        ccArr = np.zeros_like(dirtyFDF)
+        cc_arr = np.zeros_like(dirtyFDF)
         cleanFDF = np.zeros_like(dirtyFDF)
-        RMSFArr = self.RMSFArr[:, yi, xi]
-        fwhmRMSFArr = self.fwhmRMSFArr[yi, xi]
+        RMSF_arr = self.RMSF_arr[:, yi, xi]
+        fwhmRMSF_arr = self.fwhmRMSF_arr[yi, xi]
 
         # Find the index of the peak of the RMSF
-        indxMaxRMSF = np.nanargmax(RMSFArr)
+        indxMaxRMSF = np.nanargmax(RMSF_arr)
 
         # Calculate the padding in the sampled RMSF
         # Assumes only integer shifts and symmetric
-        n_phiPad = int((len(self.phi2Arr_radm2) - len(self.phi_arr_radm2)) / 2)
+        n_phiPad = int((len(self.phi2_arr_radm2) - len(self.phi_arr_radm2)) / 2)
 
         iterCount = 0
         while np.max(np.abs(residFDF)) >= self.cutoff and iterCount < self.maxIter:
@@ -635,31 +639,31 @@ class RMcleaner:
 
             # A clean component is "loop-gain * peakFDFval
             CC = self.gain * peakFDFval
-            ccArr[indxPeakFDF] += CC
+            cc_arr[indxPeakFDF] += CC
 
             # At which channel is the CC located at in the RMSF?
             indxPeakRMSF = indxPeakFDF + n_phiPad
 
             # Shift the RMSF & clip so that its peak is centred above this CC
-            shiftedRMSFArr = np.roll(RMSFArr, indxPeakRMSF - indxMaxRMSF)[
+            shiftedRMSF_arr = np.roll(RMSF_arr, indxPeakRMSF - indxMaxRMSF)[
                 n_phiPad:-n_phiPad
             ]
 
             # Subtract the product of the CC shifted RMSF from the residual FDF
-            residFDF -= CC * shiftedRMSFArr
+            residFDF -= CC * shiftedRMSF_arr
 
             # Restore the CC * a Gaussian to the cleaned FDF
-            cleanFDF += gauss1D(CC, phiPeak, fwhmRMSFArr)(self.phi_arr_radm2)
+            cleanFDF += gauss1D(CC, phiPeak, fwhmRMSF_arr)(self.phi_arr_radm2)
             iterCount += 1
-            self.iterCountArr[yi, xi] = iterCount
+            self.iterCount_arr[yi, xi] = iterCount
 
         # Create a mask for the pixels that have been cleaned
-        mask = np.abs(ccArr) > 0
+        mask = np.abs(cc_arr) > 0
         dPhi = self.phi_arr_radm2[1] - self.phi_arr_radm2[0]
-        fwhmRMSFArr_pix = fwhmRMSFArr / dPhi
+        fwhmRMSF_arr_pix = fwhmRMSF_arr / dPhi
         for i in np.where(mask)[0]:
-            start = int(i - fwhmRMSFArr_pix / 2)
-            end = int(i + fwhmRMSFArr_pix / 2)
+            start = int(i - fwhmRMSF_arr_pix / 2)
+            end = int(i + fwhmRMSF_arr_pix / 2)
             mask[start:end] = True
         residFDF_mask = np.ma.array(residFDF, mask=~mask)
         # Clean again within mask
@@ -676,32 +680,32 @@ class RMcleaner:
 
             # A clean component is "loop-gain * peakFDFval
             CC = self.gain * peakFDFval
-            ccArr[indxPeakFDF] += CC
+            cc_arr[indxPeakFDF] += CC
 
             # At which channel is the CC located at in the RMSF?
             indxPeakRMSF = indxPeakFDF + n_phiPad
 
             # Shift the RMSF & clip so that its peak is centred above this CC
-            shiftedRMSFArr = np.roll(RMSFArr, indxPeakRMSF - indxMaxRMSF)[
+            shiftedRMSF_arr = np.roll(RMSF_arr, indxPeakRMSF - indxMaxRMSF)[
                 n_phiPad:-n_phiPad
             ]
 
             # Subtract the product of the CC shifted RMSF from the residual FDF
-            residFDF -= CC * shiftedRMSFArr
+            residFDF -= CC * shiftedRMSF_arr
 
             # Restore the CC * a Gaussian to the cleaned FDF
-            cleanFDF += gauss1D(CC, phiPeak, fwhmRMSFArr)(self.phi_arr_radm2)
+            cleanFDF += gauss1D(CC, phiPeak, fwhmRMSF_arr)(self.phi_arr_radm2)
             iterCount += 1
-            self.iterCountArr[yi, xi] = iterCount
+            self.iterCount_arr[yi, xi] = iterCount
 
             # Remake masked residual FDF
             residFDF_mask = np.ma.array(residFDF, mask=~mask)
 
         cleanFDF = np.squeeze(cleanFDF)
         residFDF = np.squeeze(residFDF)
-        ccArr = np.squeeze(ccArr)
+        cc_arr = np.squeeze(cc_arr)
 
-        return cleanFDF, residFDF, ccArr
+        return cleanFDF, residFDF, cc_arr
 
 
 # -----------------------------------------------------------------------------#
@@ -856,11 +860,11 @@ def detect_peak(a, thresh=0.4):
 # -----------------------------------------------------------------------------#
 def measure_FDF_parms(
     FDF,
-    phiArr,
+    phi_arr,
     fwhmRMSF,
     dFDF=None,
-    lamSqArr_m2=None,
-    lam0Sq=None,
+    lam_sq_arr_m2=None,
+    lam0_sq=None,
     snrDoBiasCorrect=5.0,
 ):
     """
@@ -878,7 +882,7 @@ def measure_FDF_parms(
     ampPeakPIchan = absFDF[indxPeakPIchan]
 
     # Measure the RMS noise in the spectrum after masking the peak
-    dPhi = np.nanmin(np.diff(phiArr))
+    dPhi = np.nanmin(np.diff(phi_arr))
     fwhmRMSF_chan = np.ceil(fwhmRMSF / dPhi)
     iL = int(max(0, indxPeakPIchan - fwhmRMSF_chan * 2))
     iR = int(min(len(absFDF), indxPeakPIchan + fwhmRMSF_chan * 2))
@@ -897,7 +901,7 @@ def measure_FDF_parms(
         dFDF = dFDFcorMAD
 
     # Measure the RM of the peak channel
-    phiPeakPIchan = phiArr[indxPeakPIchan]
+    phiPeakPIchan = phi_arr[indxPeakPIchan]
     dPhiPeakPIchan = fwhmRMSF * dFDF / (2.0 * ampPeakPIchan)
     snrPIchan = ampPeakPIchan / dFDF
 
@@ -916,17 +920,17 @@ def measure_FDF_parms(
 
     # Calculate the derotated polarisation angle and uncertainty
     polAngle0Chan_deg = (
-        np.degrees(np.radians(polAngleChan_deg) - phiPeakPIchan * lam0Sq) % 180
+        np.degrees(np.radians(polAngleChan_deg) - phiPeakPIchan * lam0_sq) % 180
     )
-    nChansGood = np.sum(np.where(lamSqArr_m2 == lamSqArr_m2, 1.0, 0.0))
-    varLamSqArr_m2 = (
-        np.sum(lamSqArr_m2**2.0) - np.sum(lamSqArr_m2) ** 2.0 / nChansGood
+    nChansGood = np.sum(np.where(lam_sq_arr_m2 == lam_sq_arr_m2, 1.0, 0.0))
+    varLam_sq_arr_m2 = (
+        np.sum(lam_sq_arr_m2**2.0) - np.sum(lam_sq_arr_m2) ** 2.0 / nChansGood
     ) / (nChansGood - 1)
     dPolAngle0Chan_rad = np.sqrt(
         dFDF**2.0
         * nChansGood
         / (4.0 * (nChansGood - 2.0) * ampPeakPIchan**2.0)
-        * ((nChansGood - 1) / nChansGood + lam0Sq**2.0 / varLamSqArr_m2)
+        * ((nChansGood - 1) / nChansGood + lam0_sq**2.0 / varLam_sq_arr_m2)
     )
     dPolAngle0Chan_deg = np.degrees(dPolAngle0Chan_rad)
 
@@ -948,11 +952,11 @@ def measure_FDF_parms(
     # Only do the 3-point fit if peak is 1-channel from either edge
     if indxPeakPIchan > 0 and indxPeakPIchan < len(FDF) - 1:
         phiPeakPIfit, ampPeakPIfit = calc_parabola_vertex(
-            phiArr[indxPeakPIchan - 1],
+            phi_arr[indxPeakPIchan - 1],
             absFDF[indxPeakPIchan - 1],
-            phiArr[indxPeakPIchan],
+            phi_arr[indxPeakPIchan],
             absFDF[indxPeakPIchan],
-            phiArr[indxPeakPIchan + 1],
+            phi_arr[indxPeakPIchan + 1],
             absFDF[indxPeakPIchan + 1],
         )
 
@@ -961,7 +965,7 @@ def measure_FDF_parms(
         # In rare cases, a parabola can be fitted to the edge of the spectrum,
         # producing a unreasonably large RM and polarized intensity.
         # In these cases, everything should get NaN'd out.
-        if np.abs(phiPeakPIfit) > np.max(np.abs(phiArr)):
+        if np.abs(phiPeakPIfit) > np.max(np.abs(phi_arr)):
             phiPeakPIfit = np.nan
             ampPeakPIfit = np.nan
 
@@ -976,10 +980,10 @@ def measure_FDF_parms(
         # Calculate the polarisation angle from the fitted peak
         # Uncertainty from Eqn A.12 in Brentjens & De Bruyn 2005
         indxPeakPIfit = np.interp(
-            phiPeakPIfit, phiArr, np.arange(phiArr.shape[-1], dtype="f4")
+            phiPeakPIfit, phi_arr, np.arange(phi_arr.shape[-1], dtype="f4")
         )
-        peakFDFimagFit = np.interp(phiPeakPIfit, phiArr, FDF.imag)
-        peakFDFrealFit = np.interp(phiPeakPIfit, phiArr, FDF.real)
+        peakFDFimagFit = np.interp(phiPeakPIfit, phi_arr, FDF.imag)
+        peakFDFrealFit = np.interp(phiPeakPIfit, phi_arr, FDF.real)
         polAngleFit_deg = (
             0.5 * np.degrees(np.arctan2(peakFDFimagFit, peakFDFrealFit)) % 180
         )
@@ -988,13 +992,13 @@ def measure_FDF_parms(
         # Calculate the derotated polarisation angle and uncertainty
         # Uncertainty from Eqn A.20 in Brentjens & De Bruyn 2005
         polAngle0Fit_deg = (
-            np.degrees(np.radians(polAngleFit_deg) - phiPeakPIfit * lam0Sq)
+            np.degrees(np.radians(polAngleFit_deg) - phiPeakPIfit * lam0_sq)
         ) % 180
         dPolAngle0Fit_rad = np.sqrt(
             dFDF**2.0
             * nChansGood
             / (4.0 * (nChansGood - 2.0) * ampPeakPIfit**2.0)
-            * ((nChansGood - 1) / nChansGood + lam0Sq**2.0 / varLamSqArr_m2)
+            * ((nChansGood - 1) / nChansGood + lam0_sq**2.0 / varLam_sq_arr_m2)
         )
         dPolAngle0Fit_deg = np.degrees(dPolAngle0Fit_rad)
 
@@ -1034,14 +1038,14 @@ def measure_FDF_parms(
 
 
 # -----------------------------------------------------------------------------#
-def norm_cdf(mean=0.0, std=1.0, N=50, xArr=None):
+def norm_cdf(mean=0.0, std=1.0, N=50, x_arr=None):
     """Return the CDF of a normal distribution between -6 and 6 sigma, or at
     the values of an input array."""
 
-    if xArr is None:
+    if x_arr is None:
         x = np.linspace(-6.0 * std, 6.0 * std, N)
     else:
-        x = xArr
+        x = x_arr
     y = stats.norm.cdf(x, loc=mean, scale=std)
 
     return x, y
@@ -1070,7 +1074,7 @@ def cdf_percentile(x, p, q=50.0):
 
 
 # -----------------------------------------------------------------------------#
-def calc_sigma_add(xArr, yArr, dyArr, yMed=None, noise=None, nSamp=1000, suffix=""):
+def calc_sigma_add(x_arr, y_arr, dy_arr, yMed=None, noise=None, nSamp=1000, suffix=""):
     """Calculate the most likely value of additional scatter, assuming the
     input data is drawn from a normal distribution. The total uncertainty on
     each data point Y_i is modelled as dYtot_i**2 = dY_i**2 + dYadd**2."""
@@ -1078,49 +1082,49 @@ def calc_sigma_add(xArr, yArr, dyArr, yMed=None, noise=None, nSamp=1000, suffix=
     # Measure the median and MADFM of the input data if not provided.
     # Used to overplot a normal distribution when debugging.
     if yMed is None:
-        yMed = np.median(yArr)
+        yMed = np.median(y_arr)
     if noise is None:
-        noise = MAD(yArr)
+        noise = MAD(y_arr)
 
     # Sample the PDF of the additional noise term from a limit near zero to
     # a limit of the range of the data, including error bars
-    yRng = np.nanmax(yArr + dyArr) - np.nanmin(yArr - dyArr)
-    sigmaAddArr = np.linspace(yRng / nSamp, yRng, nSamp)
+    yRng = np.nanmax(y_arr + dy_arr) - np.nanmin(y_arr - dy_arr)
+    sigmaAdd_arr = np.linspace(yRng / nSamp, yRng, nSamp)
 
     # Model deviation from Gaussian as an additional noise term.
     # Loop through the range of i additional noise samples and calculate
     # chi-squared and sum(ln(sigma_total)), used later to calculate likelihood.
-    nData = len(xArr)
-    chiSqArr = np.zeros_like(sigmaAddArr)
-    lnSigmaSumArr = np.zeros_like(sigmaAddArr)
-    for i, sigmaAdd in enumerate(sigmaAddArr):
-        sigmaSqTot = dyArr**2.0 + sigmaAdd**2.0
-        lnSigmaSumArr[i] = np.nansum(np.log(np.sqrt(sigmaSqTot)))
-        chiSqArr[i] = np.nansum((yArr - yMed) ** 2.0 / sigmaSqTot)
+    nData = len(x_arr)
+    chi_sq_arr = np.zeros_like(sigmaAdd_arr)
+    lnSigmaSum_arr = np.zeros_like(sigmaAdd_arr)
+    for i, sigmaAdd in enumerate(sigmaAdd_arr):
+        sigma_sqTot = dy_arr**2.0 + sigmaAdd**2.0
+        lnSigmaSum_arr[i] = np.nansum(np.log(np.sqrt(sigma_sqTot)))
+        chi_sq_arr[i] = np.nansum((y_arr - yMed) ** 2.0 / sigma_sqTot)
     dof = nData - 1
-    chiSqRedArr = chiSqArr / dof
+    chi_sqRed_arr = chi_sq_arr / dof
 
     # Calculate the PDF in log space and normalise the peak to 1
-    lnProbArr = (
-        -np.log(sigmaAddArr)
+    lnProb_arr = (
+        -np.log(sigmaAdd_arr)
         - nData * np.log(2.0 * np.pi) / 2.0
-        - lnSigmaSumArr
-        - chiSqArr / 2.0
+        - lnSigmaSum_arr
+        - chi_sq_arr / 2.0
     )
-    lnProbArr -= np.nanmax(lnProbArr)
-    probArr = np.exp(lnProbArr)
+    lnProb_arr -= np.nanmax(lnProb_arr)
+    prob_arr = np.exp(lnProb_arr)
 
     # Normalise the area under the PDF to be 1
-    A = np.nansum(probArr * np.diff(sigmaAddArr)[0])
-    probArr /= A
+    A = np.nansum(prob_arr * np.diff(sigmaAdd_arr)[0])
+    prob_arr /= A
 
     # Calculate the cumulative PDF
-    CPDF = np.cumsum(probArr) / np.nansum(probArr)
+    CPDF = np.cumsum(prob_arr) / np.nansum(prob_arr)
 
     # Calculate the mean of the distribution and the +/- 1-sigma limits
-    sigmaAdd = cdf_percentile(x=sigmaAddArr, p=CPDF, q=50.0)
-    sigmaAddMinus = cdf_percentile(x=sigmaAddArr, p=CPDF, q=15.72)
-    sigmaAddPlus = cdf_percentile(x=sigmaAddArr, p=CPDF, q=84.27)
+    sigmaAdd = cdf_percentile(x=sigmaAdd_arr, p=CPDF, q=50.0)
+    sigmaAddMinus = cdf_percentile(x=sigmaAdd_arr, p=CPDF, q=15.72)
+    sigmaAddPlus = cdf_percentile(x=sigmaAdd_arr, p=CPDF, q=84.27)
     mDict = {
         "sigmaAdd" + suffix: toscalar(sigmaAdd),
         "dSigmaAddMinus" + suffix: toscalar(sigmaAdd - sigmaAddMinus),
@@ -1129,12 +1133,12 @@ def calc_sigma_add(xArr, yArr, dyArr, yMed=None, noise=None, nSamp=1000, suffix=
 
     # Return the curves to be plotted in a separate dictionary
     pltDict = {
-        "sigmaAddArr" + suffix: sigmaAddArr,
-        "chiSqRedArr" + suffix: chiSqRedArr,
-        "probArr" + suffix: probArr,
-        "xArr" + suffix: xArr,
-        "yArr" + suffix: yArr,
-        "dyArr" + suffix: dyArr,
+        "sigmaAdd_arr" + suffix: sigmaAdd_arr,
+        "chi_sqRed_arr" + suffix: chi_sqRed_arr,
+        "prob_arr" + suffix: prob_arr,
+        "x_arr" + suffix: x_arr,
+        "y_arr" + suffix: y_arr,
+        "dy_arr" + suffix: dy_arr,
     }
 
     # DEBUG PLOTS
@@ -1147,7 +1151,7 @@ def calc_sigma_add(xArr, yArr, dyArr, yMed=None, noise=None, nSamp=1000, suffix=
 
         # Plot the data and the +/- 1-sigma levels
         ax1 = fig.add_subplot(231)
-        ax1.errorbar(x=xArr, y=yArr, yerr=dyArr, ms=4, fmt="o")
+        ax1.errorbar(x=x_arr, y=y_arr, yerr=dy_arr, ms=4, fmt="o")
         ax1.axhline(yMed, color="grey", zorder=10)
         ax1.axhline(yMed + noise, color="r", linestyle="--", zorder=10)
         ax1.axhline(yMed - noise, color="r", linestyle="--", zorder=10)
@@ -1162,7 +1166,7 @@ def calc_sigma_add(xArr, yArr, dyArr, yMed=None, noise=None, nSamp=1000, suffix=
         fwhm = noise * (2.0 * np.sqrt(2.0 * np.log(2.0)))
         ax2 = fig.add_subplot(232)
         nBins = 15
-        n, b, p = ax2.hist(yArr, nBins, normed=1, histtype="step")
+        n, b, p = ax2.hist(y_arr, nBins, normed=1, histtype="step")
         ax2.plot(xNorm, yNorm, color="k", linestyle="--", linewidth=2)
         ax2.axvline(yMed, color="grey", zorder=11)
         ax2.axvline(yMed + fwhm / 2.0, color="r", linestyle="--", zorder=11)
@@ -1172,10 +1176,10 @@ def calc_sigma_add(xArr, yArr, dyArr, yMed=None, noise=None, nSamp=1000, suffix=
         ax2.set_ylabel(r"Normalised Counts")
 
         # Plot the ECDF versus a normal CDF
-        ecdfArr = np.array(list(range(nData))) / float(nData)
-        ySrtArr = np.sort(yArr)
+        ecdf_arr = np.array(list(range(nData))) / float(nData)
+        ySrt_arr = np.sort(y_arr)
         ax3 = fig.add_subplot(233)
-        ax3.step(ySrtArr, ecdfArr, where="mid")
+        ax3.step(ySrt_arr, ecdf_arr, where="mid")
         x, y = norm_cdf(mean=yMed, std=noise, N=1000)
         ax3.plot(x, y, color="k", linewidth=2, linestyle="--", zorder=1)
         ax3.set_title(r"CDF of Data Compared to Normal")
@@ -1184,7 +1188,7 @@ def calc_sigma_add(xArr, yArr, dyArr, yMed=None, noise=None, nSamp=1000, suffix=
 
         # Plot reduced chi-squared
         ax4 = fig.add_subplot(234)
-        ax4.step(x=sigmaAddArr, y=chiSqRedArr, linewidth=1.5, where="mid")
+        ax4.step(x=sigmaAdd_arr, y=chi_sqRed_arr, linewidth=1.5, where="mid")
         ax4.axhline(1.0, color="r", linestyle="--")
         ax4.set_title(r"$\chi^2_{\rm reduced}$ vs $\sigma_{\rm additional}$")
         ax4.set_xlabel(r"$\sigma_{\rm additional}$")
@@ -1192,7 +1196,7 @@ def calc_sigma_add(xArr, yArr, dyArr, yMed=None, noise=None, nSamp=1000, suffix=
 
         # Plot the probability distribution function
         ax5 = fig.add_subplot(235)
-        ax5.step(x=sigmaAddArr, y=probArr, linewidth=1.5, where="mid")
+        ax5.step(x=sigmaAdd_arr, y=prob_arr, linewidth=1.5, where="mid")
         ax5.axvline(sigmaAdd, color="grey", linestyle="-", linewidth=1.5)
         ax5.axvline(sigmaAddMinus, color="r", linestyle="--", linewidth=1.0)
         ax5.axvline(sigmaAddPlus, color="r", linestyle="--", linewidth=1.0)
@@ -1202,7 +1206,7 @@ def calc_sigma_add(xArr, yArr, dyArr, yMed=None, noise=None, nSamp=1000, suffix=
 
         # Plot the CPDF
         ax6 = fig.add_subplot(236)
-        ax6.step(x=sigmaAddArr, y=CPDF, linewidth=1.5, where="mid")
+        ax6.step(x=sigmaAdd_arr, y=CPDF, linewidth=1.5, where="mid")
         ax6.set_ylim(0, 1.05)
         ax6.axvline(sigmaAdd, color="grey", linestyle="-", linewidth=1.5)
         ax6.axhline(0.5, color="grey", linestyle="-", linewidth=1.5)
@@ -1237,23 +1241,23 @@ def calc_sigma_add(xArr, yArr, dyArr, yMed=None, noise=None, nSamp=1000, suffix=
 
 
 # -----------------------------------------------------------------------------#
-def calc_normal_tests(inArr, suffix=""):
+def calc_normal_tests(in_arr, suffix=""):
     """Calculate metrics measuring deviation of an array from Normal."""
 
     # Perfrorm the KS-test
-    KS_z, KS_p = stats.kstest(inArr, "norm")
+    KS_z, KS_p = stats.kstest(in_arr, "norm")
 
     # Calculate the Anderson test
-    AD_z, AD_crit, AD_sig = stats.anderson(inArr, "norm")
+    AD_z, AD_crit, AD_sig = stats.anderson(in_arr, "norm")
 
     # Calculate the skewness (measure of symmetry)
     # abs(skewness) < 0.5 =  approx symmetric
-    skewVal = stats.skew(inArr)
-    SK_z, SK_p = stats,skewtest(inArr)
+    skewVal = stats.skew(in_arr)
+    SK_z, SK_p = stats,skewtest(in_arr)
 
     # Calculate the kurtosis (tails compared to a normal distribution)
-    kurtosisVal = stats.kurtosis(inArr)
-    KUR_z, KUR_p = stats.kurtosistest(inArr)
+    kurtosisVal = stats.kurtosis(in_arr)
+    KUR_z, KUR_p = stats.kurtosistest(in_arr)
 
     # Return dictionary
     mDict = {
@@ -1275,30 +1279,30 @@ def calc_normal_tests(inArr, suffix=""):
 
 # -----------------------------------------------------------------------------#
 def measure_qu_complexity(
-    freqArr_Hz, qArr, uArr, dqArr, duArr, fracPol, psi0_deg, RM_radm2, specF=1
+    freq_arr_Hz, q_arr, u_arr, dq_arr, du_arr, fracPol, psi0_deg, RM_radm2, specF=1
 ):
 
     # Create a RM-thin model to subtract
-    pModArr, qModArr, uModArr = create_pqu_spectra_burn(
-        freqArr_Hz=freqArr_Hz,
-        fracPolArr=[fracPol],
-        psi0Arr_deg=[psi0_deg],
-        RMArr_radm2=[RM_radm2],
+    pMod_arr, qMod_arr, uMod_arr = create_pqu_spectra_burn(
+        freq_arr_Hz=freq_arr_Hz,
+        fracPol_arr=[fracPol],
+        psi0_arr_deg=[psi0_deg],
+        RM_arr_radm2=[RM_radm2],
     )
-    lamSqArr_m2 = np.power(C / freqArr_Hz, 2.0)
-    ndata = len(lamSqArr_m2)
+    lam_sq_arr_m2 = np.power(const.c.value / freq_arr_Hz, 2.0)
+    ndata = len(lam_sq_arr_m2)
 
     # Subtract the RM-thin model to create a residual q & u
-    qResidArr = qArr - qModArr
-    uResidArr = uArr - uModArr
+    qResid_arr = q_arr - qMod_arr
+    uResid_arr = u_arr - uMod_arr
 
     # Calculate value of additional scatter term for q & u (max likelihood)
     mDict = {}
     pDict = {}
     m1D, p1D = calc_sigma_add(
-        xArr=lamSqArr_m2[: int(ndata / specF)],
-        yArr=(qResidArr / dqArr)[: int(ndata / specF)],
-        dyArr=(dqArr / dqArr)[: int(ndata / specF)],
+        x_arr=lam_sq_arr_m2[: int(ndata / specF)],
+        y_arr=(qResid_arr / dq_arr)[: int(ndata / specF)],
+        dy_arr=(dq_arr / dq_arr)[: int(ndata / specF)],
         yMed=0.0,
         noise=1.0,
         suffix="Q",
@@ -1306,9 +1310,9 @@ def measure_qu_complexity(
     mDict.update(m1D)
     pDict.update(p1D)
     m2D, p2D = calc_sigma_add(
-        xArr=lamSqArr_m2[: int(ndata / specF)],
-        yArr=(uResidArr / duArr)[: int(ndata / specF)],
-        dyArr=(duArr / duArr)[: int(ndata / specF)],
+        x_arr=lam_sq_arr_m2[: int(ndata / specF)],
+        y_arr=(uResid_arr / du_arr)[: int(ndata / specF)],
+        dy_arr=(du_arr / du_arr)[: int(ndata / specF)],
         yMed=0.0,
         noise=1.0,
         suffix="U",
@@ -1318,16 +1322,16 @@ def measure_qu_complexity(
 
     # Calculate the deviations statistics
     # Done as a test for the paper, not usually offered to user.
-    # mDict.update( calc_normal_tests(qResidArr/dqArr, suffix="Q") )
-    # mDict.update( calc_normal_tests(uResidArr/duArr, suffix="U") )
+    # mDict.update( calc_normal_tests(qResid_arr/dq_arr, suffix="Q") )
+    # mDict.update( calc_normal_tests(uResid_arr/du_arr, suffix="U") )
 
     return mDict, pDict
 
 
 # -----------------------------------------------------------------------------#
-def measure_fdf_complexity(phiArr, FDF):
+def measure_fdf_complexity(phi_arr, FDF):
 
     # Second moment of clean component spectrum
-    mom2FDF = calc_mom2_FDF(FDF, phiArr)
+    mom2FDF = calc_mom2_FDF(FDF, phi_arr)
 
     return toscalar(mom2FDF)
