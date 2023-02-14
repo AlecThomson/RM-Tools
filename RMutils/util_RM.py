@@ -79,6 +79,7 @@ from RMutils.util_misc import (
     progress,
     toscalar,
 )
+from RMutils.logger import logger
 
 # Constants
 C = 2.99792458e8
@@ -86,13 +87,13 @@ C = 2.99792458e8
 
 # -----------------------------------------------------------------------------#
 def do_rmsynth_planes(
-    dataQ: np.ndarray,
-    dataU: np.ndarray,
-    lambdaSqArr_m2: np.ndarray,
-    phiArr_radm2: np.ndarray,
-    weightArr: Union[None, np.ndarray] = None,
-    lam0Sq_m2: Union[None, np.ndarray] = None,
-    nBits: int = 32,
+    data_Q: np.ndarray,
+    data_U: np.ndarray,
+    lambda_sq_arr_m2: np.ndarray,
+    phi_arr_radm2: np.ndarray,
+    weight_arr: Union[None, np.ndarray] = None,
+    lam0_sq_m2: Union[None, np.ndarray] = None,
+    n_bits: int = 32,
 ):
     """Perform RM-synthesis on Stokes Q and U cubes (1,2 or 3D). This version
     of the routine loops through spectral planes and is faster than the pixel-
@@ -101,58 +102,53 @@ def do_rmsynth_planes(
     but possible in single-dish cubes). Input data must be in standard python
     [z,y,x] order, where z is the frequency axis in ascending order.
 
-    dataQ           ... 1, 2 or 3D Stokes Q data array
-    dataU           ... 1, 2 or 3D Stokes U data array
-    lambdaSqArr_m2  ... vector of wavelength^2 values (assending freq order)
-    phiArr_radm2    ... vector of trial Faraday depth values
-    weightArr       ... vector of weights, default [None] is Uniform (all 1s)
-    nBits           ... precision of data arrays [32]
+    data_Q           ... 1, 2 or 3D Stokes Q data array
+    data_U           ... 1, 2 or 3D Stokes U data array
+    lambda_sq_arr_m2  ... vector of wavelength^2 values (assending freq order)
+    phi_arr_radm2    ... vector of trial Faraday depth values
+    weight_arr       ... vector of weights, default [None] is Uniform (all 1s)
+    n_bits           ... precision of data arrays [32]
     verbose         ... print feedback during calculation [False]
     log             ... function to be used to output messages [print]
 
     """
 
     # Default data types
-    dtFloat = "float" + str(nBits)
-    dtComplex = "complex" + str(2 * nBits)
+    dtFloat = f"float{n_bits}"
+    dtComplex = f"complex{2 * n_bits}"
 
     # Set the weight array
-    if weightArr is None:
-        weightArr = np.ones(lambdaSqArr_m2.shape, dtype=dtFloat)
-    weightArr = np.where(np.isnan(weightArr), 0.0, weightArr)
+    if weight_arr is None:
+        weight_arr = np.ones(lambda_sq_arr_m2.shape, dtype=dtFloat)
+    weight_arr = np.where(np.isnan(weight_arr), 0.0, weight_arr)
 
     # Sanity check on array sizes
-    if not weightArr.shape == lambdaSqArr_m2.shape:
-        log("Err: Lambda^2 and weight arrays must be the same shape.")
+    if not weight_arr.shape == lambda_sq_arr_m2.shape:
+        logger.error("Lambda^2 and weight arrays must be the same shape.")
         return None, None
-    if not dataQ.shape == dataU.shape:
-        log("Err: Stokes Q and U data arrays must be the same shape.")
+    if not data_Q.shape == data_U.shape:
+        logger.error("Stokes Q and U data arrays must be the same shape.")
         return None, None
-    nDims = len(dataQ.shape)
+    nDims = len(data_Q.shape)
     if not nDims <= 3:
-        log("Err: data dimensions must be <= 3.")
+        logger.error("data dimensions must be <= 3.")
         return None, None
-    if not dataQ.shape[0] == lambdaSqArr_m2.shape[0]:
-        log(
-            "Err: Data depth does not match lambda^2 vector ({} vs {}).".format(
-                dataQ.shape[0], lambdaSqArr_m2.shape[0]
-            ),
-            end=" ",
-        )
-        log("     Check that data is in [z, y, x] order.")
+    if not data_Q.shape[0] == lambda_sq_arr_m2.shape[0]:
+        logger.error(f"Data depth does not match lambda^2 vector ({data_Q.shape[0]} vs {lambda_sq_arr_m2.shape[0]}).")
+        logger.error("Check that data is in [z, y, x] order.")
         return None, None
 
     # Reshape the data arrays to 3 dimensions
     if nDims == 1:
-        dataQ = np.reshape(dataQ, (dataQ.shape[0], 1, 1))
-        dataU = np.reshape(dataU, (dataU.shape[0], 1, 1))
+        data_Q = np.reshape(data_Q, (data_Q.shape[0], 1, 1))
+        data_U = np.reshape(data_U, (data_U.shape[0], 1, 1))
     elif nDims == 2:
-        dataQ = np.reshape(dataQ, (dataQ.shape[0], dataQ.shape[1], 1))
-        dataU = np.reshape(dataU, (dataU.shape[0], dataU.shape[1], 1))
+        data_Q = np.reshape(data_Q, (data_Q.shape[0], data_Q.shape[1], 1))
+        data_U = np.reshape(data_U, (data_U.shape[0], data_U.shape[1], 1))
 
     # Create a complex polarised cube, B&dB Eqns. (8) and (14)
     # Array has dimensions [nFreq, nY, nX]
-    pCube = (dataQ + 1j * dataU) * weightArr[:, np.newaxis, np.newaxis]
+    pCube = (data_Q + 1j * data_U) * weight_arr[:, np.newaxis, np.newaxis]
 
     # Check for NaNs (flagged data) in the cube & set to zero
     mskCube = np.isnan(pCube)
@@ -161,25 +157,25 @@ def do_rmsynth_planes(
     # If full planes are flagged then set corresponding weights to zero
     mskPlanes = np.sum(np.sum(~mskCube, axis=1), axis=1)
     mskPlanes = np.where(mskPlanes == 0, 0, 1)
-    weightArr *= mskPlanes
+    weight_arr *= mskPlanes
 
     # Initialise the complex Faraday Dispersion Function cube
-    nX = dataQ.shape[-1]
-    nY = dataQ.shape[-2]
-    nPhi = phiArr_radm2.shape[0]
+    nX = data_Q.shape[-1]
+    nY = data_Q.shape[-2]
+    nPhi = phi_arr_radm2.shape[0]
     FDFcube = np.zeros((nPhi, nY, nX), dtype=dtComplex)
 
-    # lam0Sq_m2 is the weighted mean of lambda^2 distribution (B&dB Eqn. 32)
-    # Calculate a global lam0Sq_m2 value, ignoring isolated flagged voxels
-    K = 1.0 / np.sum(weightArr)
-    if lam0Sq_m2 is None:
-        lam0Sq_m2 = K * np.sum(weightArr * lambdaSqArr_m2)
-    if not np.isfinite(lam0Sq_m2):  # Can happen if all channels are NaNs/zeros
-        lam0Sq_m2 = 0.0
+    # lam0_sq_m2 is the weighted mean of lambda^2 distribution (B&dB Eqn. 32)
+    # Calculate a global lam0_sq_m2 value, ignoring isolated flagged voxels
+    K = 1.0 / np.sum(weight_arr)
+    if lam0_sq_m2 is None:
+        lam0_sq_m2 = K * np.sum(weight_arr * lambda_sq_arr_m2)
+    if not np.isfinite(lam0_sq_m2):  # Can happen if all channels are NaNs/zeros
+        lam0_sq_m2 = 0.0
 
     # The K value used to scale each FDF spectrum must take into account
     # flagged voxels data in the datacube and can be position dependent
-    weightCube = np.invert(mskCube) * weightArr[:, np.newaxis, np.newaxis]
+    weightCube = np.invert(mskCube) * weight_arr[:, np.newaxis, np.newaxis]
     with np.errstate(divide="ignore", invalid="ignore"):
         KArr = np.true_divide(1.0, np.sum(weightCube, axis=0))
         KArr[KArr == np.inf] = 0
@@ -189,30 +185,30 @@ def do_rmsynth_planes(
     if verbose:
         log("Running RM-synthesis by channel.")
         progress(40, 0)
-    a = lambdaSqArr_m2 - lam0Sq_m2
+    a = lambda_sq_arr_m2 - lam0_sq_m2
     for i in range(nPhi):
         if verbose:
             progress(40, ((i + 1) * 100.0 / nPhi))
-        arg = np.exp(-2.0j * phiArr_radm2[i] * a)[:, np.newaxis, np.newaxis]
+        arg = np.exp(-2.0j * phi_arr_radm2[i] * a)[:, np.newaxis, np.newaxis]
         FDFcube[i, :, :] = KArr * np.sum(pCube * arg, axis=0)
 
     # Remove redundant dimensions in the FDF array
     FDFcube = np.squeeze(FDFcube)
 
-    return FDFcube, lam0Sq_m2
+    return FDFcube, lam0_sq_m2
 
 
 # -----------------------------------------------------------------------------#
 def get_rmsf_planes(
-    lambdaSqArr_m2,
-    phiArr_radm2,
-    weightArr=None,
+    lambda_sq_arr_m2,
+    phi_arr_radm2,
+    weight_arr=None,
     mskArr=None,
-    lam0Sq_m2=None,
+    lam0_sq_m2=None,
     double=True,
     fitRMSF=False,
     fitRMSFreal=False,
-    nBits=32,
+    n_bits=32,
     verbose=False,
     log=print,
 ):
@@ -226,56 +222,56 @@ def get_rmsf_planes(
     time. By default the routine returns the analytical width of the RMSF main
     lobe but can also use MPFIT to fit a Gaussian.
 
-    lambdaSqArr_m2  ... vector of wavelength^2 values (assending freq order)
-    phiArr_radm2    ... vector of trial Faraday depth values
-    weightArr       ... vector of weights, default [None] is no weighting
+    lambda_sq_arr_m2  ... vector of wavelength^2 values (assending freq order)
+    phi_arr_radm2    ... vector of trial Faraday depth values
+    weight_arr       ... vector of weights, default [None] is no weighting
     maskArr         ... cube of mask values used to shape return cube [None]
-    lam0Sq_m2       ... force a reference lambda^2 value (def=calculate) [None]
+    lam0_sq_m2       ... force a reference lambda^2 value (def=calculate) [None]
     double          ... pad the Faraday depth to double-size [True]
     fitRMSF         ... fit the main lobe of the RMSF with a Gaussian [False]
     fitRMSFreal     ... fit RMSF.real, rather than abs(RMSF) [False]
-    nBits           ... precision of data arrays [32]
+    n_bits           ... precision of data arrays [32]
     verbose         ... print feedback during calculation [False]
     log             ... function to be used to output messages [print]
 
     """
 
     # Default data types
-    dtFloat = "float" + str(nBits)
-    dtComplex = "complex" + str(2 * nBits)
+    dtFloat = "float" + str(n_bits)
+    dtComplex = "complex" + str(2 * n_bits)
 
     # For cleaning the RMSF should extend by 1/2 on each side in phi-space
     if double:
-        nPhi = phiArr_radm2.shape[0]
+        nPhi = phi_arr_radm2.shape[0]
         nExt = np.ceil(nPhi / 2.0)
         resampIndxArr = np.arange(2.0 * nExt + nPhi) - nExt
-        phi2Arr = extrap(resampIndxArr, np.arange(nPhi, dtype="int"), phiArr_radm2)
+        phi2Arr = extrap(resampIndxArr, np.arange(nPhi, dtype="int"), phi_arr_radm2)
     else:
-        phi2Arr = phiArr_radm2
+        phi2Arr = phi_arr_radm2
 
     # Set the weight array
-    if weightArr is None:
-        weightArr = np.ones(lambdaSqArr_m2.shape, dtype=dtFloat)
-    weightArr = np.where(np.isnan(weightArr), 0.0, weightArr)
+    if weight_arr is None:
+        weight_arr = np.ones(lambda_sq_arr_m2.shape, dtype=dtFloat)
+    weight_arr = np.where(np.isnan(weight_arr), 0.0, weight_arr)
 
     # Set the mask array (default to 1D, no masked channels)
     if mskArr is None:
-        mskArr = np.zeros_like(lambdaSqArr_m2, dtype="bool")
+        mskArr = np.zeros_like(lambda_sq_arr_m2, dtype="bool")
         nDims = 1
     else:
         mskArr = mskArr.astype("bool")
         nDims = len(mskArr.shape)
 
     # Sanity checks on array sizes
-    if not weightArr.shape == lambdaSqArr_m2.shape:
-        log("Err: wavelength^2 and weight arrays must be the same shape.")
+    if not weight_arr.shape == lambda_sq_arr_m2.shape:
+        logger.error("wavelength^2 and weight arrays must be the same shape.")
         return None, None, None, None
     if not nDims <= 3:
-        log("Err: mask dimensions must be <= 3.")
+        logger.error("mask dimensions must be <= 3.")
         return None, None, None, None
-    if not mskArr.shape[0] == lambdaSqArr_m2.shape[0]:
-        log("Err: mask depth does not match lambda^2 vector (%d vs %d).", end=" ")
-        (mskArr.shape[0], lambdaSqArr_m2.shape[-1])
+    if not mskArr.shape[0] == lambda_sq_arr_m2.shape[0]:
+        logger.error("mask depth does not match lambda^2 vector (%d vs %d).", end=" ")
+        (mskArr.shape[0], lambda_sq_arr_m2.shape[-1])
         log("     Check that the mask is in [z, y, x] order.")
         return None, None, None, None
 
@@ -298,7 +294,7 @@ def get_rmsf_planes(
     # If full planes are flagged then set corresponding weights to zero
     xySum = np.sum(np.sum(mskArr, axis=1), axis=1)
     mskPlanes = np.where(xySum == nPix, 0, 1)
-    weightArr *= mskPlanes
+    weight_arr *= mskPlanes
 
     # Check for isolated clumps of flags (# flags in a plane not 0 or nPix)
     flagTotals = np.unique(xySum).tolist()
@@ -315,12 +311,12 @@ def get_rmsf_planes(
         do1Dcalc = False
 
     # lam0Sq is the weighted mean of LambdaSq distribution (B&dB Eqn. 32)
-    # Calculate a single lam0Sq_m2 value, ignoring isolated flagged voxels
-    K = 1.0 / np.nansum(weightArr)
-    lam0Sq_m2 = K * np.nansum(weightArr * lambdaSqArr_m2)
+    # Calculate a single lam0_sq_m2 value, ignoring isolated flagged voxels
+    K = 1.0 / np.nansum(weight_arr)
+    lam0_sq_m2 = K * np.nansum(weight_arr * lambda_sq_arr_m2)
 
     # Calculate the analytical FWHM width of the main lobe
-    fwhmRMSF = 3.8 / (np.nanmax(lambdaSqArr_m2) - np.nanmin(lambdaSqArr_m2))
+    fwhmRMSF = 3.8 / (np.nanmax(lambda_sq_arr_m2) - np.nanmin(lambda_sq_arr_m2))
 
     # Do a simple 1D calculation and replicate along X & Y axes
     if do1Dcalc:
@@ -329,8 +325,8 @@ def get_rmsf_planes(
 
         # Calculate the RMSF
         a = (-2.0 * 1j * phi2Arr).astype(dtComplex)
-        b = lambdaSqArr_m2 - lam0Sq_m2
-        RMSFArr = K * np.sum(weightArr * np.exp(np.outer(a, b)), 1)
+        b = lambda_sq_arr_m2 - lam0_sq_m2
+        RMSFArr = K * np.sum(weight_arr * np.exp(np.outer(a, b)), 1)
 
         # Fit the RMSF main lobe
         fitStatus = -1
@@ -343,7 +339,7 @@ def get_rmsf_planes(
                 mp = fit_rmsf(phi2Arr, np.abs(RMSFArr))
             if mp is None or mp.status < 1:
                 pass
-                log("Err: failed to fit the RMSF.")
+                logger.error("failed to fit the RMSF.")
                 log("     Defaulting to analytical value.")
             else:
                 fwhmRMSF = mp.params[2]
@@ -361,7 +357,7 @@ def get_rmsf_planes(
 
         # The K value used to scale each RMSF must take into account
         # isolated flagged voxels data in the datacube
-        weightCube = np.invert(mskArr) * weightArr[:, np.newaxis, np.newaxis]
+        weightCube = np.invert(mskArr) * weight_arr[:, np.newaxis, np.newaxis]
         with np.errstate(divide="ignore", invalid="ignore"):
             KArr = np.true_divide(1.0, np.sum(weightCube, axis=0))
             KArr[KArr == np.inf] = 0
@@ -370,7 +366,7 @@ def get_rmsf_planes(
         # Calculate the RMSF for each plane
         if verbose:
             progress(40, 0)
-        a = lambdaSqArr_m2 - lam0Sq_m2
+        a = lambda_sq_arr_m2 - lam0_sq_m2
         for i in range(nPhi):
             if verbose:
                 progress(40, ((i + 1) * 100.0 / nPhi))
@@ -412,7 +408,7 @@ def get_rmsf_planes(
 # -----------------------------------------------------------------------------#
 def do_rmclean_hogbom(
     dirtyFDF,
-    phiArr_radm2,
+    phi_arr_radm2,
     RMSFArr,
     phi2Arr_radm2,
     fwhmRMSFArr,
@@ -420,7 +416,7 @@ def do_rmclean_hogbom(
     maxIter=1000,
     gain=0.1,
     mskArr=None,
-    nBits=32,
+    n_bits=32,
     verbose=False,
     doPlots=False,
     pool=None,
@@ -432,7 +428,7 @@ def do_rmclean_hogbom(
     given a cube of rotation measure spread functions.
 
     dirtyFDF       ... 1, 2 or 3D complex FDF array
-    phiArr_radm2   ... 1D Faraday depth array corresponding to the FDF
+    phi_arr_radm2   ... 1D Faraday depth array corresponding to the FDF
     RMSFArr        ... 1, 2 or 3D complex RMSF array
     phi2Arr_radm2  ... double size 1D Faraday depth array of the RMSF
     fwhmRMSFArr    ... scalar, 1D or 2D array of RMSF main lobe widths
@@ -440,7 +436,7 @@ def do_rmclean_hogbom(
     maxIter        ... maximun number of CLEAN loop interations [1000]
     gain           ... CLEAN loop gain [0.1]
     mskArr         ... scalar, 1D or 2D pixel mask array [None]
-    nBits          ... precision of data arrays [32]
+    n_bits          ... precision of data arrays [32]
     verbose        ... print feedback during calculation [False]
     doPlots        ... plot the final CLEAN FDF [False]
     pool           ... thread pool for multithreading (from schwimmbad) [None]
@@ -451,34 +447,34 @@ def do_rmclean_hogbom(
     """
 
     # Default data types
-    dtFloat = "float" + str(nBits)
-    dtComplex = "complex" + str(2 * nBits)
+    dtFloat = "float" + str(n_bits)
+    dtComplex = "complex" + str(2 * n_bits)
 
     # Sanity checks on array sizes
-    nPhi = phiArr_radm2.shape[0]
+    nPhi = phi_arr_radm2.shape[0]
     if nPhi != dirtyFDF.shape[0]:
-        log("Err: 'phi2Arr_radm2' and 'dirtyFDF' are not the same length.")
+        logger.error("'phi2Arr_radm2' and 'dirtyFDF' are not the same length.")
         return None, None, None
     nPhi2 = phi2Arr_radm2.shape[0]
     if not nPhi2 == RMSFArr.shape[0]:
-        log("Err: missmatch in 'phi2Arr_radm2' and 'RMSFArr' length.")
+        logger.error("missmatch in 'phi2Arr_radm2' and 'RMSFArr' length.")
         return None, None, None
     if not (nPhi2 >= 2 * nPhi):
-        log("Err: the Faraday depth of the RMSF must be twice the FDF.")
+        logger.error("the Faraday depth of the RMSF must be twice the FDF.")
         return None, None, None
     nDims = len(dirtyFDF.shape)
     if not nDims <= 3:
-        log("Err: FDF array dimensions must be <= 3.")
+        logger.error("FDF array dimensions must be <= 3.")
         return None, None, None
     if not nDims == len(RMSFArr.shape):
-        log("Err: the input RMSF and FDF must have the same number of axes.")
+        logger.error("the input RMSF and FDF must have the same number of axes.")
         return None, None, None
     if not RMSFArr.shape[1:] == dirtyFDF.shape[1:]:
-        log("Err: the xy dimesions of the RMSF and FDF must match.")
+        logger.error("the xy dimesions of the RMSF and FDF must match.")
         return None, None, None
     if mskArr is not None:
         if not mskArr.shape == dirtyFDF.shape[1:]:
-            log("Err: pixel mask must match xy dimesnisons of FDF cube.")
+            logger.error("pixel mask must match xy dimesnisons of FDF cube.")
             log(
                 "     FDF[z,y,z] = {:}, Mask[y,x] = {:}.".format(
                     dirtyFDF.shape, mskArr.shape
@@ -526,13 +522,13 @@ def do_rmclean_hogbom(
     rmc = RMcleaner(
         RMSFArr,
         phi2Arr_radm2,
-        phiArr_radm2,
+        phi_arr_radm2,
         fwhmRMSFArr,
         iterCountArr,
         maxIter,
         gain,
         cutoff,
-        nBits,
+        n_bits,
         verbose,
         window,
     )
@@ -593,7 +589,7 @@ class RMcleaner:
         self,
         RMSFArr,
         phi2Arr_radm2,
-        phiArr_radm2,
+        phi_arr_radm2,
         fwhmRMSFArr,
         iterCountArr,
         maxIter=1000,
@@ -605,7 +601,7 @@ class RMcleaner:
     ):
         self.RMSFArr = RMSFArr
         self.phi2Arr_radm2 = phi2Arr_radm2
-        self.phiArr_radm2 = phiArr_radm2
+        self.phi_arr_radm2 = phi_arr_radm2
         self.fwhmRMSFArr = fwhmRMSFArr
         self.iterCountArr = iterCountArr
         self.maxIter = maxIter
@@ -632,14 +628,14 @@ class RMcleaner:
 
         # Calculate the padding in the sampled RMSF
         # Assumes only integer shifts and symmetric
-        nPhiPad = int((len(self.phi2Arr_radm2) - len(self.phiArr_radm2)) / 2)
+        nPhiPad = int((len(self.phi2Arr_radm2) - len(self.phi_arr_radm2)) / 2)
 
         iterCount = 0
         while np.max(np.abs(residFDF)) >= self.cutoff and iterCount < self.maxIter:
             # Get the absolute peak channel, values and Faraday depth
             indxPeakFDF = np.argmax(np.abs(residFDF))
             peakFDFval = residFDF[indxPeakFDF]
-            phiPeak = self.phiArr_radm2[indxPeakFDF]
+            phiPeak = self.phi_arr_radm2[indxPeakFDF]
 
             # A clean component is "loop-gain * peakFDFval
             CC = self.gain * peakFDFval
@@ -657,13 +653,13 @@ class RMcleaner:
             residFDF -= CC * shiftedRMSFArr
 
             # Restore the CC * a Gaussian to the cleaned FDF
-            cleanFDF += gauss1D(CC, phiPeak, fwhmRMSFArr)(self.phiArr_radm2)
+            cleanFDF += gauss1D(CC, phiPeak, fwhmRMSFArr)(self.phi_arr_radm2)
             iterCount += 1
             self.iterCountArr[yi, xi] = iterCount
 
         # Create a mask for the pixels that have been cleaned
         mask = np.abs(ccArr) > 0
-        dPhi = self.phiArr_radm2[1] - self.phiArr_radm2[0]
+        dPhi = self.phi_arr_radm2[1] - self.phi_arr_radm2[0]
         fwhmRMSFArr_pix = fwhmRMSFArr / dPhi
         for i in np.where(mask)[0]:
             start = int(i - fwhmRMSFArr_pix / 2)
@@ -680,7 +676,7 @@ class RMcleaner:
             # Get the absolute peak channel, values and Faraday depth
             indxPeakFDF = np.ma.argmax(np.abs(residFDF_mask))
             peakFDFval = residFDF_mask[indxPeakFDF]
-            phiPeak = self.phiArr_radm2[indxPeakFDF]
+            phiPeak = self.phi_arr_radm2[indxPeakFDF]
 
             # A clean component is "loop-gain * peakFDFval
             CC = self.gain * peakFDFval
@@ -698,7 +694,7 @@ class RMcleaner:
             residFDF -= CC * shiftedRMSFArr
 
             # Restore the CC * a Gaussian to the cleaned FDF
-            cleanFDF += gauss1D(CC, phiPeak, fwhmRMSFArr)(self.phiArr_radm2)
+            cleanFDF += gauss1D(CC, phiPeak, fwhmRMSFArr)(self.phi_arr_radm2)
             iterCount += 1
             self.iterCountArr[yi, xi] = iterCount
 
@@ -1397,9 +1393,9 @@ def measure_fdf_complexity(phiArr, FDF):
 
 
 # -----------------------------------------------------------------------------#
-def do_rmsynth(dataQ, dataU, lamSqArr, phiArr, weight=None, dtype="float32"):
+def do_rmsynth(data_Q, data_U, lamSqArr, phiArr, weight=None, dtype="float32"):
     """Perform RM-synthesis on Stokes Q and U cubes. This version operates on
-    data in spectral order, i.e., [zyx] => [yxz] (np.transpose(dataQ, (1,2,0)).
+    data in spectral order, i.e., [zyx] => [yxz] (np.transpose(data_Q, (1,2,0)).
 
     *** Depricated by the faster 'do_rmsynth_planes' routine, above. ***
 
@@ -1407,63 +1403,63 @@ def do_rmsynth(dataQ, dataU, lamSqArr, phiArr, weight=None, dtype="float32"):
 
     # Parse the weight argument
     if weight is None:
-        weightArr = np.ones(lamSqArr.shape, dtype=dtype)
+        weight_arr = np.ones(lamSqArr.shape, dtype=dtype)
     else:
-        weightArr = np.array(weight, dtype=dtype)
+        weight_arr = np.array(weight, dtype=dtype)
 
     # Sanity check on array sizes
-    if not weightArr.shape == lamSqArr.shape:
+    if not weight_arr.shape == lamSqArr.shape:
         print("Err: Lambda^2 and weight arrays must be the same shape.")
         return None, [None, None], None, None
-    if not dataQ.shape == dataU.shape:
+    if not data_Q.shape == data_U.shape:
         print("Err: Stokes Q and U data arrays must be the same shape.")
         return None, [None, None], None, None
-    nDims = len(dataQ.shape)
+    nDims = len(data_Q.shape)
     if not nDims <= 3:
         print("Err: data-dimensions must be <= 3.")
         return None, [None, None], None, None
-    if not dataQ.shape[-1] == lamSqArr.shape[-1]:
+    if not data_Q.shape[-1] == lamSqArr.shape[-1]:
         print("Err: The Stokes Q and U arrays mush be in spectral order.")
         print("     # Stokes = %d, # Lamda = %d.", end=" ")
-        (dataQ.shape[-1], lamSqArr.shape[-1])
+        (data_Q.shape[-1], lamSqArr.shape[-1])
         return None, [None, None], None, None
 
     # Reshape data arrays to allow the same recipies to work on all
     if nDims == 1:
-        dataQ = np.reshape(dataQ, (1, 1, dataQ.shape[-1]))
-        dataU = np.reshape(dataU, (1, 1, dataU.shape[-1]))
+        data_Q = np.reshape(data_Q, (1, 1, data_Q.shape[-1]))
+        data_U = np.reshape(data_U, (1, 1, data_U.shape[-1]))
     elif nDims == 2:
-        dataQ = np.reshape(dataQ, (1, dataQ.shape[-2], dataQ.shape[-1]))
-        dataU = np.reshape(dataU, (1, dataU.shape[-2], dataU.shape[-1]))
+        data_Q = np.reshape(data_Q, (1, data_Q.shape[-2], data_Q.shape[-1]))
+        data_U = np.reshape(data_U, (1, data_U.shape[-2], data_U.shape[-1]))
 
     # Create a blanking mask assuming NaNs are blanked in the input data
     # Set the weight = 0 in fully blanked planes
-    dataMsk = np.where(np.isnan(dataQ) + np.isnan(dataU), 0, 1)
+    dataMsk = np.where(np.isnan(data_Q) + np.isnan(data_U), 0, 1)
     dataMsk = np.where(np.sum(np.sum(dataMsk, 0), 0) == 0, 1, 0)
-    weightArr = np.where(dataMsk == 1, 0.0, weightArr)
+    weight_arr = np.where(dataMsk == 1, 0.0, weight_arr)
     del dataMsk
 
     # Create a complex polarised cube, B&dB Eqns. (8) and (14)
     # Cube has dimensions (nY, nX, nFreq)
-    pCube = (dataQ + 1j * dataU) * weightArr
+    pCube = (data_Q + 1j * data_U) * weight_arr
 
     # Initialise the complex Faraday Dispersion Function (FDF) cube
     # Remember, python index order is reversed [2,1,0] = [y,x,phi]
-    nY = dataQ.shape[0]
-    nX = dataQ.shape[1]
+    nY = data_Q.shape[0]
+    nX = data_Q.shape[1]
     nPhi = phiArr.shape[0]
     FDFcube = np.ndarray((nY, nX, nPhi), dtype="complex")
 
     # B&dB equations (24) and (38) give the inverse sum of the weights
     # Get the weighted mean of the LambdaSq distribution (B&dB Eqn. 32)
-    K = 1.0 / np.nansum(weightArr)
-    lam0Sq_m2 = K * np.nansum(weightArr * lamSqArr)
+    K = 1.0 / np.nansum(weight_arr)
+    lam0_sq_m2 = K * np.nansum(weight_arr * lamSqArr)
 
     # Mininize the number of inner-loop operations by calculating the
     # argument of the EXP term in B&dB Eqns. (25) and (36) for the FDF
     # Returned array has dimensions (nPhi x nFreq)
     a = -2.0 * 1j * phiArr
-    b = lamSqArr - lam0Sq_m2
+    b = lamSqArr - lam0_sq_m2
     arg = np.exp(np.outer(a, b))
 
     # Do the synthesis at each pixel of the image
@@ -1480,27 +1476,27 @@ def do_rmsynth(dataQ, dataU, lamSqArr, phiArr, weight=None, dtype="float32"):
             FDFcube[k, i, :] = K * np.nansum(pCube[k, i, :] * arg, axis=1)
 
     # Calculate the complex Rotation Measure Spread Function
-    RMSFArr, phiSamp, fwhmRMSF = get_RMSF(lamSqArr, phiArr, weightArr, lam0Sq_m2)
+    RMSFArr, phiSamp, fwhmRMSF = get_RMSF(lamSqArr, phiArr, weight_arr, lam0_sq_m2)
 
     # Reshape the data and FDF cube back to their original shapes
     if nDims == 1:
-        dataQ = np.reshape(dataQ, (dataQ.shape[-1]))
-        dataU = np.reshape(dataU, (dataU.shape[-1]))
+        data_Q = np.reshape(data_Q, (data_Q.shape[-1]))
+        data_U = np.reshape(data_U, (data_U.shape[-1]))
         FDFcube = np.reshape(FDFcube, (FDFcube.shape[-1]))
     elif nDims == 2:
-        dataQ = np.reshape(dataQ, (dataQ.shape[-2], dataQ.shape[-1]))
-        dataU = np.reshape(dataU, (dataU.shape[-2], dataU.shape[-1]))
+        data_Q = np.reshape(data_Q, (data_Q.shape[-2], data_Q.shape[-1]))
+        data_U = np.reshape(data_U, (data_U.shape[-2], data_U.shape[-1]))
         FDFcube = np.reshape(FDFcube, (FDFcube.shape[-2], FDFcube.shape[-1]))
 
-    return FDFcube, [phiSamp, RMSFArr], lam0Sq_m2, fwhmRMSF
+    return FDFcube, [phiSamp, RMSFArr], lam0_sq_m2, fwhmRMSF
 
 
 # -----------------------------------------------------------------------------#
 def get_RMSF(
     lamSqArr,
     phiArr,
-    weightArr=None,
-    lam0Sq_m2=None,
+    weight_arr=None,
+    lam0_sq_m2=None,
     double=True,
     fitRMSFreal=False,
     dtype="float32",
@@ -1512,17 +1508,17 @@ def get_RMSF(
     """
 
     # Set the weight array
-    if weightArr is None:
+    if weight_arr is None:
         uniformWt = True
-        weightArr = np.ones(lamSqArr.shape, dtype=dtype)
+        weight_arr = np.ones(lamSqArr.shape, dtype=dtype)
     else:
         uniformWt = False
-        weightArr = np.array(weightArr, dtype=dtype)
+        weight_arr = np.array(weight_arr, dtype=dtype)
 
     # lam0Sq is the weighted mean of the LambdaSq distribution (B&dB Eqn. 32)
-    K = 1.0 / np.nansum(weightArr)
-    if lam0Sq_m2 is None:
-        lam0Sq_m2 = K * np.nansum(weightArr * lamSqArr)
+    K = 1.0 / np.nansum(weight_arr)
+    if lam0_sq_m2 is None:
+        lam0_sq_m2 = K * np.nansum(weight_arr * lamSqArr)
 
     # For cleaning the RMSF should extend by 1/2 on each side in phi-space
     if double:
@@ -1535,8 +1531,8 @@ def get_RMSF(
 
     # Calculate the RM spread function
     a = -2.0 * 1j * phi2Arr
-    b = lamSqArr - lam0Sq_m2
-    RMSFArr = K * np.nansum(weightArr * np.exp(np.outer(a, b)), 1)
+    b = lamSqArr - lam0_sq_m2
+    RMSFArr = K * np.nansum(weight_arr * np.exp(np.outer(a, b)), 1)
 
     # Calculate (B&dB Equation 61) or fit the main-lobe FWHM of the RMSF
     fwhmRMSF = 3.8 / (np.nanmax(lamSqArr) - np.nanmin(lamSqArr))
@@ -1653,17 +1649,17 @@ def do_rmclean(
     if not weight is None:
 
         uniformWt = False
-        weightArr = np.array(weight, dtype=dtype)
+        weight_arr = np.array(weight, dtype=dtype)
 
-        # Check weightArr and lamSqArr have the same length
-        if not weightArr.shape[0] == lamSqArr.shape[0]:
-            print("Err: the lamSqArr and weightArr are not the same length.")
+        # Check weight_arr and lamSqArr have the same length
+        if not weight_arr.shape[0] == lamSqArr.shape[0]:
+            print("Err: the lamSqArr and weight_arr are not the same length.")
             sys.exit(1)
 
     # or else use uniform weighting
     else:
         uniformWt = True
-        weightArr = np.ones(lamSqArr.shape, dtype=dtype)
+        weight_arr = np.ones(lamSqArr.shape, dtype=dtype)
 
     if doPlots:
 
@@ -1684,16 +1680,16 @@ def do_rmclean(
 
     # Calculate the normalisation constant.
     # BdB Equations (24) and (38) give the inverse sum of the weights.
-    K = 1.0 / np.nansum(weightArr)
+    K = 1.0 / np.nansum(weight_arr)
 
     # Calculate the default lambda_0^2:
     # the weighted mean of the LambdaSq distribution (B&dB Eqn. 32).
-    lam0Sq_m2 = K * np.nansum(weightArr * lamSqArr)
+    lam0_sq_m2 = K * np.nansum(weight_arr * lamSqArr)
 
     # Calculate the RMSF if it has not been passed in
     # Equation (26) OF BdB05
     if RMSFArr is None:
-        RMSFArr, phi2Arr, fwhmRMSF = get_RMSF(lamSqArr, phiArr, weightArr, lam0Sq_m2)
+        RMSFArr, phi2Arr, fwhmRMSF = get_RMSF(lamSqArr, phiArr, weight_arr, lam0_sq_m2)
     else:
         phi2Arr = RMSFphiArr
 
@@ -1991,13 +1987,13 @@ def plot_complexity(freqArr_Hz, qArr, uArr, dqArr, duArr, fracPol, psi0_deg, RM_
 
 
 def threeDnoise_do_rmsynth_planes(
-    dataQ,
-    dataU,
-    lambdaSqArr_m2,
-    phiArr_radm2,
-    weightArr=None,
-    lam0Sq_m2=None,
-    nBits=32,
+    data_Q,
+    data_U,
+    lambda_sq_arr_m2,
+    phi_arr_radm2,
+    weight_arr=None,
+    lam0_sq_m2=None,
+    n_bits=32,
     verbose=False,
     log=print,
 ):
@@ -2008,68 +2004,68 @@ def threeDnoise_do_rmsynth_planes(
     but possible in single-dish cubes). Input data must be in standard python
     [z,y,x] order, where z is the frequency axis in ascending order.
 
-    dataQ           ... 1, 2 or 3D Stokes Q data array
-    dataU           ... 1, 2 or 3D Stokes U data array
-    lambdaSqArr_m2  ... vector of wavelength^2 values (assending freq order)
-    phiArr_radm2    ... vector of trial Faraday depth values
-    weightArr       ... 1, 2 or 3D array of weights, default [None] is Uniform (all 1s)
-    nBits           ... precision of data arrays [32]
+    data_Q           ... 1, 2 or 3D Stokes Q data array
+    data_U           ... 1, 2 or 3D Stokes U data array
+    lambda_sq_arr_m2  ... vector of wavelength^2 values (assending freq order)
+    phi_arr_radm2    ... vector of trial Faraday depth values
+    weight_arr       ... 1, 2 or 3D array of weights, default [None] is Uniform (all 1s)
+    n_bits           ... precision of data arrays [32]
     verbose         ... print feedback during calculation [False]
 
     Returns:
         FDFcube     ... 1, 2, or 3D complex array of Faraday spectra
-        lam0Sq_m2   ... 0, 1, or 2D array of lambda_0^2 values.
+        lam0_sq_m2   ... 0, 1, or 2D array of lambda_0^2 values.
     """
 
     log(
         "3D noise functions are still in prototype stage! Proper function is not guaranteed!"
     )
     # Default data types
-    dtFloat = "float" + str(nBits)
-    dtComplex = "complex" + str(2 * nBits)
+    dtFloat = "float" + str(n_bits)
+    dtComplex = "complex" + str(2 * n_bits)
 
     # Set the weight array
-    if weightArr is None:
-        weightArr = np.ones(dataQ.shape, dtype=dtFloat)
-    weightArr = np.where(np.isnan(weightArr), 0.0, weightArr)
+    if weight_arr is None:
+        weight_arr = np.ones(data_Q.shape, dtype=dtFloat)
+    weight_arr = np.where(np.isnan(weight_arr), 0.0, weight_arr)
 
     # Sanity check on array sizes
-    if (not weightArr.shape == lambdaSqArr_m2.shape) and (
-        not weightArr.shape == dataQ.shape
+    if (not weight_arr.shape == lambda_sq_arr_m2.shape) and (
+        not weight_arr.shape == data_Q.shape
     ):
-        log("Err: Weight array must have same size as lambda^2 or Q/U arrays.")
+        logger.error("Weight array must have same size as lambda^2 or Q/U arrays.")
         return None, None
-    if not dataQ.shape == dataU.shape:
-        log("Err: Stokes Q and U data arrays must be the same shape.")
+    if not data_Q.shape == data_U.shape:
+        logger.error("Stokes Q and U data arrays must be the same shape.")
         return None, None
-    nDims = len(dataQ.shape)
-    if not dataQ.shape[0] == lambdaSqArr_m2.shape[0]:
+    nDims = len(data_Q.shape)
+    if not data_Q.shape[0] == lambda_sq_arr_m2.shape[0]:
         log("Wavelength array and first axis of data must have same length.")
         return None, None
     if not nDims <= 3:
-        log("Err: data dimensions must be <= 3.")
+        logger.error("data dimensions must be <= 3.")
         return None, None
-    if not dataQ.shape[0] == lambdaSqArr_m2.shape[0]:
-        log("Err: Data depth does not match lambda^2 vector (%d vs %d).", end=" ")
-        (dataQ.shape[0], lambdaSqArr_m2.shape[0])
+    if not data_Q.shape[0] == lambda_sq_arr_m2.shape[0]:
+        logger.error("Data depth does not match lambda^2 vector (%d vs %d).", end=" ")
+        (data_Q.shape[0], lambda_sq_arr_m2.shape[0])
         print("     Check that data is in [z, y, x] order.")
         return None, None
 
     # Reshape the data arrays to 3 dimensions
     if nDims == 1:
-        dataQ = np.reshape(dataQ, (dataQ.shape[0], 1, 1))
-        dataU = np.reshape(dataU, (dataU.shape[0], 1, 1))
+        data_Q = np.reshape(data_Q, (data_Q.shape[0], 1, 1))
+        data_U = np.reshape(data_U, (data_U.shape[0], 1, 1))
     elif nDims == 2:
-        dataQ = np.reshape(dataQ, (dataQ.shape[0], dataQ.shape[1], 1))
-        dataU = np.reshape(dataU, (dataU.shape[0], dataU.shape[1], 1))
+        data_Q = np.reshape(data_Q, (data_Q.shape[0], data_Q.shape[1], 1))
+        data_U = np.reshape(data_U, (data_U.shape[0], data_U.shape[1], 1))
 
     # Check shape of weight array and pad if necessary:
-    if weightArr.ndim < 3:
-        weightArr = np.repeat(weightArr, dataQ.shape)
+    if weight_arr.ndim < 3:
+        weight_arr = np.repeat(weight_arr, data_Q.shape)
 
     # Create a complex polarised cube, B&dB Eqns. (8) and (14)
     # Array has dimensions [nFreq, nY, nX]
-    pCube = (dataQ + 1j * dataU) * weightArr
+    pCube = (data_Q + 1j * data_U) * weight_arr
 
     # Check for NaNs (flagged data) in the cube & set to zero
     mskCube = np.isnan(pCube)
@@ -2078,25 +2074,25 @@ def threeDnoise_do_rmsynth_planes(
     # If full planes are flagged then set corresponding weights to zero
     mskPlanes = np.sum(np.sum(~mskCube, axis=1), axis=1)
     mskPlanes = np.where(mskPlanes == 0, 0, 1)
-    weightArr *= mskPlanes[:, np.newaxis, np.newaxis]
+    weight_arr *= mskPlanes[:, np.newaxis, np.newaxis]
 
     # Initialise the complex Faraday Dispersion Function cube
-    nX = dataQ.shape[-1]
-    nY = dataQ.shape[-2]
-    nPhi = phiArr_radm2.shape[0]
+    nX = data_Q.shape[-1]
+    nY = data_Q.shape[-2]
+    nPhi = phi_arr_radm2.shape[0]
     FDFcube = np.zeros((nPhi, nY, nX), dtype=dtComplex)
 
-    # lam0Sq_m2 is the weighted mean of lambda^2 distribution (B&dB Eqn. 32)
-    # Calculate a per-pixel lam0Sq_m2 value, ignoring isolated flagged voxels
-    K = 1.0 / np.sum(weightArr, axis=0)
-    if lam0Sq_m2 is None:
-        lam0Sq_m2 = K * np.sum(
-            weightArr * lambdaSqArr_m2[:, np.newaxis, np.newaxis], axis=0
+    # lam0_sq_m2 is the weighted mean of lambda^2 distribution (B&dB Eqn. 32)
+    # Calculate a per-pixel lam0_sq_m2 value, ignoring isolated flagged voxels
+    K = 1.0 / np.sum(weight_arr, axis=0)
+    if lam0_sq_m2 is None:
+        lam0_sq_m2 = K * np.sum(
+            weight_arr * lambda_sq_arr_m2[:, np.newaxis, np.newaxis], axis=0
         )
 
     # The K value used to scale each FDF spectrum must take into account
     # flagged voxels data in the datacube and can be position dependent
-    weightCube = np.invert(mskCube) * weightArr
+    weightCube = np.invert(mskCube) * weight_arr
     with np.errstate(divide="ignore", invalid="ignore"):
         KArr = np.true_divide(1.0, np.sum(weightCube, axis=0))
         KArr[KArr == np.inf] = 0
@@ -2106,30 +2102,30 @@ def threeDnoise_do_rmsynth_planes(
     if verbose:
         log("Running RM-synthesis by channel.")
         progress(40, 0)
-    a = lambdaSqArr_m2[:, np.newaxis, np.newaxis] - lam0Sq_m2[np.newaxis, :, :]
+    a = lambda_sq_arr_m2[:, np.newaxis, np.newaxis] - lam0_sq_m2[np.newaxis, :, :]
     for i in range(nPhi):
         if verbose:
             progress(40, ((i + 1) * 100.0 / nPhi))
-        arg = np.exp(-2.0j * phiArr_radm2[i] * a)
+        arg = np.exp(-2.0j * phi_arr_radm2[i] * a)
         FDFcube[i, :, :] = KArr * np.sum(pCube * arg, axis=0)
     # Remove redundant dimensions in the FDF array
     FDFcube = np.squeeze(FDFcube)
-    lam0Sq_m2 = np.squeeze(lam0Sq_m2)
+    lam0_sq_m2 = np.squeeze(lam0_sq_m2)
 
-    return FDFcube, lam0Sq_m2
+    return FDFcube, lam0_sq_m2
 
 
 # -----------------------------------------------------------------------------#
 # 3D noise functions are still in prototype stage! Proper function is not guaranteed!
 def threeDnoise_get_rmsf_planes(
-    lambdaSqArr_m2,
-    phiArr_radm2,
-    weightArr=None,
-    lam0Sq_m2=None,
+    lambda_sq_arr_m2,
+    phi_arr_radm2,
+    weight_arr=None,
+    lam0_sq_m2=None,
     double=True,
     fitRMSF=False,
     fitRMSFreal=False,
-    nBits=32,
+    n_bits=32,
     verbose=False,
     log=print,
 ):
@@ -2146,14 +2142,14 @@ def threeDnoise_get_rmsf_planes(
     weight array (as zeros or NaNs).
     If no weight array is supplied, uniform (equal) weights are assumed.
 
-    lambdaSqArr_m2  ... vector of wavelength^2 values (assending freq order)
-    phiArr_radm2    ... vector of trial Faraday depth values
-    weightArr       ... array (1/2/3D) of weights, default [None] is no weighting
-    lam0Sq_m2       ... force a reference lambda^2 value (def=calculate) [None]
+    lambda_sq_arr_m2  ... vector of wavelength^2 values (assending freq order)
+    phi_arr_radm2    ... vector of trial Faraday depth values
+    weight_arr       ... array (1/2/3D) of weights, default [None] is no weighting
+    lam0_sq_m2       ... force a reference lambda^2 value (def=calculate) [None]
     double          ... pad the Faraday depth to double-size [True]
     fitRMSF         ... fit the main lobe of the RMSF with a Gaussian [False]
     fitRMSFreal     ... fit RMSF.real, rather than abs(RMSF) [False]
-    nBits           ... precision of data arrays [32]
+    n_bits           ... precision of data arrays [32]
     verbose         ... print feedback during calculation [False]
 
     """
@@ -2161,74 +2157,74 @@ def threeDnoise_get_rmsf_planes(
         "3D noise functions are still in prototype stage! Proper function is not guaranteed!"
     )
     # Default data types
-    dtFloat = "float" + str(nBits)
-    dtComplex = "complex" + str(2 * nBits)
+    dtFloat = "float" + str(n_bits)
+    dtComplex = "complex" + str(2 * n_bits)
 
     # For cleaning the RMSF should extend by 1/2 on each side in phi-space
     if double:
-        nPhi = phiArr_radm2.shape[0]
+        nPhi = phi_arr_radm2.shape[0]
         nExt = np.ceil(nPhi / 2.0)
         resampIndxArr = np.arange(2.0 * nExt + nPhi) - nExt
-        phi2Arr = extrap(resampIndxArr, np.arange(nPhi, dtype="int"), phiArr_radm2)
+        phi2Arr = extrap(resampIndxArr, np.arange(nPhi, dtype="int"), phi_arr_radm2)
     else:
-        phi2Arr = phiArr_radm2
+        phi2Arr = phi_arr_radm2
 
     # Set the weight array
-    if weightArr is None:
-        weightArr = np.ones(lambdaSqArr_m2.shape, dtype=dtFloat)
-    weightArr = np.where(np.isnan(weightArr), 0.0, weightArr)
-    nDims = weightArr.ndim
+    if weight_arr is None:
+        weight_arr = np.ones(lambda_sq_arr_m2.shape, dtype=dtFloat)
+    weight_arr = np.where(np.isnan(weight_arr), 0.0, weight_arr)
+    nDims = weight_arr.ndim
 
     # Set the mask array (default to 1D, no masked channels)
 
     # Sanity checks on array sizes
-    #    if not weightArr.shape  == lambdaSqArr_m2.shape:
+    #    if not weight_arr.shape  == lambda_sq_arr_m2.shape:
     #        print("Err: wavelength^2 and weight arrays must be the same shape.")
     #        return None, None, None, None
     if not nDims <= 3:
-        log("Err: mask dimensions must be <= 3.")
+        logger.error("mask dimensions must be <= 3.")
         return None, None, None, None
-    if not weightArr.shape[0] == lambdaSqArr_m2.shape[0]:
+    if not weight_arr.shape[0] == lambda_sq_arr_m2.shape[0]:
         log(
             "Error: Weight depth does not match lambda^2 vector ({} vs {}).".format(
-                weightArr.shape[0], lambdaSqArr_m2.shape[-1]
+                weight_arr.shape[0], lambda_sq_arr_m2.shape[-1]
             )
         )
 
         log("Check that the mask is in [z, y, x] order.")
         return None, None, None, None
 
-    # Adjust dimensions of weightArr to be 3D no matter what, for convenience/generality below
+    # Adjust dimensions of weight_arr to be 3D no matter what, for convenience/generality below
     if nDims == 1:
-        weightArr = weightArr[:, np.newaxis, np.newaxis]
+        weight_arr = weight_arr[:, np.newaxis, np.newaxis]
     elif nDims == 2:
-        weightArr = weightArr[:, :, np.newaxis]
+        weight_arr = weight_arr[:, :, np.newaxis]
 
     # Initialise the complex RM Spread Function cube
-    nX = weightArr.shape[-1]
-    nY = weightArr.shape[-2]
+    nX = weight_arr.shape[-1]
+    nY = weight_arr.shape[-2]
     nPix = nX * nY
     nPhi = phi2Arr.shape[0]
     RMSFcube = np.ones((nPhi, nY, nX), dtype=dtComplex)
 
     # If full planes are flagged then set corresponding weights to zero
     # Check if weights are uniform across the image plane:
-    pixel_variation = np.sum(np.std(weightArr, axis=(1, 2)))
+    pixel_variation = np.sum(np.std(weight_arr, axis=(1, 2)))
     if pixel_variation == 0.0:
         do1Dcalc = True
     else:
         do1Dcalc = False
 
     # lam0Sq is the weighted mean of LambdaSq distribution (B&dB Eqn. 32)
-    # Calculate a lam0Sq_m2 value per pixel, ignoring isolated flagged voxels
-    K = 1.0 / np.nansum(weightArr, axis=0)
-    lam0Sq_m2 = K * np.nansum(
-        weightArr * lambdaSqArr_m2[:, np.newaxis, np.newaxis], axis=0
+    # Calculate a lam0_sq_m2 value per pixel, ignoring isolated flagged voxels
+    K = 1.0 / np.nansum(weight_arr, axis=0)
+    lam0_sq_m2 = K * np.nansum(
+        weight_arr * lambda_sq_arr_m2[:, np.newaxis, np.newaxis], axis=0
     )
 
     # Calculate the analytical FWHM width of the main lobe
     fwhmRMSF = (
-        2.0 * m.sqrt(3.0) / (np.nanmax(lambdaSqArr_m2) - np.nanmin(lambdaSqArr_m2))
+        2.0 * m.sqrt(3.0) / (np.nanmax(lambda_sq_arr_m2) - np.nanmin(lambda_sq_arr_m2))
     )
 
     # Do a simple 1D calculation and replicate along X & Y axes
@@ -2238,8 +2234,8 @@ def threeDnoise_get_rmsf_planes(
 
         # Calculate the RMSF
         a = (-2.0 * 1j * phi2Arr).astype(dtComplex)
-        b = lambdaSqArr_m2 - lam0Sq_m2[0, 0]
-        RMSFArr = K[0, 0] * np.sum(weightArr[:, 0, 0] * np.exp(np.outer(a, b)), 1)
+        b = lambda_sq_arr_m2 - lam0_sq_m2[0, 0]
+        RMSFArr = K[0, 0] * np.sum(weight_arr[:, 0, 0] * np.exp(np.outer(a, b)), 1)
 
         # Fit the RMSF main lobe
         fitStatus = -1
@@ -2252,7 +2248,7 @@ def threeDnoise_get_rmsf_planes(
                 mp = fit_rmsf(phi2Arr, np.abs(RMSFArr))
             if mp is None or mp.status < 1:
                 pass
-                log("Err: failed to fit the RMSF.")
+                logger.error("failed to fit the RMSF.")
                 log("     Defaulting to analytical value.")
             else:
                 fwhmRMSF = mp.params[2]
@@ -2271,20 +2267,20 @@ def threeDnoise_get_rmsf_planes(
         # The K value used to scale each RMSF must take into account
         # isolated flagged voxels data in the datacube
         with np.errstate(divide="ignore", invalid="ignore"):
-            KArr = np.true_divide(1.0, np.sum(weightArr, axis=0))
+            KArr = np.true_divide(1.0, np.sum(weight_arr, axis=0))
             KArr[KArr == np.inf] = 0
             KArr = np.nan_to_num(KArr)
 
         # Calculate the RMSF for each plane
         if verbose:
             progress(40, 0)
-        a = lambdaSqArr_m2[:, np.newaxis, np.newaxis] - lam0Sq_m2[np.newaxis, :, :]
+        a = lambda_sq_arr_m2[:, np.newaxis, np.newaxis] - lam0_sq_m2[np.newaxis, :, :]
         for i in range(nPhi):
             if verbose:
                 progress(40, ((i + 1) * 100.0 / nPhi))
             arg = np.exp(-2.0j * phi2Arr[i] * a)
             #            RMSFcube[i,:,:] =  KArr * np.sum(uCube * arg, axis=0)
-            RMSFcube[i, :, :] = KArr * np.sum(weightArr * arg, axis=0)
+            RMSFcube[i, :, :] = KArr * np.sum(weight_arr * arg, axis=0)
         # Default to the analytical RMSF
         fwhmRMSFArr = np.ones((nY, nX), dtype=dtFloat) * fwhmRMSF
         statArr = np.ones((nY, nX), dtype="int") * (-1)
