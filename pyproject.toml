@@ -1,0 +1,62 @@
+[tool.poetry]
+name = "rmtools"
+version = "1.3.0"
+description = "RM-synthesis, RM-clean and QU-fitting on polarised radio spectra"
+authors = [
+    "Cormac Purcell",
+    "Cameron Van Eck",
+    "Alec Thomson",
+    "Matthew Alger",
+    "Lennart Heino",
+    "Maxwell Fine",
+    "Lerato Sebokolodi",
+    "physicist-boris"
+]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+numpy = "^1.22"
+scipy = "*"
+matplotlib = "^3.4"
+astropy = "^5"
+bilby = {version = "^1.1.5", optional = true}
+schwimmbad = {version = "*", optional = true}
+
+[tool.poetry.extras]
+dev = [
+    "black",
+    "isort",
+    "pytest",
+]
+qufitting = ["bilby"]
+parallel = ["schwimmbad"]
+
+[tool.poetry.group.dev.dependencies]
+black = "^23.1.0"
+isort = "^5.12.0"
+pytest = "^7.2.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+rmsynth3d =  "RMTools.RMTools_3D.do_RMsynth_3D:main"
+rmclean3d =  "RMTools.RMTools_3D.do_RMclean_3D:main"
+rmsynth1d =  "RMTools.RMTools_1D.do_RMsynth_1D:main"
+rmclean1d =  "RMTools.RMTools_1D.do_RMclean_1D:main"
+rmsynth1dFITS =  "RMTools.RMTools_1D.do_RMsynth_1D_fromFITS:main"
+qufit =  "RMTools.RMTools_1D.do_QUfit_1D_mnest:main"
+rmtools_freqfile =  "RMTools.RMTools_3D.make_freq_file:save_freq_file"
+rmtools_calcRMSF =  "RMTools.RMTools_1D.calculate_RMSF:main"
+rmtools_testdata1D =  "RMTools.RMTools_1D.mk_test_ascii_data:main"
+rmtools_createchunks =  "RMTools.RMTools_3D.create_chunks:main"
+rmtools_assemblechunks =  "RMTools.RMTools_3D.assemble_chunks:main"
+rmtools_fitIcube =  "RMTools.RMTools_3D.do_fitIcube:main"
+rmtools_peakfitcube =  "RMTools.RMTools_3D.RMpeakfit_3D:main"
+rmtools_testdata3D =  "RMTools.RMTools_3D.mk_test_cube_data:main"
+rmtools_extractregion =  "RMTools.RMTools_3D.extract_region:main"
+rmtools_bwdepol =  "RMTools.RMTools_1D.rmtools_bwdepol:main"
+rmtools_bwpredict =  "RMTools.RMTools_1D.rmtools_bwpredict:main"
