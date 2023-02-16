@@ -1,4 +1,13 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Run RM-CLEAN on an ASCII Faraday dispersion function (FDF), applying
+the rotation measure spread function created by the script
+'do_RMsynth_1D.py'. Runs in two steps: an initial clean of the whole FDF,
+to the specified depth (set by -c flag), followed by a deeper clean (set by
+-w flag) limited to windows around the previous clean components.
+Saves ASCII files containing a deconvolved FDF & clean-component spectrum.
+"""
 # =============================================================================#
 #                                                                             #
 # NAME:     do_RMclean_1D.py                                                  #
@@ -519,14 +528,6 @@ def main():
     """
 
     # Help string to be shown using the -h option
-    descStr = """
-    Run RM-CLEAN on an ASCII Faraday dispersion function (FDF), applying
-    the rotation measure spread function created by the script
-    'do_RMsynth_1D.py'. Runs in two steps: an initial clean of the whole FDF,
-    to the specified depth (set by -c flag), followed by a deeper clean (set by
-    -w flag) limited to windows around the previous clean components.
-    Saves ASCII files containing a deconvolved FDF & clean-component spectrum.
-    """
 
     epilog_text = """
     By default, saves the following files:
@@ -538,7 +539,7 @@ def main():
 
     # Parse the command line options
     parser = argparse.ArgumentParser(
-        description=descStr,
+        description=__doc__,
         epilog=epilog_text,
         formatter_class=argparse.RawTextHelpFormatter,
     )

@@ -1,7 +1,21 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Run RM-synthesis on Stokes I, Q and U spectra (1D) stored in an ASCII
+file. The Stokes I spectrum is first fit with a polynomial or power law
+and the resulting model used to create fractional q = Q/I and u = U/I spectra.
+
+The ASCII file should the following columns, in a space separated format:
+[freq_Hz, I, Q, U, I_err, Q_err, U_err]
+OR
+[freq_Hz, Q, U, Q_err, U_err]
+
+
+To get outputs, one or more of the following flags must be set: -S, -p, -v.
+"""
 # =============================================================================#
 #                                                                             #
-# NAME:     do_RMsynth_1D.py                                                  #
+# NAME:     rmsynth.py                                                        #
 #                                                                             #
 # PURPOSE: API for runnning RM-synthesis on an ASCII Stokes I, Q & U spectrum.#
 #                                                                             #
@@ -674,19 +688,6 @@ def main():
     """
 
     # Help string to be shown using the -h option
-    descStr = """
-    Run RM-synthesis on Stokes I, Q and U spectra (1D) stored in an ASCII
-    file. The Stokes I spectrum is first fit with a polynomial or power law 
-    and the resulting model used to create fractional q = Q/I and u = U/I spectra.
-
-    The ASCII file should the following columns, in a space separated format:
-    [freq_Hz, I, Q, U, I_err, Q_err, U_err]
-    OR
-    [freq_Hz, Q, U, Q_err, U_err]
-
-
-    To get outputs, one or more of the following flags must be set: -S, -p, -v.
-    """
 
     epilog_text = """
     Outputs with -S flag:
@@ -700,7 +701,7 @@ def main():
 
     # Parse the command line options
     parser = argparse.ArgumentParser(
-        description=descStr,
+        description=__doc__,
         epilog=epilog_text,
         formatter_class=argparse.RawTextHelpFormatter,
     )

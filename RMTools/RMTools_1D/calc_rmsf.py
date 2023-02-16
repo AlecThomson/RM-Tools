@@ -1,22 +1,23 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Wed Mar 27 11:01:48 2019
-
-@author: cvaneck
-
-This routine will determine the RMSF and related parameters,
-giving the following input information. One of:
-a file with channel frequencies and weights
-OR
-a file with channel frequencies (assumes equal weights)
-OR
-Input values for mininum frequency, maximum frequency, and channel width.
-(assumes equal weights and all channels present)
-
-The outputs are a list of relavant RMSF properties, and a plot of the RMSF 
-shape.
+Calculate and plot RMSF and report main properties, given a supplied
+frequency coverage and optional weights (either as second column of
+frequency file, or as separate file)
 """
+# This routine will determine the RMSF and related parameters,
+# giving the following input information. One of:
+# a file with channel frequencies and weights
+# OR
+# a file with channel frequencies (assumes equal weights)
+# OR
+# Input values for mininum frequency, maximum frequency, and channel width.
+# (assumes equal weights and all channels present)
+
+# The outputs are a list of relavant RMSF properties, and a plot of the RMSF
+# shape.
+
+__author__  = "cvaneck"
 
 # import sys
 import argparse
@@ -35,13 +36,8 @@ def main():
     arrays to the function that works out the RMSF properties.
     """
 
-    descStr = """
-    Calculate and plot RMSF and report main properties, given a supplied 
-    frequency coverage and optional weights (either as second column of 
-    frequency file, or as separate file)."""
-
     parser = argparse.ArgumentParser(
-        description=descStr, formatter_class=argparse.RawTextHelpFormatter
+        description=__doc__, formatter_class=argparse.RawTextHelpFormatter
     )
     parser.add_argument(
         "freqFile",

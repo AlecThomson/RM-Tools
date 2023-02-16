@@ -1,8 +1,11 @@
-#!/usr/bin/env python
-
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Simultaneously fit Stokes Q/I and U/I spectra with a Faraday active models.
+"""
 # =============================================================================#
 #                                                                             #
-# NAME:     do_QUfit_1D_nest.py                                               #
+# NAME:     qufit.py                                                          #
 #                                                                             #
 # PURPOSE:  Code to simultaneously fit Stokes Q/I and U/I spectra with a      #
 #           Faraday active models.                                            #

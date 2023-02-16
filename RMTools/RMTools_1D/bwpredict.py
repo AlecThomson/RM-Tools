@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+"""Algorithm for finding polarized sources while accounting for bandwidth depolarization."""
 # =============================================================================#
 #                                                                             #
 # NAME:     rmtools_bwpredict.py                                              #
@@ -38,7 +39,7 @@ import sys
 
 import matplotlib.pyplot as plt
 import numpy as np
-from .rmtools_bwdepol import (
+from .bwdepol import (
     adjoint_theory,
     estimate_channel_bandwidth,
     plot_adjoint_info,

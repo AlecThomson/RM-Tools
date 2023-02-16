@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-This is an experimental tool to generate Stokes Q and U models from
-clean components produced by RMclean1D.
-
-
-Author: cvaneck, Aug 2021
+Generate Stokes QU model based on clean components and (optional)
+Stokes I model. Requires inputs to rmsynth1D and outputs of rmsynth1d and
+rmclean1d. Saves ASCII file containing arrays of IQU for each channel.
 """
+# This is an experimental tool to generate Stokes Q and U models from
+# clean components produced by RMclean1D.
+
+__author__  = "cvaneck"
 
 import json
 
@@ -93,16 +95,9 @@ def main():
     rmclean1d.
     """
     import argparse
-
-    descStr = """
-    Generate Stokes QU model based on clean components and (optional) 
-    Stokes I model. Requires inputs to rmsynth1D and outputs of rmsynth1d and
-    rmclean1d. Saves ASCII file containing arrays of IQU for each channel.
-    """
-
     # Parse the command line options
     parser = argparse.ArgumentParser(
-        description=descStr, formatter_class=argparse.RawTextHelpFormatter
+        description=__doc__, formatter_class=argparse.RawTextHelpFormatter
     )
     parser.add_argument(
         "freqfile",

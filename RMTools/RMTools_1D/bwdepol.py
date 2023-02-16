@@ -1,7 +1,9 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""Algorithm for finding polarized sources while accounting for bandwidth depolarization."""
 # =============================================================================#
 #                                                                             #
-# NAME:     rmtools_bwdepol.py                                                #
+# NAME:     bwdel.py                                                #
 #                                                                             #
 # PURPOSE: Algorithm for finding polarized sources while accounting for       #
 #          bandwidth depolarization.                                          #
