@@ -1,12 +1,3 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 """Dependencies for RM utilities """
-__all__ = [
-    "mpfit",
-    "normalize",
-    "util_FITS",
-    "util_misc",
-    "util_plotFITS",
-    "util_plotTk",
-    "util_rec",
-    "util_RM",
-]
+from . import *
