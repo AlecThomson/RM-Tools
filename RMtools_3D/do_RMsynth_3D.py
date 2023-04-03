@@ -186,7 +186,7 @@ def run_rmsynth(dataQ, dataU, freqArr_Hz, dataI=None, rmsArr=None,
     # nearest two planes.
     with np.errstate(divide='ignore', invalid='ignore'):
         freq0_Hz = np.true_divide(C , m.sqrt(lam0Sq_m2))
-                                  
+
     if dataI is not None:
         idx = np.abs(freqArr_Hz - freq0_Hz).argmin()
         if freqArr_Hz[idx]<freq0_Hz:
@@ -399,7 +399,7 @@ def writefits(dataArr, headtemplate, fitRMSF=False, prefixOut="", outDir="",
 
 
     #Generate peak maps:
-        
+
     maxPI,peakRM = create_peak_maps(FDFcube,phiArr_radm2,Ndim-freq_axis)
     # Save a maximum polarised intensity map
     fitsFileOut = outDir + "/" + prefixOut + "FDF_maxPI.fits"
@@ -435,7 +435,7 @@ def create_peak_maps(FDFcube,phiArr_radm2,phi_axis=0):
     Inputs:
         FDFcube: output cube from run_rmsynth
         phiArr_radm2: array of Faraday depth values, from run_rmsynth
-        phi_axis (int): number of the axis for Faraday depth (in python order, 
+        phi_axis (int): number of the axis for Faraday depth (in python order,
                          not FITS order). Defaults to zero (first axis).
     Returns:
         maxPI: array of same dimensions as FDFcube exceppt collapsed along
@@ -443,15 +443,15 @@ def create_peak_maps(FDFcube,phiArr_radm2,phi_axis=0):
                 intensity for each pixel
         peakRM: as maxPI, but with the Faraday depth location of the peak
     """
-    
+
     maxPI=np.max(np.abs(FDFcube), axis=phi_axis)
     peakRM_indices = np.argmax(np.abs(FDFcube), axis=phi_axis)
     peakRM=phiArr_radm2[peakRM_indices]
-    
+
     return maxPI, peakRM
 
-    
-    
+
+
 
 
 
@@ -502,7 +502,7 @@ def readFitsCube(file, verbose, log = print):
             print('NAXIS{} = {}'.format(i,head['NAXIS'+str(i)]),end='  ')
         print()
 
-    freq_axis=find_freq_axis(head) 
+    freq_axis=find_freq_axis(head)
     #If the frequency axis isn't the last one, rotate the array until it is.
     #Recall that pyfits reverses the axis ordering, so we want frequency on
     #axis 0 of the numpy array.
