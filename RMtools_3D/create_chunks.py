@@ -12,33 +12,30 @@ A separate routine will re-assemble the individual chunks into a combined file a
 This code attempts to minimize the memory profile: in principle it should never
 need more memory than the size of a single chunk, and perhaps not even that much.
 
+Divide a FITS cube into small pieces for memory-efficient RM synthesis.
+Files will be created in running directory.
+WARNING: ONLY WORKS ON FIRST HDU, OTHERS WILL BE LOST.
+
 @author: cvaneck
 May 2019
 """
 
 import numpy as np
 import argparse
-import astropy.io.fits as pf
+from astropy.io import fits
 import os.path as path
 from math import ceil, floor, log10
-from tqdm.auto import trange
+from tqdm.auto import trange, tqdm
+import multiprocessing as mp
 
-def main():
-    """This function will divide a large FITS file or cube into smaller chunks.
-    It does so in a memory efficient way that requires only a small RAM overhead
-    (approximately 1 chunk worth?).
-    """
-    descStr="""
-    Divide a FITS cube into small pieces for memory-efficient RM synthesis.
-    Files will be created in running directory.
-    WARNING: ONLY WORKS ON FIRST HDU, OTHERS WILL BE LOST."""
+def cli():
 
-    parser = argparse.ArgumentParser(description=descStr,
+    parser = argparse.ArgumentParser(description=__doc__,
                              formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument("infile", metavar="filename.fits",
                         help="FITS cube containing data")
     parser.add_argument("Nperchunk", metavar="N_pixels",
-                        help="Number of pixels per chunk")
+                        help="Number of pixels per chunk", type=int)
     parser.add_argument("-v", dest="verbose", action="store_true",
                         help="Verbose [False].")
     parser.add_argument("-p", dest="prefix", default=None,
@@ -51,17 +48,36 @@ def main():
     if not path.exists(args.infile):
         raise Exception('Input file not found!')
 
-    if args.prefix == None:
-        prefix=path.splitext(args.infile)[0]
-    else:
-        prefix=args.prefix
+    prefix = path.splitext(args.infile)[0] if not args.prefix else args.prefix
+
+    return main(
+        infile=args.infile,
+        Nperchunk=Nperchunk,
+        verbose=args.verbose,
+        prefix=prefix,
+    )
 
 
 
 
-    hdu=pf.open(args.infile,memmap=True)
-    header=hdu[0].header
-    data=np.transpose(hdu[0].data)
+def _worker(i, prefix, prntcode, split, new_header, pbar):
+    """This is the worker function for the multiprocessing version of the code.
+    It is a separate function so that it can be pickled.
+    """
+    filename=('{}.C{'+prntcode+'}.fits').format(prefix,i)
+    fits.writeto(filename, split, new_header,overwrite=True)
+    pbar.update(1)
+
+def main(
+    infile: str,
+    Nperchunk: int,
+    verbose: bool = False,
+    prefix: str = None,
+):
+    with fits.open(infile,memmap=True, mode="denywrite") as hdul:
+        hdu = hdul[0]
+        header = hdu.header
+        data = hdu.data
 
     x_image=header['NAXIS1']
     y_image=header['NAXIS2']
@@ -69,13 +85,13 @@ def main():
 
     num_chunks=ceil(Npix_image/Nperchunk)
     digits=floor(log10(num_chunks))+1
-    prntcode=':0'+str(digits)+'d'
+    prntcode = f":0{digits}d"
 
-    if args.verbose:
+    if verbose:
         print(('Chunk name set to "{}.C{'+prntcode+'}.fits"').format(prefix,0))
         print('File will be divided into {} chunks'.format(num_chunks))
 
-    base_idx_arr=np.array(range(Nperchunk))
+    base_idx_arr=np.arange(Nperchunk)
 
     new_header=header.copy()
     new_header['NAXIS2']=1
@@ -83,28 +99,14 @@ def main():
     new_header['OLDXDIM']=x_image
     new_header['OLDYDIM']=y_image
 
-    #Run for all but last. Last chunk requires some finessing.
-    for i in trange(num_chunks-1, desc="Creating chunks"):
-        idx=base_idx_arr+i*Nperchunk
-        xarr = idx // y_image
-        yarr = idx % y_image
-        newdata=np.expand_dims(data[xarr,yarr],1)
+    splits = np.array_split(data, num_chunks, axis=-1)
+
+    for i, split in enumerate(tqdm(splits, desc="Writing chunks", disable=not verbose)):
         filename=('{}.C{'+prntcode+'}.fits').format(prefix,i)
-        pf.writeto(filename,np.transpose(newdata),new_header,overwrite=True)
-
-    i+=1
-    idx=base_idx_arr+i*Nperchunk
-    idx=idx[idx < Npix_image]
-    xarr = idx // y_image
-    yarr = idx % y_image
-    newdata=np.expand_dims(data[xarr,yarr],1)
-    filename=('{}.C{'+prntcode+'}.fits').format(prefix,i)
-    pf.writeto(filename,np.transpose(newdata),new_header,overwrite=True)
-
-    hdu.close()
+        fits.writeto(filename, split, new_header,overwrite=True)
 
 
 if __name__ == "__main__":
-    main()
+    cli()
 
 
