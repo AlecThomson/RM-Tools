@@ -26,7 +26,8 @@ from astropy.io import fits
 import os.path as path
 from math import ceil, floor, log10
 from tqdm.auto import trange, tqdm
-import multiprocessing as mp
+from dask import delayed, compute
+from dask.distributed import Client, LocalCluster
 
 def cli():
 
@@ -59,14 +60,22 @@ def cli():
 
 
 
-
-def _worker(i, prefix, prntcode, split, new_header, pbar):
+@delayed()
+def _worker(
+    i: int, 
+    prefix: str, 
+    prntcode: str, 
+    split: np.ndarray, 
+    new_header: fits.Header, 
+    # pbar: tqdm,
+):
     """This is the worker function for the multiprocessing version of the code.
     It is a separate function so that it can be pickled.
     """
+    print(f"Hello from worker {i}")
     filename=('{}.C{'+prntcode+'}.fits').format(prefix,i)
     fits.writeto(filename, split, new_header,overwrite=True)
-    pbar.update(1)
+    # pbar.update(1)
 
 def main(
     infile: str,
@@ -74,7 +83,7 @@ def main(
     verbose: bool = False,
     prefix: str = None,
 ):
-    print("USING NUMPY")
+    print("USING NUMPY AND DASK")
     with fits.open(infile,memmap=True, mode="denywrite") as hdul:
         hdu = hdul[0]
         header = hdu.header
@@ -105,6 +114,7 @@ def main(
     for i, split in enumerate(tqdm(splits, desc="Writing chunks", disable=not verbose)):
         filename=('{}.C{'+prntcode+'}.fits').format(prefix,i)
         fits.writeto(filename, split, new_header,overwrite=True)
+
 
 
 if __name__ == "__main__":
