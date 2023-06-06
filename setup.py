@@ -50,7 +50,7 @@ setup(
                             'rmtools_freqfile=RMtools_3D.make_freq_file:save_freq_file',
                             'rmtools_calcRMSF=RMtools_1D.calculate_RMSF:main',
                             'rmtools_testdata1D=RMtools_1D.mk_test_ascii_data:main',
-                            'rmtools_createchunks=RMtools_3D.create_chunks:main',
+                            'rmtools_createchunks=RMtools_3D.create_chunks:cli',
                             'rmtools_assemblechunks=RMtools_3D.assemble_chunks:main',
                             'rmtools_fitIcube=RMtools_3D.do_fitIcube:main',
                             'rmtools_peakfitcube=RMtools_3D.RMpeakfit_3D:main',
