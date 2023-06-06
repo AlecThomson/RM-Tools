@@ -74,6 +74,7 @@ def main(
     verbose: bool = False,
     prefix: str = None,
 ):
+    print("USING NUMPY")
     with fits.open(infile,memmap=True, mode="denywrite") as hdul:
         hdu = hdul[0]
         header = hdu.header
