@@ -125,7 +125,6 @@ async def create(
     new_header["OLDXDIM"] = x_image
     new_header["OLDYDIM"] = y_image
 
-    # splits = [x async for x in array_split(data, num_chunks, axis=-1)]
     splits = np.array_split(data, num_chunks, axis=-1)
 
     tasks = []
