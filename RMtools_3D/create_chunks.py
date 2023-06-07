@@ -31,6 +31,7 @@ from dask import delayed, compute
 from dask.distributed import Client, LocalCluster
 import asyncio
 from datetime import datetime
+import asyncstdlib
 
 def main():
 
@@ -62,15 +63,10 @@ def main():
         )
     )
 
-async def _write(filename, split, new_header):
-    return await fits.writeto(filename, split, new_header,overwrite=True)
-    # await asyncio.sleep(1)
-
 async def worker(i, split, new_header, prefix, prntcode):
     print(f"{datetime.utcnow()} Worker {i} starting...")
     filename=('{}.C{'+prntcode+'}.fits').format(prefix,i)
-    await _write(filename, split, new_header)
-    # await asyncio.sleep(1)
+    await asyncio.to_thread(fits.writeto, filename, split, new_header, overwrite=True)
     print(f"{datetime.utcnow()} Worker {i} done")
 
 
@@ -104,6 +100,7 @@ async def create(
     new_header['OLDXDIM']=x_image
     new_header['OLDYDIM']=y_image
 
+    # splits = [x async for x in array_split(data, num_chunks, axis=-1)]
     splits = np.array_split(data, num_chunks, axis=-1)
 
     tasks = []
@@ -111,8 +108,6 @@ async def create(
         tasks.append(asyncio.create_task(worker(i, split, new_header, prefix, prntcode)))
 
     await tqdm.gather(*tasks)
-
-
 
 
 if __name__ == "__main__":
