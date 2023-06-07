@@ -25,11 +25,14 @@ import argparse
 from astropy.io import fits
 import os.path as path
 from math import ceil, floor, log10
-from tqdm.auto import trange, tqdm
+from tqdm.asyncio import tqdm
+# from tqdm.auto import tqdm, trange
 from dask import delayed, compute
 from dask.distributed import Client, LocalCluster
+import asyncio
+from datetime import datetime
 
-def cli():
+def main():
 
     parser = argparse.ArgumentParser(description=__doc__,
                              formatter_class=argparse.RawTextHelpFormatter)
@@ -50,40 +53,34 @@ def cli():
         raise Exception('Input file not found!')
 
     prefix = path.splitext(args.infile)[0] if not args.prefix else args.prefix
-
-    return main(
-        infile=args.infile,
-        Nperchunk=Nperchunk,
-        verbose=args.verbose,
-        prefix=prefix,
+    asyncio.run(
+        create(
+            infile=args.infile,
+            Nperchunk=Nperchunk,
+            verbose=args.verbose,
+            prefix=prefix,
+        )
     )
 
+async def _write(filename, split, new_header):
+    return await fits.writeto(filename, split, new_header,overwrite=True)
+    # await asyncio.sleep(1)
 
-
-@delayed()
-def _worker(
-    i: int, 
-    prefix: str, 
-    prntcode: str, 
-    split: np.ndarray, 
-    new_header: fits.Header, 
-    # pbar: tqdm,
-):
-    """This is the worker function for the multiprocessing version of the code.
-    It is a separate function so that it can be pickled.
-    """
-    print(f"Hello from worker {i}")
+async def worker(i, split, new_header, prefix, prntcode):
+    print(f"{datetime.utcnow()} Worker {i} starting...")
     filename=('{}.C{'+prntcode+'}.fits').format(prefix,i)
-    fits.writeto(filename, split, new_header,overwrite=True)
-    # pbar.update(1)
+    await _write(filename, split, new_header)
+    # await asyncio.sleep(1)
+    print(f"{datetime.utcnow()} Worker {i} done")
 
-def main(
+
+async def create(
     infile: str,
     Nperchunk: int,
     verbose: bool = False,
     prefix: str = None,
 ):
-    print("USING NUMPY AND DASK")
+    print("USING NUMPY")
     with fits.open(infile,memmap=True, mode="denywrite") as hdul:
         hdu = hdul[0]
         header = hdu.header
@@ -101,8 +98,6 @@ def main(
         print(('Chunk name set to "{}.C{'+prntcode+'}.fits"').format(prefix,0))
         print('File will be divided into {} chunks'.format(num_chunks))
 
-    base_idx_arr=np.arange(Nperchunk)
-
     new_header=header.copy()
     new_header['NAXIS2']=1
     new_header['NAXIS1']=Nperchunk
@@ -111,13 +106,16 @@ def main(
 
     splits = np.array_split(data, num_chunks, axis=-1)
 
-    for i, split in enumerate(tqdm(splits, desc="Writing chunks", disable=not verbose)):
-        filename=('{}.C{'+prntcode+'}.fits').format(prefix,i)
-        fits.writeto(filename, split, new_header,overwrite=True)
+    tasks = []
+    for i, split in enumerate(splits):
+        tasks.append(asyncio.create_task(worker(i, split, new_header, prefix, prntcode)))
+
+    await tqdm.gather(*tasks)
+
 
 
 
 if __name__ == "__main__":
-    cli()
+    main()
 
 
