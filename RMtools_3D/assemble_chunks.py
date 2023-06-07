@@ -116,7 +116,7 @@ def update_and_write(
         stopx (int): Stopping x index of chunk
         starty (int): Starting y index of chunk
         stopy (int): Stopping y index of chunk
-    """    
+    """
     large_hdul[0].data[
         ...,
         starty:stopy,

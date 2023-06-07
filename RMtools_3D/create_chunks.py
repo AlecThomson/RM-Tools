@@ -20,37 +20,43 @@ WARNING: ONLY WORKS ON FIRST HDU, OTHERS WILL BE LOST.
 May 2019
 """
 
-import numpy as np
 import argparse
-from astropy.io import fits
-import os.path as path
-from math import ceil, floor, log10
-from tqdm.asyncio import tqdm
-from dask import delayed, compute
-from dask.distributed import Client, LocalCluster
 import asyncio
+import os.path as path
 from datetime import datetime
-from typing import Coroutine, List, Tuple, Optional
+from math import ceil, floor, log10
+from typing import Coroutine, List, Optional, Tuple
+
+import numpy as np
+from astropy.io import fits
+from dask import compute, delayed
+from dask.distributed import Client, LocalCluster
+from tqdm.asyncio import tqdm
+
 
 def main():
-
-    parser = argparse.ArgumentParser(description=__doc__,
-                             formatter_class=argparse.RawTextHelpFormatter)
-    parser.add_argument("infile", metavar="filename.fits",
-                        help="FITS cube containing data")
-    parser.add_argument("Nperchunk", metavar="N_pixels",
-                        help="Number of pixels per chunk", type=int)
-    parser.add_argument("-v", dest="verbose", action="store_true",
-                        help="Verbose [False].")
-    parser.add_argument("-p", dest="prefix", default=None,
-                        help="Prefix of output files [filename]")
+    parser = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawTextHelpFormatter
+    )
+    parser.add_argument(
+        "infile", metavar="filename.fits", help="FITS cube containing data"
+    )
+    parser.add_argument(
+        "Nperchunk", metavar="N_pixels", help="Number of pixels per chunk", type=int
+    )
+    parser.add_argument(
+        "-v", dest="verbose", action="store_true", help="Verbose [False]."
+    )
+    parser.add_argument(
+        "-p", dest="prefix", default=None, help="Prefix of output files [filename]"
+    )
 
     args = parser.parse_args()
 
-    Nperchunk=int(args.Nperchunk)
+    Nperchunk = int(args.Nperchunk)
 
     if not path.exists(args.infile):
-        raise Exception('Input file not found!')
+        raise Exception("Input file not found!")
 
     prefix = path.splitext(args.infile)[0] if not args.prefix else args.prefix
     asyncio.run(
@@ -62,7 +68,10 @@ def main():
         )
     )
 
-async def worker(i: int, split: np.ndarray, new_header: fits.Header, prefix: str, prntcode: str) -> Coroutine[None]:
+
+async def worker(
+    i: int, split: np.ndarray, new_header: fits.Header, prefix: str, prntcode: str
+) -> Coroutine[None]:
     """Asynchronously write a chunk to disk.
 
     Args:
@@ -74,9 +83,9 @@ async def worker(i: int, split: np.ndarray, new_header: fits.Header, prefix: str
 
     Returns:
         Coroutine[None]: Coroutine to be awaited
-    """    
+    """
     print(f"{datetime.utcnow()} Worker {i} starting...")
-    filename=('{}.C{'+prntcode+'}.fits').format(prefix,i)
+    filename = ("{}.C{" + prntcode + "}.fits").format(prefix, i)
     await asyncio.to_thread(fits.writeto, filename, split, new_header, overwrite=True)
     print(f"{datetime.utcnow()} Worker {i} done")
 
@@ -94,41 +103,41 @@ async def create(
         Nperchunk (int): Number of pixels per chunk
         verbose (bool, optional): Verbose output. Defaults to False.
         prefix (Optional[str], optional): Prefix for output files. Defaults to None.
-    """    
-    with fits.open(infile,memmap=True, mode="denywrite") as hdul:
+    """
+    with fits.open(infile, memmap=True, mode="denywrite") as hdul:
         hdu = hdul[0]
         header = hdu.header
         data = hdu.data
 
-    x_image=header['NAXIS1']
-    y_image=header['NAXIS2']
-    Npix_image=x_image*y_image
+    x_image = header["NAXIS1"]
+    y_image = header["NAXIS2"]
+    Npix_image = x_image * y_image
 
-    num_chunks=ceil(Npix_image/Nperchunk)
-    digits=floor(log10(num_chunks))+1
+    num_chunks = ceil(Npix_image / Nperchunk)
+    digits = floor(log10(num_chunks)) + 1
     prntcode = f":0{digits}d"
 
     if verbose:
-        print(('Chunk name set to "{}.C{'+prntcode+'}.fits"').format(prefix,0))
-        print('File will be divided into {} chunks'.format(num_chunks))
+        print(('Chunk name set to "{}.C{' + prntcode + '}.fits"').format(prefix, 0))
+        print("File will be divided into {} chunks".format(num_chunks))
 
-    new_header=header.copy()
-    new_header['NAXIS2']=1
-    new_header['NAXIS1']=Nperchunk
-    new_header['OLDXDIM']=x_image
-    new_header['OLDYDIM']=y_image
+    new_header = header.copy()
+    new_header["NAXIS2"] = 1
+    new_header["NAXIS1"] = Nperchunk
+    new_header["OLDXDIM"] = x_image
+    new_header["OLDYDIM"] = y_image
 
     # splits = [x async for x in array_split(data, num_chunks, axis=-1)]
     splits = np.array_split(data, num_chunks, axis=-1)
 
     tasks = []
     for i, split in enumerate(splits):
-        tasks.append(asyncio.create_task(worker(i, split, new_header, prefix, prntcode)))
+        tasks.append(
+            asyncio.create_task(worker(i, split, new_header, prefix, prntcode))
+        )
 
     await tqdm.gather(*tasks)
 
 
 if __name__ == "__main__":
     main()
-
-
