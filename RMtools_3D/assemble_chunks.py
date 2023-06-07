@@ -13,12 +13,11 @@ Output name will follow the name of the input chunk, minus the '.C??.'
 
 import argparse
 import asyncio
-import os.path as path
 import re
 from datetime import datetime
 from glob import glob
-from math import ceil, floor, log10
-from typing import Coroutine, List, Tuple
+from math import ceil
+from typing import Awaitable
 
 import numpy as np
 from astropy.io import fits
@@ -77,7 +76,7 @@ async def worker(
     stopx: int,
     starty: int,
     stopy: int,
-) -> Coroutine[None]:
+) -> Awaitable[None]:
     """Asynchronously update the large FITS file with the chunk data.
 
     Args:
@@ -129,7 +128,7 @@ async def assemble(
     chunkname: str,
     output_filename: str,
     overwrite: bool = False,
-) -> Coroutine[None]:
+) -> Awaitable[None]:
     """Asynchronously assemble a large FITS file from smaller chunks.
 
     Args:
@@ -193,7 +192,6 @@ async def assemble(
         large = large_hdul[0]
         large_data = large.data
         large_shape = large_data.shape
-        print(f"{large_shape=}")
         y_full = False
         x_full = False
         startx = 0
@@ -204,8 +202,6 @@ async def assemble(
             stopx = startx + chunk_shape[-1]
             stopy = starty + chunk_shape[-2]
             # Fill in the large array with the chunk data
-            print(f"{starty}:{stopy}")
-            print(f"{startx}:{stopx}")
             task = asyncio.create_task(
                 worker(i, chunk, large_hdul, startx, stopx, starty, stopy)
             )

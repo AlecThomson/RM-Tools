@@ -25,12 +25,10 @@ import asyncio
 import os.path as path
 from datetime import datetime
 from math import ceil, floor, log10
-from typing import Coroutine, List, Optional, Tuple
+from typing import Awaitable, Optional
 
 import numpy as np
 from astropy.io import fits
-from dask import compute, delayed
-from dask.distributed import Client, LocalCluster
 from tqdm.asyncio import tqdm
 
 
@@ -71,7 +69,7 @@ def main():
 
 async def worker(
     i: int, split: np.ndarray, new_header: fits.Header, prefix: str, prntcode: str
-) -> Coroutine[None]:
+) -> Awaitable[None]:
     """Asynchronously write a chunk to disk.
 
     Args:
@@ -95,7 +93,7 @@ async def create(
     Nperchunk: int,
     verbose: bool = False,
     prefix: Optional[str] = None,
-):
+) -> Awaitable[None]:
     """Create chunks from a FITS file asynchronously.
 
     Args:
