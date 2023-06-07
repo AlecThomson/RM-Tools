@@ -11,7 +11,7 @@ output files from 3D RM synthesis back into larger cubes.
 
 import numpy as np
 import argparse
-import astropy.io.fits as pf
+from astropy.io import fits
 import os.path as path
 from math import ceil, floor, log10
 from glob import glob
@@ -47,13 +47,19 @@ def main():
     else:
         output_filename=args.output
 
+
+def assemble(
+    chunkname: str,
+    output_filename: str,
+    overwrite: bool = False,
+):
     #Get all the chunk filenames. Missing chunks will break things!
-    filename=re.search('\.C\d+\.',args.chunkname)
-    chunkfiles=glob(args.chunkname[0:filename.start()]+'.C*.'+args.chunkname[filename.end():])
+    filename=re.search('\.C\d+\.',chunkname)
+    chunkfiles=glob(chunkname[0:filename.start()]+'.C*.'+chunkname[filename.end():])
     chunkfiles.sort()
 
 
-    old_header=pf.getheader(chunkfiles[0])
+    old_header=fits.getheader(chunkfiles[0])
     x_dim=old_header['OLDXDIM']
     y_dim=old_header['OLDYDIM']
     Nperchunk=old_header['NAXIS1']
@@ -72,7 +78,7 @@ def main():
 
 
     #Create blank file:
-    new_header.tofile(output_filename,overwrite=args.overwrite)
+    new_header.tofile(output_filename,overwrite=overwrite)
 
     #According to astropy, this is how to create a large file without needing it in memory:
     shape = tuple(new_header['NAXIS{0}'.format(ii)] for ii in range(1, new_header['NAXIS']+1))
@@ -86,43 +92,48 @@ def main():
 
     base_idx_arr=np.array(range(Nperchunk))
 
-    large=pf.open(output_filename,mode='update',memmap=True)
+    things = []
+    for f in chunkfiles:
+        things.append(fits.getdata(f,memmap=True))
 
-    for i in trange(num_chunks-1, desc='Assembling chunks'):
+    from IPython import embed
+    embed()
+
+    with fits.open(output_filename,mode='update',memmap=True) as large:
+        for i in trange(num_chunks-1, desc='Assembling chunks'):
+            file=chunkfiles[i]
+            idx=base_idx_arr+i*Nperchunk
+            xarr = idx // y_dim
+            yarr = idx % y_dim
+
+            chunk=fits.open(file,memmap=True)
+            if Ndim == 4:
+                large[0].data[:,:,yarr,xarr]=chunk[0].data[:,:,0,:]
+            elif Ndim == 3:
+                large[0].data[:,yarr,xarr]=chunk[0].data[:,0,:]
+            elif Ndim == 2:
+                large[0].data[yarr,xarr]=chunk[0].data
+
+    #       large.flush()
+            chunk.close()
+
+        i+=1
         file=chunkfiles[i]
         idx=base_idx_arr+i*Nperchunk
+        idx=idx[idx < Npix_image]
         xarr = idx // y_dim
         yarr = idx % y_dim
-
-        chunk=pf.open(file,memmap=True)
+        chunk=fits.open(file,memmap=True)
         if Ndim == 4:
             large[0].data[:,:,yarr,xarr]=chunk[0].data[:,:,0,:]
         elif Ndim == 3:
             large[0].data[:,yarr,xarr]=chunk[0].data[:,0,:]
         elif Ndim == 2:
             large[0].data[yarr,xarr]=chunk[0].data
-
- #       large.flush()
+        large.flush()
         chunk.close()
 
-    i+=1
-    file=chunkfiles[i]
-    idx=base_idx_arr+i*Nperchunk
-    idx=idx[idx < Npix_image]
-    xarr = idx // y_dim
-    yarr = idx % y_dim
-    chunk=pf.open(file,memmap=True)
-    if Ndim == 4:
-        large[0].data[:,:,yarr,xarr]=chunk[0].data[:,:,0,:]
-    elif Ndim == 3:
-        large[0].data[:,yarr,xarr]=chunk[0].data[:,0,:]
-    elif Ndim == 2:
-        large[0].data[yarr,xarr]=chunk[0].data
-    large.flush()
-    chunk.close()
 
-
-    large.close()
 
 if __name__ == "__main__":
     main()
