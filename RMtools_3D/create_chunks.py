@@ -26,12 +26,11 @@ from astropy.io import fits
 import os.path as path
 from math import ceil, floor, log10
 from tqdm.asyncio import tqdm
-# from tqdm.auto import tqdm, trange
 from dask import delayed, compute
 from dask.distributed import Client, LocalCluster
 import asyncio
 from datetime import datetime
-import asyncstdlib
+from typing import Coroutine, List, Tuple, Optional
 
 def main():
 
@@ -63,7 +62,19 @@ def main():
         )
     )
 
-async def worker(i, split, new_header, prefix, prntcode):
+async def worker(i: int, split: np.ndarray, new_header: fits.Header, prefix: str, prntcode: str) -> Coroutine[None]:
+    """Asynchronously write a chunk to disk.
+
+    Args:
+        i (int): Worker number
+        split (np.ndarray): Chunk of data
+        new_header (fits.Header): New header
+        prefix (str): Output file prefix
+        prntcode (str): Output file number format
+
+    Returns:
+        Coroutine[None]: Coroutine to be awaited
+    """    
     print(f"{datetime.utcnow()} Worker {i} starting...")
     filename=('{}.C{'+prntcode+'}.fits').format(prefix,i)
     await asyncio.to_thread(fits.writeto, filename, split, new_header, overwrite=True)
@@ -74,9 +85,16 @@ async def create(
     infile: str,
     Nperchunk: int,
     verbose: bool = False,
-    prefix: str = None,
+    prefix: Optional[str] = None,
 ):
-    print("USING NUMPY")
+    """Create chunks from a FITS file asynchronously.
+
+    Args:
+        infile (str): Input file name to be chunked
+        Nperchunk (int): Number of pixels per chunk
+        verbose (bool, optional): Verbose output. Defaults to False.
+        prefix (Optional[str], optional): Prefix for output files. Defaults to None.
+    """    
     with fits.open(infile,memmap=True, mode="denywrite") as hdul:
         hdu = hdul[0]
         header = hdu.header
