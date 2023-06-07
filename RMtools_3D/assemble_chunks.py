@@ -93,51 +93,47 @@ def assemble(
         fobj.write(b'\0')
 
 
-    # if len(chunkfiles) != num_chunks:
-    #     raise Exception('Number of chunk files found does not match expectations!')
-
-    base_idx_arr=np.array(range(Nperchunk))
-
-    things = []
+    chunks = []
     for f in chunkfiles:
-        things.append(fits.getdata(f,memmap=True))
+        chunks.append(fits.getdata(f,memmap=True))
 
-    from IPython import embed
-    embed()
+    with fits.open(output_filename,mode='update',memmap=True) as large_hdul:
+        large=large_hdul[0]
+        large_data = large.data
+        large_shape = large_data.shape
+        print(f"{large_shape=}")
+        y_full = False
+        x_full = False
+        startx = 0
+        starty = 0
+        for i, chunk in enumerate(tqdm(chunks,desc='Assembling chunks')):
+            chunk_shape = chunk.shape
+            previous_chunk_shape = chunks[i-1].shape if i > 0 else (0, 0)
+            # Calculate the start and stop indices for the chunk
+            stopx = startx + chunk_shape[-1]
+            stopy = starty + chunk_shape[-2]
+            # Fill in the large array with the chunk data
+            print(f"{starty}:{stopy}")
+            print(f"{startx}:{stopx}")
+            large_hdul[0].data[
+                ...,
+                starty:stopy,
+                startx:stopx,
+            ] = chunk
 
-    with fits.open(output_filename,mode='update',memmap=True) as large:
-        for i in trange(num_chunks-1, desc='Assembling chunks'):
-            file=chunkfiles[i]
-            idx=base_idx_arr+i*Nperchunk
-            xarr = idx // y_dim
-            yarr = idx % y_dim
+            large_hdul.flush(verbose=True)
+            # Check if the chunk filled the x or y dimension
+            x_full = stopx == large_shape[-1]
+            y_full = stopy == large_shape[-2]
+            # Update the start indices for the next chunk
+            startx = 0 if x_full else stopx
+            starty = 0 if y_full else stopy
+            
 
-            chunk=fits.open(file,memmap=True)
-            if Ndim == 4:
-                large[0].data[:,:,yarr,xarr]=chunk[0].data[:,:,0,:]
-            elif Ndim == 3:
-                large[0].data[:,yarr,xarr]=chunk[0].data[:,0,:]
-            elif Ndim == 2:
-                large[0].data[yarr,xarr]=chunk[0].data
 
-    #       large.flush()
-            chunk.close()
 
-        i+=1
-        file=chunkfiles[i]
-        idx=base_idx_arr+i*Nperchunk
-        idx=idx[idx < Npix_image]
-        xarr = idx // y_dim
-        yarr = idx % y_dim
-        chunk=fits.open(file,memmap=True)
-        if Ndim == 4:
-            large[0].data[:,:,yarr,xarr]=chunk[0].data[:,:,0,:]
-        elif Ndim == 3:
-            large[0].data[:,yarr,xarr]=chunk[0].data[:,0,:]
-        elif Ndim == 2:
-            large[0].data[yarr,xarr]=chunk[0].data
-        large.flush()
-        chunk.close()
+
+
 
 
 
