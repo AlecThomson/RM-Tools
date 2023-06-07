@@ -90,7 +90,14 @@ async def worker(
     print(f"{datetime.utcnow()} Worker {i} done")
 
 
-def update_and_write(large_hdul, chunk, startx, stopx, starty, stopy):
+def update_and_write(
+    large_hdul: fits.HDUList,
+    chunk: np.ndarray,
+    startx: int,
+    stopx: int,
+    starty: int,
+    stopy: int,
+) -> None:
     large_hdul[0].data[
         ...,
         starty:stopy,
@@ -103,7 +110,7 @@ async def assemble(
     chunkname: str,
     output_filename: str,
     overwrite: bool = False,
-):
+) -> Coroutine[None]:
     # Get all the chunk filenames. Missing chunks will break things!
     filename = re.search("\.C\d+\.", chunkname)
     chunkfiles = glob(
