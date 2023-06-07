@@ -16,7 +16,9 @@ import os.path as path
 from math import ceil, floor, log10
 from glob import glob
 import re
-from tqdm.auto import tqdm, trange
+from tqdm.asyncio import tqdm, trange
+import asyncio
+from datetime import datetime
 
 
 def main():
@@ -47,14 +49,32 @@ def main():
     else:
         output_filename=args.output
 
-    return assemble(
-        chunkname=args.chunkname,
-        output_filename=output_filename,
-        overwrite=args.overwrite,
+    asyncio.run( 
+        assemble(
+            chunkname=args.chunkname,
+            output_filename=output_filename,
+            overwrite=args.overwrite,
+        )
     )
 
+async def worker(i,chunk,large_hdul,startx, stopx, starty, stopy):
+    print(f"{datetime.utcnow()} Worker {i} starting...")
+    # large_hdul = await asyncio.to_thread(_worker, large_hdul, chunk, startx, stopx, starty, stopy)
+    await asyncio.to_thread(update_and_write, large_hdul, chunk, startx, stopx, starty, stopy)
+    # await asyncio.sleep(1)
+    # await asyncio.to_thread(large_hdul[0].data[...,starty:stopy,startx:stopx].__setitem__, slice(None), chunk)
+    # await asyncio.to_thread(large_hdul.flush,verbose=True)
+    print(f"{datetime.utcnow()} Worker {i} done")
 
-def assemble(
+def update_and_write(large_hdul, chunk, startx, stopx, starty, stopy):
+    large_hdul[0].data[
+            ...,
+            starty:stopy,
+            startx:stopx,
+    ] = chunk
+    large_hdul.flush(verbose=True)
+
+async def assemble(
     chunkname: str,
     output_filename: str,
     overwrite: bool = False,
@@ -97,6 +117,7 @@ def assemble(
     for f in chunkfiles:
         chunks.append(fits.getdata(f,memmap=True))
 
+    tasks = []
     with fits.open(output_filename,mode='update',memmap=True) as large_hdul:
         large=large_hdul[0]
         large_data = large.data
@@ -106,36 +127,34 @@ def assemble(
         x_full = False
         startx = 0
         starty = 0
-        for i, chunk in enumerate(tqdm(chunks,desc='Assembling chunks')):
+        for i, chunk in enumerate(chunks):
             chunk_shape = chunk.shape
-            previous_chunk_shape = chunks[i-1].shape if i > 0 else (0, 0)
             # Calculate the start and stop indices for the chunk
             stopx = startx + chunk_shape[-1]
             stopy = starty + chunk_shape[-2]
             # Fill in the large array with the chunk data
             print(f"{starty}:{stopy}")
             print(f"{startx}:{stopx}")
-            large_hdul[0].data[
-                ...,
-                starty:stopy,
-                startx:stopx,
-            ] = chunk
+            # large_hdul[0].data[
+            #     ...,
+            #     starty:stopy,
+            #     startx:stopx,
+            # ] = chunk
 
-            large_hdul.flush(verbose=True)
+            # large_hdul.flush(verbose=True)
+            task = asyncio.create_task(worker(i, chunk,large_hdul, startx, stopx, starty, stopy))
             # Check if the chunk filled the x or y dimension
             x_full = stopx == large_shape[-1]
             y_full = stopy == large_shape[-2]
             # Update the start indices for the next chunk
             startx = 0 if x_full else stopx
             starty = 0 if y_full else stopy
+
+            tasks.append(task)
+        
+    
+        await tqdm.gather(*tasks)
             
-
-
-
-
-
-
-
 
 if __name__ == "__main__":
     main()
