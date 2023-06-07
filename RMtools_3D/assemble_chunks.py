@@ -47,6 +47,12 @@ def main():
     else:
         output_filename=args.output
 
+    return assemble(
+        chunkname=args.chunkname,
+        output_filename=output_filename,
+        overwrite=args.overwrite,
+    )
+
 
 def assemble(
     chunkname: str,
@@ -87,8 +93,8 @@ def assemble(
         fobj.write(b'\0')
 
 
-    if len(chunkfiles) != num_chunks:
-        raise Exception('Number of chunk files found does not match expectations!')
+    # if len(chunkfiles) != num_chunks:
+    #     raise Exception('Number of chunk files found does not match expectations!')
 
     base_idx_arr=np.array(range(Nperchunk))
 
