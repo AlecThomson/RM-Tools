@@ -152,9 +152,6 @@ async def assemble(
     old_header = fits.getheader(chunkfiles[0])
     x_dim = old_header["OLDXDIM"]
     y_dim = old_header["OLDYDIM"]
-    Nperchunk = old_header["NAXIS1"]
-    Npix_image = x_dim * y_dim
-    num_chunks = ceil(Npix_image / Nperchunk)
     Ndim = old_header["NAXIS"]
 
     if (Ndim != 4) and (Ndim != 3) and (Ndim != 2):
